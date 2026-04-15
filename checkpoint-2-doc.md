@@ -4,7 +4,14 @@
 
 ### 1.1 Purpose
 
-The **Cricket Tournament Management System** is a web application that allows users to create and manage cricket tournaments, record match results, track player and team statistics, and share tournament outcomes with other users. It serves cricket enthusiasts, league organisers, and casual players who want a centralised platform to run tournaments and analyse performance.
+The **Cricket Tournament Management System** is a web-based application that allows users to:
+
+- Create and manage cricket tournaments  
+- Record match results  
+- Track player and team statistics  
+- Share tournament outcomes with other users  
+
+It provides a platform for cricket enthusiasts, league organizers, and casual players to run tournaments and analyze performance in a centralized system.
 
 ### 1.2 Core Requirements
 
