@@ -27,6 +27,7 @@ It provides a platform for cricket enthusiasts, league organizers, and casual pl
 **Bootstrap 5**: We used Bootstrap 5 in our individual assignments so it is the framework everyone is most familiar with. Compared to writing vanilla HTML and CSS from scratch, Bootstrap provides a large set of ready-to-use components and a responsive grid system, it can speed up development significantly and gives pages a polished, consistent look with less effort.
 
 ## 2 User Stories
+User stories are grouped for different categories for ease of managemnt and implentation.
 
 ### 2.1 Account Management
 
