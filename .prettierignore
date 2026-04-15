@@ -1,0 +1,14 @@
+# Dependencies and VCS
+node_modules
+.git
+
+# Build and generated output
+dist
+build
+coverage
+
+# Logs and lock artifacts
+*.log
+
+# Editor/system files
+.DS_Store
