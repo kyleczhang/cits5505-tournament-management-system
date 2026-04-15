@@ -1,0 +1,129 @@
+/* Design system: emerald (cricket field) + championship gold + navy accents */
+
+:root {
+  /* Palette */
+  --ctm-primary: #0f766e; /* teal-700 — cricket field */
+  --ctm-primary-dark: #0b5952;
+  --ctm-primary-light: #14b8a6;
+  --ctm-accent: #f59e0b; /* amber-500 — championship gold */
+  --ctm-accent-dark: #d97706;
+  --ctm-cta: #16a34a; /* green-600 */
+  --ctm-cta-dark: #15803d;
+  --ctm-danger: #dc2626;
+  --ctm-bg: #f8fafc; /* slate-50 */
+  --ctm-bg-alt: #f1f5f9; /* slate-100 */
+  --ctm-card: #ffffff;
+  --ctm-text: #0f172a; /* slate-900 */
+  --ctm-muted: #475569; /* slate-600 */
+  --ctm-subtle: #94a3b8; /* slate-400 */
+  --ctm-border: #e2e8f0; /* slate-200 */
+  --ctm-border-strong: #cbd5e1; /* slate-300 */
+
+  /* Status */
+  --ctm-status-upcoming: #2563eb;
+  --ctm-status-live: #dc2626;
+  --ctm-status-completed: #64748b;
+
+  /* Elevation */
+  --ctm-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --ctm-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --ctm-shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.12);
+
+  /* Radii */
+  --ctm-radius-sm: 6px;
+  --ctm-radius: 12px;
+  --ctm-radius-lg: 20px;
+
+  /* Type */
+  --ctm-font-heading: 'Bebas Neue', 'Oswald', system-ui, sans-serif;
+  --ctm-font-body: 'Fira Sans', 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* z-index scale */
+  --z-nav: 1030;
+  --z-modal: 1050;
+}
+
+/* Bootstrap overrides */
+.btn-primary,
+.bg-primary {
+  background-color: var(--ctm-primary) !important;
+  border-color: var(--ctm-primary) !important;
+}
+.btn-primary:hover {
+  background-color: var(--ctm-primary-dark) !important;
+  border-color: var(--ctm-primary-dark) !important;
+}
+.text-primary {
+  color: var(--ctm-primary) !important;
+}
+.link-primary {
+  color: var(--ctm-primary);
+  text-decoration: none;
+}
+.link-primary:hover {
+  color: var(--ctm-primary-dark);
+  text-decoration: underline;
+}
+
+/* Base */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  font-family: var(--ctm-font-body);
+  background: var(--ctm-bg);
+  color: var(--ctm-text);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+main {
+  flex: 1 0 auto;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.display-1,
+.display-2,
+.display-3,
+.display-4 {
+  font-family: var(--ctm-font-heading);
+  letter-spacing: 0.02em;
+  font-weight: 400;
+  color: var(--ctm-text);
+}
+
+h1 {
+  font-size: clamp(2rem, 4vw + 1rem, 3.5rem);
+  line-height: 1.1;
+}
+h2 {
+  font-size: clamp(1.75rem, 2.5vw + 1rem, 2.5rem);
+  line-height: 1.15;
+}
+h3 {
+  font-size: 1.75rem;
+}
+
+.lead {
+  color: var(--ctm-muted);
+  font-size: 1.125rem;
+}
+
+/* Links should be clearly accessible */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(15, 118, 110, 0.35);
+  outline-offset: 2px;
+  border-radius: var(--ctm-radius-sm);
+}
