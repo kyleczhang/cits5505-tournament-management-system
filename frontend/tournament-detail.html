@@ -1,0 +1,789 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>UWA Social League 2026 — CRIKTRACK</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fira+Sans:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link href="css/styles.css" rel="stylesheet" />
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+    <div data-layout="nav"></div>
+
+    <main id="main">
+      <!-- Tournament hero -->
+      <section
+        style="
+          background: linear-gradient(135deg, #0f766e, #0b5952);
+          color: #fff;
+          padding: 3rem 0 3.5rem;
+          position: relative;
+          overflow: hidden;
+        "
+      >
+        <div
+          style="
+            position: absolute;
+            right: -120px;
+            top: -120px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(
+              circle,
+              rgba(245, 158, 11, 0.3),
+              transparent 70%
+            );
+          "
+        ></div>
+        <div class="container position-relative">
+          <nav aria-label="breadcrumb" class="mb-3">
+            <ol
+              class="breadcrumb small"
+              style="--bs-breadcrumb-divider-color: #cbd5e1"
+            >
+              <li class="breadcrumb-item">
+                <a href="tournaments-list.html" style="color: #cbd5e1"
+                  >Tournaments</a
+                >
+              </li>
+              <li
+                class="breadcrumb-item active"
+                style="color: #fff"
+                aria-current="page"
+              >
+                UWA Social League
+              </li>
+            </ol>
+          </nav>
+          <div
+            class="d-flex flex-wrap justify-content-between align-items-start gap-3"
+          >
+            <div>
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge-ctm badge-live">Live</span>
+                <span
+                  class="badge-ctm"
+                  style="background: rgba(255, 255, 255, 0.15); color: #fff"
+                  >Round Robin</span
+                >
+              </div>
+              <h1 class="mb-2" style="color: #fff">UWA Social League 2026</h1>
+              <p class="mb-0" style="color: rgba(255, 255, 255, 0.8)">
+                Friendly weekly 20-over matches between UWA clubs.
+              </p>
+              <div
+                class="d-flex flex-wrap gap-3 mt-3 small"
+                style="color: rgba(255, 255, 255, 0.85)"
+              >
+                <span class="d-inline-flex align-items-center gap-1"
+                  ><svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <rect
+                      x="3"
+                      y="5"
+                      width="18"
+                      height="16"
+                      rx="2"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    />
+                    <path
+                      d="M3 9h18"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    /></svg
+                  >Started 15 Mar 2026</span
+                >
+                <span>•</span>
+                <span>6 teams • 15 matches</span>
+                <span>•</span>
+                <span>Organiser: Cheng Zhang</span>
+              </div>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+              <button
+                class="btn btn-ctm-accent"
+                data-share="https://criktrack.app/t/101/share"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  class="me-1"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v14"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
+                </svg>
+                Share
+              </button>
+              <a
+                class="btn"
+                href="match-record.html"
+                style="
+                  background: #fff;
+                  color: var(--ctm-primary);
+                  font-weight: 600;
+                "
+                data-role-gate="organizer"
+                >Enter result</a
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <!-- Tabs -->
+          <ul class="nav nav-pills nav-pills-ctm gap-2 mb-4" role="tablist">
+            <li class="nav-item">
+              <button
+                class="nav-link active"
+                data-bs-toggle="pill"
+                data-bs-target="#fixtures"
+                type="button"
+                role="tab"
+              >
+                Fixtures
+              </button>
+            </li>
+            <li class="nav-item">
+              <button
+                class="nav-link"
+                data-bs-toggle="pill"
+                data-bs-target="#standings"
+                type="button"
+                role="tab"
+              >
+                Points table
+              </button>
+            </li>
+            <li class="nav-item">
+              <button
+                class="nav-link"
+                data-bs-toggle="pill"
+                data-bs-target="#stats"
+                type="button"
+                role="tab"
+              >
+                Top performers
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content">
+            <!-- Fixtures -->
+            <div
+              class="tab-pane fade show active"
+              id="fixtures"
+              role="tabpanel"
+            >
+              <div class="d-flex flex-column gap-3">
+                <article class="match-row">
+                  <div class="team">
+                    <span class="team-logo">CRU</span>
+                    <div>
+                      <div>Crawley Crusaders</div>
+                      <div class="team-score">182/6</div>
+                    </div>
+                  </div>
+                  <div class="divider">
+                    <div class="badge-ctm badge-completed mb-1">Completed</div>
+                    <div class="small muted">12 Apr 2026</div>
+                    <a
+                      href="match-scorecard.html"
+                      class="small link-primary d-block mt-1"
+                      >Scorecard →</a
+                    >
+                  </div>
+                  <div class="team right">
+                    <div class="text-end">
+                      <div>Nedlands Knights</div>
+                      <div class="team-score">165/9</div>
+                    </div>
+                    <span
+                      class="team-logo"
+                      style="
+                        background: linear-gradient(135deg, #1e40af, #3b82f6);
+                      "
+                      >NED</span
+                    >
+                  </div>
+                </article>
+
+                <article class="match-row">
+                  <div class="team">
+                    <span
+                      class="team-logo"
+                      style="
+                        background: linear-gradient(135deg, #b45309, #f59e0b);
+                      "
+                      >CLA</span
+                    >
+                    <div>
+                      <div>Claremont Comets</div>
+                      <div class="team-score">145/7</div>
+                    </div>
+                  </div>
+                  <div class="divider">
+                    <div class="badge-ctm badge-completed mb-1">Completed</div>
+                    <div class="small muted">14 Apr 2026</div>
+                    <a
+                      href="match-scorecard.html"
+                      class="small link-primary d-block mt-1"
+                      >Scorecard →</a
+                    >
+                  </div>
+                  <div class="team right">
+                    <div class="text-end">
+                      <div>Shenton Sharks</div>
+                      <div class="team-score">147/4</div>
+                    </div>
+                    <span
+                      class="team-logo"
+                      style="
+                        background: linear-gradient(135deg, #7c3aed, #a78bfa);
+                      "
+                      >SHE</span
+                    >
+                  </div>
+                </article>
+
+                <article class="match-row" style="border-color: #dc2626">
+                  <div class="team">
+                    <span class="team-logo">CRU</span>
+                    <div>
+                      <div>Crawley Crusaders</div>
+                      <div class="team-score">
+                        94/2 <span class="small muted">(12.1)</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="divider">
+                    <div class="badge-ctm badge-live mb-1">Live</div>
+                    <div class="small muted">21 Apr 2026 • 18:30</div>
+                    <a
+                      href="match-scorecard.html"
+                      class="small link-primary d-block mt-1"
+                      >Watch →</a
+                    >
+                  </div>
+                  <div class="team right">
+                    <div class="text-end">
+                      <div>Claremont Comets</div>
+                      <div class="team-score muted">Yet to bat</div>
+                    </div>
+                    <span
+                      class="team-logo"
+                      style="
+                        background: linear-gradient(135deg, #b45309, #f59e0b);
+                      "
+                      >CLA</span
+                    >
+                  </div>
+                </article>
+
+                <article class="match-row">
+                  <div class="team">
+                    <span
+                      class="team-logo"
+                      style="
+                        background: linear-gradient(135deg, #dc2626, #ef4444);
+                      "
+                      >PER</span
+                    >
+                    <div>Perth Panthers</div>
+                  </div>
+                  <div class="divider">
+                    <div class="badge-ctm badge-upcoming mb-1">Upcoming</div>
+                    <div class="small muted">19 Apr 2026 • 14:00</div>
+                  </div>
+                  <div class="team right">
+                    <div>Fremantle Falcons</div>
+                    <span
+                      class="team-logo"
+                      style="
+                        background: linear-gradient(135deg, #64748b, #94a3b8);
+                      "
+                      >FRE</span
+                    >
+                  </div>
+                </article>
+
+                <article class="match-row">
+                  <div class="team">
+                    <span
+                      class="team-logo"
+                      style="
+                        background: linear-gradient(135deg, #1e40af, #3b82f6);
+                      "
+                      >NED</span
+                    >
+                    <div>Nedlands Knights</div>
+                  </div>
+                  <div class="divider">
+                    <div class="badge-ctm badge-upcoming mb-1">Upcoming</div>
+                    <div class="small muted">26 Apr 2026 • 14:00</div>
+                  </div>
+                  <div class="team right">
+                    <div>Shenton Sharks</div>
+                    <span
+                      class="team-logo"
+                      style="
+                        background: linear-gradient(135deg, #7c3aed, #a78bfa);
+                      "
+                      >SHE</span
+                    >
+                  </div>
+                </article>
+              </div>
+            </div>
+
+            <!-- Standings -->
+            <div class="tab-pane fade" id="standings" role="tabpanel">
+              <div class="table-responsive">
+                <table class="ctm-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 60px">#</th>
+                      <th>Team</th>
+                      <th>P</th>
+                      <th>W</th>
+                      <th>L</th>
+                      <th>Points</th>
+                      <th>NRR</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="rank rank-1">1</td>
+                      <td class="team-chip">
+                        <span class="team-logo">CRU</span>Crawley Crusaders
+                      </td>
+                      <td>5</td>
+                      <td>5</td>
+                      <td>0</td>
+                      <td><strong>10</strong></td>
+                      <td>+2.15</td>
+                    </tr>
+                    <tr>
+                      <td class="rank">2</td>
+                      <td class="team-chip">
+                        <span
+                          class="team-logo"
+                          style="
+                            background: linear-gradient(
+                              135deg,
+                              #1e40af,
+                              #3b82f6
+                            );
+                          "
+                          >NED</span
+                        >Nedlands Knights
+                      </td>
+                      <td>5</td>
+                      <td>3</td>
+                      <td>2</td>
+                      <td><strong>6</strong></td>
+                      <td>+0.82</td>
+                    </tr>
+                    <tr>
+                      <td class="rank">3</td>
+                      <td class="team-chip">
+                        <span
+                          class="team-logo"
+                          style="
+                            background: linear-gradient(
+                              135deg,
+                              #b45309,
+                              #f59e0b
+                            );
+                          "
+                          >CLA</span
+                        >Claremont Comets
+                      </td>
+                      <td>5</td>
+                      <td>3</td>
+                      <td>2</td>
+                      <td><strong>6</strong></td>
+                      <td>+0.41</td>
+                    </tr>
+                    <tr>
+                      <td class="rank">4</td>
+                      <td class="team-chip">
+                        <span
+                          class="team-logo"
+                          style="
+                            background: linear-gradient(
+                              135deg,
+                              #7c3aed,
+                              #a78bfa
+                            );
+                          "
+                          >SHE</span
+                        >Shenton Sharks
+                      </td>
+                      <td>5</td>
+                      <td>2</td>
+                      <td>3</td>
+                      <td><strong>4</strong></td>
+                      <td>-0.30</td>
+                    </tr>
+                    <tr>
+                      <td class="rank">5</td>
+                      <td class="team-chip">
+                        <span
+                          class="team-logo"
+                          style="
+                            background: linear-gradient(
+                              135deg,
+                              #64748b,
+                              #94a3b8
+                            );
+                          "
+                          >FRE</span
+                        >Fremantle Falcons
+                      </td>
+                      <td>5</td>
+                      <td>1</td>
+                      <td>4</td>
+                      <td><strong>2</strong></td>
+                      <td>-1.25</td>
+                    </tr>
+                    <tr>
+                      <td class="rank">6</td>
+                      <td class="team-chip">
+                        <span
+                          class="team-logo"
+                          style="
+                            background: linear-gradient(
+                              135deg,
+                              #dc2626,
+                              #ef4444
+                            );
+                          "
+                          >PER</span
+                        >Perth Panthers
+                      </td>
+                      <td>5</td>
+                      <td>1</td>
+                      <td>4</td>
+                      <td><strong>2</strong></td>
+                      <td>-1.84</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="small muted mt-2">
+                Tie-breaker: Net Run Rate (NRR). Top 2 teams qualify for the
+                final.
+              </p>
+            </div>
+
+            <!-- Stats -->
+            <div class="tab-pane fade" id="stats" role="tabpanel">
+              <div class="row g-4">
+                <div class="col-lg-6">
+                  <div class="ctm-card">
+                    <h3
+                      class="h5 mb-3 d-flex align-items-center gap-2"
+                      style="
+                        font-family: var(--ctm-font-body);
+                        font-weight: 700;
+                      "
+                    >
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        aria-hidden="true"
+                        style="color: var(--ctm-accent)"
+                      >
+                        <path
+                          d="M12 2l2.5 6.5L21 9l-5 4.5L17.5 20 12 16.5 6.5 20 8 13.5 3 9l6.5-.5z"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linejoin="round"
+                        /></svg
+                      >Leading run-scorers
+                    </h3>
+                    <div class="table-responsive">
+                      <table class="ctm-table">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Player</th>
+                            <th>Runs</th>
+                            <th>Avg</th>
+                            <th>SR</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td class="rank rank-1">1</td>
+                            <td>
+                              <a class="link-primary" href="player-stats.html"
+                                >Aarav Patel</a
+                              >
+                              <div class="small muted">Crusaders</div>
+                            </td>
+                            <td><strong>287</strong></td>
+                            <td>71.75</td>
+                            <td>142.8</td>
+                          </tr>
+                          <tr>
+                            <td class="rank">2</td>
+                            <td>
+                              <a class="link-primary" href="player-stats.html"
+                                >Liam O'Connor</a
+                              >
+                              <div class="small muted">Knights</div>
+                            </td>
+                            <td><strong>241</strong></td>
+                            <td>60.25</td>
+                            <td>131.2</td>
+                          </tr>
+                          <tr>
+                            <td class="rank">3</td>
+                            <td>
+                              <a class="link-primary" href="player-stats.html"
+                                >Rohan Das</a
+                              >
+                              <div class="small muted">Comets</div>
+                            </td>
+                            <td><strong>198</strong></td>
+                            <td>49.50</td>
+                            <td>125.6</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-6">
+                  <div class="ctm-card">
+                    <h3
+                      class="h5 mb-3 d-flex align-items-center gap-2"
+                      style="
+                        font-family: var(--ctm-font-body);
+                        font-weight: 700;
+                      "
+                    >
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        aria-hidden="true"
+                        style="color: var(--ctm-primary)"
+                      >
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="9"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        />
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="5"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        />
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="1.5"
+                          fill="currentColor"
+                        /></svg
+                      >Leading wicket-takers
+                    </h3>
+                    <div class="table-responsive">
+                      <table class="ctm-table">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Player</th>
+                            <th>Wkts</th>
+                            <th>Avg</th>
+                            <th>Econ</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td class="rank rank-1">1</td>
+                            <td>
+                              <a class="link-primary" href="player-stats.html"
+                                >Imran Khan</a
+                              >
+                              <div class="small muted">Sharks</div>
+                            </td>
+                            <td><strong>12</strong></td>
+                            <td>14.2</td>
+                            <td>6.1</td>
+                          </tr>
+                          <tr>
+                            <td class="rank">2</td>
+                            <td>
+                              <a class="link-primary" href="player-stats.html"
+                                >James Butler</a
+                              >
+                              <div class="small muted">Crusaders</div>
+                            </td>
+                            <td><strong>10</strong></td>
+                            <td>16.8</td>
+                            <td>6.8</td>
+                          </tr>
+                          <tr>
+                            <td class="rank">3</td>
+                            <td>
+                              <a class="link-primary" href="player-stats.html"
+                                >Sachin Rao</a
+                              >
+                              <div class="small muted">Knights</div>
+                            </td>
+                            <td><strong>9</strong></td>
+                            <td>18.3</td>
+                            <td>7.2</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Venue map -->
+          <div class="row g-4 mt-1">
+            <div class="col-lg-12">
+              <div class="ctm-map" aria-labelledby="venue-title">
+                <div class="ctm-map-header">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M12 22s7-6.2 7-12a7 7 0 10-14 0c0 5.8 7 12 7 12z"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linejoin="round"
+                    />
+                    <circle
+                      cx="12"
+                      cy="10"
+                      r="2.5"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    />
+                  </svg>
+                  <div>
+                    <div class="ctm-map-title" id="venue-title">
+                      UWA Sports Park
+                    </div>
+                    <div class="ctm-map-address">
+                      Hackett Dr, Crawley WA 6009, Australia
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="ctm-map-frame"
+                  data-ctm-map
+                  data-lat="-31.9833"
+                  data-lng="115.8167"
+                  data-label="UWA Sports Park"
+                ></div>
+                <div class="ctm-map-provider"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comments -->
+          <section
+            class="ctm-comments"
+            data-ctm-comments
+            data-tournament-id="101"
+            aria-labelledby="tournament-comments-title"
+          >
+            <h3 id="tournament-comments-title">
+              Discussion
+              <span class="ctm-comment-count" data-ctm-comment-count></span>
+            </h3>
+            <ul class="ctm-comment-list" data-ctm-comment-list></ul>
+            <form
+              class="ctm-comment-form"
+              data-ctm-comment-form
+              aria-label="Post a comment"
+            >
+              <div class="d-flex align-items-center gap-2 small muted">
+                <span class="avatar" data-ctm-current-avatar aria-hidden="true"
+                  >CZ</span
+                >
+                <span
+                  >Commenting as
+                  <strong data-ctm-current-name>Cheng Zhang</strong></span
+                >
+                <span class="ctm-badge-organizer" data-ctm-current-badge
+                  >Organizer</span
+                >
+              </div>
+              <label class="visually-hidden" for="tournament-comment-body"
+                >Comment</label
+              >
+              <textarea
+                id="tournament-comment-body"
+                class="form-control"
+                rows="3"
+                placeholder="Share your thoughts on this tournament…"
+                required
+              ></textarea>
+              <div class="ctm-comment-meta">
+                <span data-ctm-comment-counter>0 / 500</span>
+                <button type="submit" class="btn btn-ctm-primary btn-sm">
+                  Post comment
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <div data-layout="footer"></div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/mockdata.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/roles.js"></script>
+    <script src="js/maps.js"></script>
+    <script src="js/comments.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>

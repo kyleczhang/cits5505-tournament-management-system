@@ -1,0 +1,37 @@
+/* ---------- FOOTER ---------- */
+.ctm-footer {
+  background: #0f172a;
+  color: #cbd5e1;
+  padding: 2.5rem 0 1.5rem;
+  margin-top: 4rem;
+  flex-shrink: 0;
+}
+.ctm-footer h5 {
+  color: #fff;
+  font-size: 1rem;
+  font-family: var(--ctm-font-body);
+  font-weight: 700;
+  margin-bottom: 1rem;
+  letter-spacing: normal;
+}
+.ctm-footer a {
+  color: #94a3b8;
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+.ctm-footer a:hover {
+  color: var(--ctm-accent);
+}
+.ctm-footer .brand-block {
+  font-family: var(--ctm-font-heading);
+  font-size: 1.5rem;
+  color: #fff;
+  letter-spacing: 0.05em;
+}
+.ctm-footer .copy {
+  border-top: 1px solid #1e293b;
+  padding-top: 1.25rem;
+  margin-top: 2rem;
+  font-size: 0.875rem;
+  color: #64748b;
+}
