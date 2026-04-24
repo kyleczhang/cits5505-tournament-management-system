@@ -4,14 +4,7 @@
 
 ### 1.1 Purpose
 
-The **Cricket Tournament Management System** is a web-based application that allows users to:
-
-- Create and manage cricket tournaments  
-- Record match results  
-- Track player and team statistics  
-- Share tournament outcomes with other users  
-
-It provides a platform for cricket enthusiasts, league organizers, and casual players to run tournaments and analyze performance in a centralized system.
+The **Cricket Tournament Management System** is a web application that allows users to create and manage cricket tournaments, record match results, track player and team statistics, and share tournament outcomes with other users. It serves cricket enthusiasts, league organisers, and casual players who want a centralised platform to run tournaments and analyse performance.
 
 ### 1.2 Core Requirements
 
@@ -27,7 +20,6 @@ It provides a platform for cricket enthusiasts, league organizers, and casual pl
 **Bootstrap 5**: We used Bootstrap 5 in our individual assignments so it is the framework everyone is most familiar with. Compared to writing vanilla HTML and CSS from scratch, Bootstrap provides a large set of ready-to-use components and a responsive grid system, it can speed up development significantly and gives pages a polished, consistent look with less effort.
 
 ## 2 User Stories
-User stories are grouped for different categories for ease of managemnt and implentation.
 
 ### 2.1 Account Management
 
