@@ -1,0 +1,21 @@
+/* Bootstrap overrides */
+.btn-primary,
+.bg-primary {
+  background-color: var(--ctm-primary) !important;
+  border-color: var(--ctm-primary) !important;
+}
+.btn-primary:hover {
+  background-color: var(--ctm-primary-dark) !important;
+  border-color: var(--ctm-primary-dark) !important;
+}
+.text-primary {
+  color: var(--ctm-primary) !important;
+}
+.link-primary {
+  color: var(--ctm-primary);
+  text-decoration: none;
+}
+.link-primary:hover {
+  color: var(--ctm-primary-dark);
+  text-decoration: underline;
+}
