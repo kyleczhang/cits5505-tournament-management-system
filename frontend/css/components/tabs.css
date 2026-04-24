@@ -1,0 +1,11 @@
+/* ---------- TABS ---------- */
+.nav-pills-ctm .nav-link {
+  color: var(--ctm-muted);
+  border-radius: var(--ctm-radius-sm);
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+}
+.nav-pills-ctm .nav-link.active {
+  background: var(--ctm-primary);
+  color: #fff;
+}
