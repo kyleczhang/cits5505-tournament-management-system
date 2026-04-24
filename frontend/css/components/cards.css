@@ -1,0 +1,116 @@
+/* ---------- CARDS ---------- */
+.ctm-card {
+  background: var(--ctm-card);
+  border: 1px solid var(--ctm-border);
+  border-radius: var(--ctm-radius);
+  padding: 1.5rem;
+  box-shadow: var(--ctm-shadow-sm);
+  transition:
+    box-shadow 200ms ease,
+    transform 200ms ease,
+    border-color 200ms ease;
+}
+.ctm-card-hover:hover {
+  box-shadow: var(--ctm-shadow);
+  border-color: var(--ctm-border-strong);
+}
+
+.ctm-card-accent {
+  border-top: 4px solid var(--ctm-accent);
+}
+
+.stat-card {
+  background: var(--ctm-card);
+  border: 1px solid var(--ctm-border);
+  border-radius: var(--ctm-radius);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--ctm-shadow-sm);
+}
+.stat-card .stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--ctm-radius-sm);
+  background: rgba(15, 118, 110, 0.1);
+  color: var(--ctm-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.stat-card .stat-value {
+  font-family: var(--ctm-font-heading);
+  font-size: 2rem;
+  color: var(--ctm-text);
+  line-height: 1;
+}
+.stat-card .stat-label {
+  font-size: 0.875rem;
+  color: var(--ctm-muted);
+  margin-top: 0.25rem;
+}
+
+/* ---------- TOURNAMENT CARD ---------- */
+.tournament-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fff;
+  border: 1px solid var(--ctm-border);
+  border-radius: var(--ctm-radius);
+  overflow: hidden;
+  box-shadow: var(--ctm-shadow-sm);
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease;
+  cursor: pointer;
+}
+.tournament-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ctm-shadow-lg);
+}
+.tournament-card .card-cover {
+  height: 120px;
+  background: linear-gradient(
+    135deg,
+    var(--ctm-primary),
+    var(--ctm-primary-light)
+  );
+  position: relative;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: flex-end;
+  color: #fff;
+}
+.tournament-card .card-cover.alt {
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+}
+.tournament-card .card-cover.warm {
+  background: linear-gradient(135deg, #b45309, #f59e0b);
+}
+.tournament-card .card-cover .status-pill {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+}
+.tournament-card .card-cover h3 {
+  color: #fff;
+  font-size: 1.5rem;
+  margin: 0;
+  line-height: 1.1;
+}
+.tournament-card .card-body {
+  padding: 1rem 1.25rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.tournament-card .meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ctm-muted);
+  font-size: 0.9rem;
+}
