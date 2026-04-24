@@ -1,0 +1,88 @@
+/* Base element styles: typography, focus ring, skip link, reduced motion. */
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  font-family: var(--ctm-font-body);
+  background: var(--ctm-bg);
+  color: var(--ctm-text);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+main {
+  flex: 1 0 auto;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.display-1,
+.display-2,
+.display-3,
+.display-4 {
+  font-family: var(--ctm-font-heading);
+  letter-spacing: 0.02em;
+  font-weight: 400;
+  color: var(--ctm-text);
+}
+
+h1 {
+  font-size: clamp(2rem, 4vw + 1rem, 3.5rem);
+  line-height: 1.1;
+}
+h2 {
+  font-size: clamp(1.75rem, 2.5vw + 1rem, 2.5rem);
+  line-height: 1.15;
+}
+h3 {
+  font-size: 1.75rem;
+}
+
+.lead {
+  color: var(--ctm-muted);
+  font-size: 1.125rem;
+}
+
+/* Links should be clearly accessible */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(15, 118, 110, 0.35);
+  outline-offset: 2px;
+  border-radius: var(--ctm-radius-sm);
+}
+
+/* Skip link for keyboard users */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--ctm-primary);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  z-index: 9999;
+  border-radius: 0 0 var(--ctm-radius-sm) 0;
+}
+.skip-link:focus {
+  left: 0;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
