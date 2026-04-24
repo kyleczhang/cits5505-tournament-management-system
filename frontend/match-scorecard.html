@@ -1,579 +1,189 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Match Scorecard — CRIKTRACK</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fira+Sans:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link href="css/styles.css" rel="stylesheet" />
-  </head>
-  <body>
-    <a href="#main" class="skip-link">Skip to main content</a>
-    <div data-layout="nav"></div>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Match Scorecard — CRIKTRACK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fira+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div data-layout="nav"></div>
 
-    <main id="main">
-      <section class="section">
-        <div class="container">
-          <nav aria-label="breadcrumb" class="mb-3">
-            <ol class="breadcrumb small">
-              <li class="breadcrumb-item">
-                <a class="link-primary" href="tournaments-list.html"
-                  >Tournaments</a
-                >
-              </li>
-              <li class="breadcrumb-item">
-                <a class="link-primary" href="tournament-detail.html"
-                  >UWA Social League</a
-                >
-              </li>
-              <li class="breadcrumb-item active" aria-current="page">
-                Match 1
-              </li>
-            </ol>
-          </nav>
+<main id="main">
+  <section class="section">
+    <div class="container">
+      <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+          <li class="breadcrumb-item"><a class="link-primary" href="tournaments-list.html">Tournaments</a></li>
+          <li class="breadcrumb-item"><a class="link-primary" href="tournament-detail.html">UWA Social League</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Match 1</li>
+        </ol>
+      </nav>
 
-          <!-- Scorecard header -->
-          <div class="scorecard-header">
-            <div
-              class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3"
-            >
-              <div>
-                <span
-                  class="badge-ctm badge-completed"
-                  style="background: rgba(255, 255, 255, 0.2); color: #fff"
-                  >Completed • 12 Apr 2026</span
-                >
-                <p class="mb-1 mt-2 small muted">
-                  UWA Sports Park, Oval 3 • Crusaders won the toss and elected
-                  to bat
-                </p>
-              </div>
-              <a
-                class="btn btn-ctm-accent"
-                href="match-record.html"
-                data-role-gate="organizer"
-                >Edit result</a
-              >
-            </div>
-            <div class="row align-items-center g-3">
-              <div class="col-md-5">
-                <div class="d-flex align-items-center gap-3">
-                  <span class="team-logo lg">CRU</span>
-                  <div>
-                    <div class="muted small">Crawley Crusaders</div>
-                    <div class="innings-score">
-                      182<span style="font-size: 1.5rem; opacity: 0.8">/6</span>
-                    </div>
-                    <div class="muted small">20.0 overs</div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-2 text-center">
-                <div
-                  style="
-                    font-family: var(--ctm-font-heading);
-                    font-size: 1.8rem;
-                    color: rgba(255, 255, 255, 0.6);
-                  "
-                >
-                  vs
-                </div>
-              </div>
-              <div class="col-md-5">
-                <div
-                  class="d-flex align-items-center gap-3 justify-content-md-end"
-                >
-                  <div class="text-md-end">
-                    <div class="muted small">Nedlands Knights</div>
-                    <div class="innings-score">
-                      165<span style="font-size: 1.5rem; opacity: 0.8">/9</span>
-                    </div>
-                    <div class="muted small">20.0 overs</div>
-                  </div>
-                  <span
-                    class="team-logo lg"
-                    style="
-                      background: linear-gradient(135deg, #1e40af, #3b82f6);
-                    "
-                    >NED</span
-                  >
-                </div>
-              </div>
-            </div>
-            <hr
-              style="
-                border-color: rgba(255, 255, 255, 0.2);
-                margin: 1.5rem 0 1rem;
-              "
-            />
-            <div class="text-center">
-              <strong
-                style="
-                  color: var(--ctm-accent);
-                  font-family: var(--ctm-font-heading);
-                  font-size: 1.5rem;
-                  letter-spacing: 0.05em;
-                "
-                >Crusaders won by 17 runs</strong
-              >
-              <div class="muted small mt-1">
-                Player of the match: Aarav Patel (78 off 52)
-              </div>
-            </div>
+      <!-- Scorecard header -->
+      <div class="scorecard-header">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+          <div>
+            <span class="badge-ctm badge-completed" style="background:rgba(255,255,255,0.2); color:#fff;">Completed • 12 Apr 2026</span>
+            <p class="mb-1 mt-2 small muted">UWA Sports Park, Oval 3 • Crusaders won the toss and elected to bat</p>
           </div>
-
-          <!-- Innings 1: Batting -->
-          <div class="innings-section">
-            <div class="innings-title">
-              <span
-                >Crawley Crusaders innings — <strong>182/6</strong> (20.0)</span
-              ><span class="small muted">Batting</span>
-            </div>
-            <div class="table-responsive">
-              <table
-                class="ctm-table"
-                style="border: none; border-radius: 0; box-shadow: none"
-              >
-                <thead>
-                  <tr>
-                    <th>Batter</th>
-                    <th>Dismissal</th>
-                    <th>R</th>
-                    <th>B</th>
-                    <th>4s</th>
-                    <th>6s</th>
-                    <th>SR</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>
-                      <a class="link-primary" href="player-stats.html"
-                        ><strong>Aarav Patel</strong></a
-                      >
-                    </td>
-                    <td class="muted">c Rao b Khan</td>
-                    <td><strong>78</strong></td>
-                    <td>52</td>
-                    <td>8</td>
-                    <td>3</td>
-                    <td>150.0</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a class="link-primary" href="player-stats.html"
-                        ><strong>James Butler</strong></a
-                      >
-                    </td>
-                    <td class="muted">b Khan</td>
-                    <td>45</td>
-                    <td>38</td>
-                    <td>5</td>
-                    <td>1</td>
-                    <td>118.4</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Ethan Wu</strong></td>
-                    <td class="muted">run out</td>
-                    <td>22</td>
-                    <td>18</td>
-                    <td>2</td>
-                    <td>0</td>
-                    <td>122.2</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Noah Smith</strong></td>
-                    <td class="muted">c &amp; b Singh</td>
-                    <td>14</td>
-                    <td>9</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>155.6</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Jacob Lim</strong></td>
-                    <td class="muted">not out</td>
-                    <td>12</td>
-                    <td>8</td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>150.0</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Arjun Rao</strong></td>
-                    <td class="muted">b Khan</td>
-                    <td>4</td>
-                    <td>5</td>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>80.0</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Daniel Park</strong></td>
-                    <td class="muted">not out</td>
-                    <td>2</td>
-                    <td>2</td>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>100.0</td>
-                  </tr>
-                  <tr style="background: var(--ctm-bg-alt)">
-                    <td colspan="2" class="small muted">
-                      <strong>Extras</strong> (b 1, lb 2, w 2)
-                    </td>
-                    <td colspan="5"><strong>5</strong></td>
-                  </tr>
-                  <tr style="background: var(--ctm-bg-alt)">
-                    <td colspan="2">
-                      <strong>TOTAL</strong>
-                      <span class="small muted">20.0 overs, RR 9.10</span>
-                    </td>
-                    <td colspan="5"><strong>182/6</strong></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Innings 1: Bowling -->
-          <div class="innings-section">
-            <div class="innings-title">
-              <span>Nedlands Knights — Bowling</span>
-            </div>
-            <div class="table-responsive">
-              <table
-                class="ctm-table"
-                style="border: none; border-radius: 0; box-shadow: none"
-              >
-                <thead>
-                  <tr>
-                    <th>Bowler</th>
-                    <th>O</th>
-                    <th>M</th>
-                    <th>R</th>
-                    <th>W</th>
-                    <th>Econ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>Imran Khan</strong></td>
-                    <td>4.0</td>
-                    <td>0</td>
-                    <td>28</td>
-                    <td><strong>3</strong></td>
-                    <td>7.0</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Ravi Singh</strong></td>
-                    <td>4.0</td>
-                    <td>0</td>
-                    <td>34</td>
-                    <td>1</td>
-                    <td>8.5</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Sachin Rao</strong></td>
-                    <td>4.0</td>
-                    <td>0</td>
-                    <td>41</td>
-                    <td>0</td>
-                    <td>10.3</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Ben Cooper</strong></td>
-                    <td>4.0</td>
-                    <td>0</td>
-                    <td>39</td>
-                    <td>1</td>
-                    <td>9.8</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Matt Hayes</strong></td>
-                    <td>4.0</td>
-                    <td>0</td>
-                    <td>40</td>
-                    <td>0</td>
-                    <td>10.0</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Innings 2: Batting -->
-          <div class="innings-section">
-            <div class="innings-title">
-              <span
-                >Nedlands Knights innings — <strong>165/9</strong> (20.0)</span
-              ><span class="small muted">Batting</span>
-            </div>
-            <div class="table-responsive">
-              <table
-                class="ctm-table"
-                style="border: none; border-radius: 0; box-shadow: none"
-              >
-                <thead>
-                  <tr>
-                    <th>Batter</th>
-                    <th>Dismissal</th>
-                    <th>R</th>
-                    <th>B</th>
-                    <th>4s</th>
-                    <th>6s</th>
-                    <th>SR</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>Liam O'Connor</strong></td>
-                    <td class="muted">c Butler b Park</td>
-                    <td><strong>62</strong></td>
-                    <td>44</td>
-                    <td>6</td>
-                    <td>2</td>
-                    <td>140.9</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Ravi Singh</strong></td>
-                    <td class="muted">b Lim</td>
-                    <td>33</td>
-                    <td>28</td>
-                    <td>3</td>
-                    <td>1</td>
-                    <td>117.9</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Sachin Rao</strong></td>
-                    <td class="muted">c Wu b Butler</td>
-                    <td>21</td>
-                    <td>20</td>
-                    <td>2</td>
-                    <td>0</td>
-                    <td>105.0</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Ben Cooper</strong></td>
-                    <td class="muted">lbw b Lim</td>
-                    <td>18</td>
-                    <td>14</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>128.6</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Matt Hayes</strong></td>
-                    <td class="muted">c Smith b Butler</td>
-                    <td>10</td>
-                    <td>11</td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>90.9</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Imran Khan</strong></td>
-                    <td class="muted">not out</td>
-                    <td>9</td>
-                    <td>8</td>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>112.5</td>
-                  </tr>
-                  <tr style="background: var(--ctm-bg-alt)">
-                    <td colspan="2" class="small muted">
-                      <strong>Extras</strong> (b 2, lb 4, w 6)
-                    </td>
-                    <td colspan="5"><strong>12</strong></td>
-                  </tr>
-                  <tr style="background: var(--ctm-bg-alt)">
-                    <td colspan="2">
-                      <strong>TOTAL</strong>
-                      <span class="small muted">20.0 overs, RR 8.25</span>
-                    </td>
-                    <td colspan="5"><strong>165/9</strong></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Innings 2: Bowling -->
-          <div class="innings-section">
-            <div class="innings-title">
-              <span>Crawley Crusaders — Bowling</span>
-            </div>
-            <div class="table-responsive">
-              <table
-                class="ctm-table"
-                style="border: none; border-radius: 0; box-shadow: none"
-              >
-                <thead>
-                  <tr>
-                    <th>Bowler</th>
-                    <th>O</th>
-                    <th>M</th>
-                    <th>R</th>
-                    <th>W</th>
-                    <th>Econ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>Daniel Park</strong></td>
-                    <td>4.0</td>
-                    <td>0</td>
-                    <td>29</td>
-                    <td>2</td>
-                    <td>7.3</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Jacob Lim</strong></td>
-                    <td>4.0</td>
-                    <td>1</td>
-                    <td>22</td>
-                    <td><strong>3</strong></td>
-                    <td>5.5</td>
-                  </tr>
-                  <tr>
-                    <td><strong>James Butler</strong></td>
-                    <td>4.0</td>
-                    <td>0</td>
-                    <td>34</td>
-                    <td>2</td>
-                    <td>8.5</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Arjun Rao</strong></td>
-                    <td>4.0</td>
-                    <td>0</td>
-                    <td>38</td>
-                    <td>1</td>
-                    <td>9.5</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Noah Smith</strong></td>
-                    <td>4.0</td>
-                    <td>0</td>
-                    <td>42</td>
-                    <td>1</td>
-                    <td>10.5</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Venue map -->
-          <div class="ctm-map" aria-labelledby="match-venue-title">
-            <div class="ctm-map-header">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M12 22s7-6.2 7-12a7 7 0 10-14 0c0 5.8 7 12 7 12z"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linejoin="round"
-                />
-                <circle
-                  cx="12"
-                  cy="10"
-                  r="2.5"
-                  stroke="currentColor"
-                  stroke-width="2"
-                />
-              </svg>
-              <div>
-                <div class="ctm-map-title" id="match-venue-title">
-                  UWA Sports Park, Oval 3
-                </div>
-                <div class="ctm-map-address">
-                  Hackett Dr, Crawley WA 6009, Australia
-                </div>
-              </div>
-            </div>
-            <div
-              class="ctm-map-frame"
-              data-ctm-map
-              data-lat="-31.9833"
-              data-lng="115.8167"
-              data-label="UWA Sports Park, Oval 3"
-            ></div>
-            <div class="ctm-map-provider"></div>
-          </div>
-
-          <!-- Comments -->
-          <section
-            class="ctm-comments"
-            data-ctm-comments
-            data-match-id="501"
-            aria-labelledby="match-comments-title"
-          >
-            <h3 id="match-comments-title">
-              Match discussion
-              <span class="ctm-comment-count" data-ctm-comment-count></span>
-            </h3>
-            <ul class="ctm-comment-list" data-ctm-comment-list></ul>
-            <form
-              class="ctm-comment-form"
-              data-ctm-comment-form
-              aria-label="Post a comment"
-            >
-              <div class="d-flex align-items-center gap-2 small muted">
-                <span class="avatar" data-ctm-current-avatar aria-hidden="true"
-                  >CZ</span
-                >
-                <span
-                  >Commenting as
-                  <strong data-ctm-current-name>Cheng Zhang</strong></span
-                >
-                <span class="ctm-badge-organizer" data-ctm-current-badge
-                  >Organizer</span
-                >
-              </div>
-              <label class="visually-hidden" for="match-comment-body"
-                >Comment</label
-              >
-              <textarea
-                id="match-comment-body"
-                class="form-control"
-                rows="3"
-                placeholder="Share your thoughts on this match…"
-                required
-              ></textarea>
-              <div class="ctm-comment-meta">
-                <span data-ctm-comment-counter>0 / 500</span>
-                <button type="submit" class="btn btn-ctm-primary btn-sm">
-                  Post comment
-                </button>
-              </div>
-            </form>
-          </section>
+          <a class="btn btn-ctm-accent" href="match-record.html" data-role-gate="organizer">Edit result</a>
         </div>
-      </section>
-    </main>
+        <div class="row align-items-center g-3">
+          <div class="col-md-5">
+            <div class="d-flex align-items-center gap-3">
+              <span class="team-logo lg">CRU</span>
+              <div>
+                <div class="muted small">Crawley Crusaders</div>
+                <div class="innings-score">182<span style="font-size:1.5rem; opacity:0.8;">/6</span></div>
+                <div class="muted small">20.0 overs</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-2 text-center">
+            <div style="font-family:var(--ctm-font-heading); font-size:1.8rem; color:rgba(255,255,255,0.6);">vs</div>
+          </div>
+          <div class="col-md-5">
+            <div class="d-flex align-items-center gap-3 justify-content-md-end">
+              <div class="text-md-end">
+                <div class="muted small">Nedlands Knights</div>
+                <div class="innings-score">165<span style="font-size:1.5rem; opacity:0.8;">/9</span></div>
+                <div class="muted small">20.0 overs</div>
+              </div>
+              <span class="team-logo lg" style="background:linear-gradient(135deg,#1E40AF,#3B82F6);">NED</span>
+            </div>
+          </div>
+        </div>
+        <hr style="border-color:rgba(255,255,255,0.2); margin:1.5rem 0 1rem;">
+        <div class="text-center">
+          <strong style="color:var(--ctm-accent); font-family:var(--ctm-font-heading); font-size:1.5rem; letter-spacing:0.05em;">Crusaders won by 17 runs</strong>
+          <div class="muted small mt-1">Player of the match: Aarav Patel (78 off 52)</div>
+        </div>
+      </div>
 
-    <div data-layout="footer"></div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/config.js"></script>
-    <script src="js/mockdata.js"></script>
-    <script src="js/layout.js"></script>
-    <script src="js/roles.js"></script>
-    <script src="js/maps.js"></script>
-    <script src="js/comments.js"></script>
-    <script src="js/main.js"></script>
-  </body>
+      <!-- Innings 1: Batting -->
+      <div class="innings-section">
+        <div class="innings-title"><span>Crawley Crusaders innings — <strong>182/6</strong> (20.0)</span><span class="small muted">Batting</span></div>
+        <div class="table-responsive">
+          <table class="ctm-table" style="border:none; border-radius:0; box-shadow:none;">
+            <thead><tr><th>Batter</th><th>Dismissal</th><th>R</th><th>B</th><th>4s</th><th>6s</th><th>SR</th></tr></thead>
+            <tbody>
+              <tr><td><a class="link-primary" href="player-stats.html"><strong>Aarav Patel</strong></a></td><td class="muted">c Rao b Khan</td><td><strong>78</strong></td><td>52</td><td>8</td><td>3</td><td>150.0</td></tr>
+              <tr><td><a class="link-primary" href="player-stats.html"><strong>James Butler</strong></a></td><td class="muted">b Khan</td><td>45</td><td>38</td><td>5</td><td>1</td><td>118.4</td></tr>
+              <tr><td><strong>Ethan Wu</strong></td><td class="muted">run out</td><td>22</td><td>18</td><td>2</td><td>0</td><td>122.2</td></tr>
+              <tr><td><strong>Noah Smith</strong></td><td class="muted">c &amp; b Singh</td><td>14</td><td>9</td><td>1</td><td>1</td><td>155.6</td></tr>
+              <tr><td><strong>Jacob Lim</strong></td><td class="muted">not out</td><td>12</td><td>8</td><td>1</td><td>0</td><td>150.0</td></tr>
+              <tr><td><strong>Arjun Rao</strong></td><td class="muted">b Khan</td><td>4</td><td>5</td><td>0</td><td>0</td><td>80.0</td></tr>
+              <tr><td><strong>Daniel Park</strong></td><td class="muted">not out</td><td>2</td><td>2</td><td>0</td><td>0</td><td>100.0</td></tr>
+              <tr style="background:var(--ctm-bg-alt);"><td colspan="2" class="small muted"><strong>Extras</strong> (b 1, lb 2, w 2)</td><td colspan="5"><strong>5</strong></td></tr>
+              <tr style="background:var(--ctm-bg-alt);"><td colspan="2"><strong>TOTAL</strong> <span class="small muted">20.0 overs, RR 9.10</span></td><td colspan="5"><strong>182/6</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Innings 1: Bowling -->
+      <div class="innings-section">
+        <div class="innings-title"><span>Nedlands Knights — Bowling</span></div>
+        <div class="table-responsive">
+          <table class="ctm-table" style="border:none; border-radius:0; box-shadow:none;">
+            <thead><tr><th>Bowler</th><th>O</th><th>M</th><th>R</th><th>W</th><th>Econ</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Imran Khan</strong></td><td>4.0</td><td>0</td><td>28</td><td><strong>3</strong></td><td>7.0</td></tr>
+              <tr><td><strong>Ravi Singh</strong></td><td>4.0</td><td>0</td><td>34</td><td>1</td><td>8.5</td></tr>
+              <tr><td><strong>Sachin Rao</strong></td><td>4.0</td><td>0</td><td>41</td><td>0</td><td>10.3</td></tr>
+              <tr><td><strong>Ben Cooper</strong></td><td>4.0</td><td>0</td><td>39</td><td>1</td><td>9.8</td></tr>
+              <tr><td><strong>Matt Hayes</strong></td><td>4.0</td><td>0</td><td>40</td><td>0</td><td>10.0</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Innings 2: Batting -->
+      <div class="innings-section">
+        <div class="innings-title"><span>Nedlands Knights innings — <strong>165/9</strong> (20.0)</span><span class="small muted">Batting</span></div>
+        <div class="table-responsive">
+          <table class="ctm-table" style="border:none; border-radius:0; box-shadow:none;">
+            <thead><tr><th>Batter</th><th>Dismissal</th><th>R</th><th>B</th><th>4s</th><th>6s</th><th>SR</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Liam O'Connor</strong></td><td class="muted">c Butler b Park</td><td><strong>62</strong></td><td>44</td><td>6</td><td>2</td><td>140.9</td></tr>
+              <tr><td><strong>Ravi Singh</strong></td><td class="muted">b Lim</td><td>33</td><td>28</td><td>3</td><td>1</td><td>117.9</td></tr>
+              <tr><td><strong>Sachin Rao</strong></td><td class="muted">c Wu b Butler</td><td>21</td><td>20</td><td>2</td><td>0</td><td>105.0</td></tr>
+              <tr><td><strong>Ben Cooper</strong></td><td class="muted">lbw b Lim</td><td>18</td><td>14</td><td>1</td><td>1</td><td>128.6</td></tr>
+              <tr><td><strong>Matt Hayes</strong></td><td class="muted">c Smith b Butler</td><td>10</td><td>11</td><td>1</td><td>0</td><td>90.9</td></tr>
+              <tr><td><strong>Imran Khan</strong></td><td class="muted">not out</td><td>9</td><td>8</td><td>0</td><td>0</td><td>112.5</td></tr>
+              <tr style="background:var(--ctm-bg-alt);"><td colspan="2" class="small muted"><strong>Extras</strong> (b 2, lb 4, w 6)</td><td colspan="5"><strong>12</strong></td></tr>
+              <tr style="background:var(--ctm-bg-alt);"><td colspan="2"><strong>TOTAL</strong> <span class="small muted">20.0 overs, RR 8.25</span></td><td colspan="5"><strong>165/9</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Innings 2: Bowling -->
+      <div class="innings-section">
+        <div class="innings-title"><span>Crawley Crusaders — Bowling</span></div>
+        <div class="table-responsive">
+          <table class="ctm-table" style="border:none; border-radius:0; box-shadow:none;">
+            <thead><tr><th>Bowler</th><th>O</th><th>M</th><th>R</th><th>W</th><th>Econ</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Daniel Park</strong></td><td>4.0</td><td>0</td><td>29</td><td>2</td><td>7.3</td></tr>
+              <tr><td><strong>Jacob Lim</strong></td><td>4.0</td><td>1</td><td>22</td><td><strong>3</strong></td><td>5.5</td></tr>
+              <tr><td><strong>James Butler</strong></td><td>4.0</td><td>0</td><td>34</td><td>2</td><td>8.5</td></tr>
+              <tr><td><strong>Arjun Rao</strong></td><td>4.0</td><td>0</td><td>38</td><td>1</td><td>9.5</td></tr>
+              <tr><td><strong>Noah Smith</strong></td><td>4.0</td><td>0</td><td>42</td><td>1</td><td>10.5</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Venue map -->
+      <div class="ctm-map" aria-labelledby="match-venue-title">
+        <div class="ctm-map-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 10-14 0c0 5.8 7 12 7 12z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="2"/></svg>
+          <div>
+            <div class="ctm-map-title" id="match-venue-title">UWA Sports Park, Oval 3</div>
+            <div class="ctm-map-address">Hackett Dr, Crawley WA 6009, Australia</div>
+          </div>
+        </div>
+        <div class="ctm-map-frame" data-ctm-map data-lat="-31.9833" data-lng="115.8167" data-label="UWA Sports Park, Oval 3"></div>
+        <div class="ctm-map-provider"></div>
+      </div>
+
+      <!-- Comments -->
+      <section class="ctm-comments" data-ctm-comments data-match-id="501" aria-labelledby="match-comments-title">
+        <h3 id="match-comments-title">Match discussion <span class="ctm-comment-count" data-ctm-comment-count></span></h3>
+        <ul class="ctm-comment-list" data-ctm-comment-list></ul>
+        <form class="ctm-comment-form" data-ctm-comment-form aria-label="Post a comment">
+          <div class="d-flex align-items-center gap-2 small muted">
+            <span class="avatar" data-ctm-current-avatar aria-hidden="true">CZ</span>
+            <span>Commenting as <strong data-ctm-current-name>Cheng Zhang</strong></span>
+            <span class="ctm-badge-organizer" data-ctm-current-badge>Organizer</span>
+          </div>
+          <label class="visually-hidden" for="match-comment-body">Comment</label>
+          <textarea id="match-comment-body" class="form-control" rows="3" placeholder="Share your thoughts on this match…" required></textarea>
+          <div class="ctm-comment-meta">
+            <span data-ctm-comment-counter>0 / 500</span>
+            <button type="submit" class="btn btn-ctm-primary btn-sm">Post comment</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </section>
+</main>
+
+<div data-layout="footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/mockdata.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/roles.js"></script>
+<script src="js/maps.js"></script>
+<script src="js/comments.js"></script>
+<script src="js/main.js"></script>
+</body>
 </html>
