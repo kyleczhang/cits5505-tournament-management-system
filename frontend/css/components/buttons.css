@@ -1,0 +1,53 @@
+/* ---------- BUTTONS ---------- */
+.btn {
+  font-weight: 600;
+  border-radius: var(--ctm-radius-sm);
+  padding: 0.6rem 1.25rem;
+  transition:
+    transform 200ms ease,
+    background-color 200ms ease,
+    box-shadow 200ms ease;
+  cursor: pointer;
+}
+.btn-ctm-primary {
+  background: var(--ctm-primary);
+  color: #fff;
+  border: 1px solid var(--ctm-primary);
+}
+.btn-ctm-primary:hover {
+  background: var(--ctm-primary-dark);
+  color: #fff;
+  box-shadow: var(--ctm-shadow);
+}
+
+.btn-ctm-accent {
+  background: var(--ctm-accent);
+  color: #1f2937;
+  border: 1px solid var(--ctm-accent);
+  font-weight: 700;
+}
+.btn-ctm-accent:hover {
+  background: var(--ctm-accent-dark);
+  color: #fff;
+  box-shadow: var(--ctm-shadow);
+}
+
+.btn-ctm-ghost {
+  background: transparent;
+  color: var(--ctm-primary);
+  border: 1px solid var(--ctm-border-strong);
+}
+.btn-ctm-ghost:hover {
+  background: var(--ctm-bg-alt);
+  color: var(--ctm-primary-dark);
+}
+
+.btn-ctm-outline {
+  background: transparent;
+  color: var(--ctm-primary);
+  border: 2px solid var(--ctm-primary);
+}
+.btn-ctm-outline:hover {
+  background: var(--ctm-primary);
+  color: #fff;
+}
