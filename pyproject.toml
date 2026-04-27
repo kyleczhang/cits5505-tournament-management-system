@@ -1,0 +1,27 @@
+[project]
+name = "criktrack"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+src = ["app"]
+extend-exclude = ["app/migrations"]
+
+[tool.ruff.lint]
+select = [
+  "E",
+  "F",
+  "I",
+  "UP",
+  "B",
+  "SIM",
+  "C4",
+  "RUF",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["app/tests"]
+filterwarnings = ["ignore::DeprecationWarning"]
+markers = ["selenium: end-to-end tests driven via a real browser"]
