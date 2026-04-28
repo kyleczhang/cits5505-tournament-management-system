@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.display_name }} — Profile — CRIKTRACK{% endblock %}
+
+{% set cover_classes = {'live': '', 'upcoming': 'alt', 'completed': 'warm'} %}
+{% set status_badges = {'live': 'badge-live', 'upcoming': 'badge-upcoming', 'completed': 'badge-completed'} %}
+
+{% block content %}
+  <section class="section">
+    <div class="container">
+      <div class="ctm-card mb-4">
+        <div class="d-flex flex-wrap align-items-center gap-4">
+          <span class="avatar xl">{{ user.initials }}</span>
+          <div class="flex-grow-1">
+            <h1 class="mb-1">{{ user.display_name }}</h1>
+            <p class="mb-2 muted">
+              {% if user.location %}{{ user.location }}{% else %}Cricket fan{% endif %}
+              {% if user.role.value == 'organizer' %} • <span class="badge-ctm badge-format">Organizer</span>{% endif %}
+            </p>
+            <p class="mb-0">{{ user.bio or 'No bio yet.' }}</p>
+          </div>
+          {% if is_self %}
+            <a href="{{ url_for('users.profile_edit') }}" class="btn btn-ctm-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="me-1" aria-hidden="true"><path d="M3 21l4-1 11-11-3-3L4 17l-1 4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+              Edit profile
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-sm-4"><div class="stat-card"><div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><div><div class="stat-value">{{ stats.tournaments_organised }}</div><div class="stat-label">Tournaments organised</div></div></div></div>
+        <div class="col-sm-4"><div class="stat-card"><div class="stat-icon" style="background:rgba(22,163,74,0.12); color:#15803D;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><div><div class="stat-value">{{ stats.matches_recorded }}</div><div class="stat-label">Matches recorded</div></div></div></div>
+        <div class="col-sm-4"><div class="stat-card"><div class="stat-icon" style="background:rgba(245,158,11,0.12); color:#B45309;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l2.5 6.5L21 9l-5 4.5L17.5 20 12 16.5 6.5 20 8 13.5 3 9l6.5-.5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div><div><div class="stat-value">{{ stats.titles_won }}</div><div class="stat-label">Titles won</div></div></div></div>
+      </div>
+
+      <h2 class="h4 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Tournament history</h2>
+      <div class="row g-3">
+        {% for t in organised %}
+          <div class="col-md-6 col-lg-4">
+            <a class="text-decoration-none" href="{{ url_for('tournaments.detail', tournament_id=t.id) }}">
+              <article class="tournament-card">
+                <div class="card-cover {{ cover_classes.get(t.status.value, '') }}">
+                  <span class="status-pill badge-ctm {{ status_badges.get(t.status.value, '') }}">{{ t.status.value | capitalize }}</span>
+                  <h3>{{ t.name }}</h3>
+                </div>
+                <div class="card-body">
+                  <div class="meta"><span class="badge-ctm badge-format">Organiser</span><span class="small">{{ t.team_count }} teams</span></div>
+                </div>
+              </article>
+            </a>
+          </div>
+        {% else %}
+          <div class="col-12">
+            <div class="ctm-card text-center muted">No tournaments yet.</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endblock %}
