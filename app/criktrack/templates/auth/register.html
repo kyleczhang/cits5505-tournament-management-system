@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% from "auth/_helpers.html" import field %}
+
+{% block title %}Sign up — CRIKTRACK{% endblock %}
+
+{% block content %}
+  <section class="auth-wrapper">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 col-xl-5">
+          <div class="auth-card">
+            <div class="text-center mb-4">
+              <h1>Create an account</h1>
+              <p class="muted m-0">Start managing your cricket tournament in minutes.</p>
+            </div>
+
+            <form method="post" novalidate>
+              {{ form.hidden_tag() }}
+
+              {{ field(form.display_name, "Full name", autocomplete="name", placeholder="e.g. Aarav Patel") }}
+              {{ field(form.email, "Email address", type="email", autocomplete="email", placeholder="you@example.com") }}
+              {{ field(form.password, "Password", type="password", autocomplete="new-password",
+                       hint="At least 8 characters with letters and digits.",
+                       extra={"minlength": "8"}) }}
+              {{ field(form.password_confirm, "Confirm password", type="password", autocomplete="new-password") }}
+              {{ field(form.invite_code, "Organizer invite code (optional)", placeholder="Leave blank for a regular account") }}
+
+              <div class="form-check mb-4">
+                {{ form.terms(class="form-check-input" + (" is-invalid" if form.terms.errors else "")) }}
+                <label for="{{ form.terms.id }}" class="form-check-label small">
+                  I agree to the <a href="#" class="link-primary">terms of service</a> and
+                  <a href="#" class="link-primary">privacy policy</a>.
+                </label>
+                {% for err in form.terms.errors %}
+                  <div class="form-hint-error" role="alert">{{ err }}</div>
+                {% endfor %}
+              </div>
+
+              {{ form.submit(class="btn btn-ctm-primary w-100 btn-lg") }}
+            </form>
+
+            <p class="text-center muted mt-4 mb-0 small">
+              Already have an account? <a class="link-primary" href="{{ url_for('auth.login') }}">Log in</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
