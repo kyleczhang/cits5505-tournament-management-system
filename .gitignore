@@ -1,5 +1,7 @@
+# Repo-wide editor and local tooling
+.vscode/
+.idea/
+.claude/
+CLAUDE.md
 .DS_Store
 
-.claude
-
-CLAUDE.md
