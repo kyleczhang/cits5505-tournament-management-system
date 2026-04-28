@@ -1,0 +1,60 @@
+/* ---------- VENUE MAP ---------- */
+.ctm-map {
+  background: #fff;
+  border: 1px solid var(--ctm-border);
+  border-radius: var(--ctm-radius);
+  padding: 1.25rem;
+  box-shadow: var(--ctm-shadow-sm);
+  margin-bottom: 1rem;
+}
+.ctm-map .ctm-map-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+.ctm-map .ctm-map-header svg {
+  color: var(--ctm-primary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.ctm-map .ctm-map-title {
+  font-weight: 700;
+  color: var(--ctm-text);
+  font-size: 1.05rem;
+}
+.ctm-map .ctm-map-address {
+  color: var(--ctm-muted);
+  font-size: 0.9rem;
+}
+.ctm-map-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--ctm-radius-sm);
+  overflow: hidden;
+  background: var(--ctm-bg-alt);
+  border: 1px solid var(--ctm-border);
+}
+.ctm-map-frame iframe,
+.ctm-map-frame .gm-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.ctm-map-provider {
+  font-size: 0.75rem;
+  color: var(--ctm-subtle);
+  margin-top: 0.5rem;
+  text-align: right;
+}
+.ctm-map-provider a {
+  color: var(--ctm-muted);
+  text-decoration: none;
+}
+.ctm-map-provider a:hover {
+  color: var(--ctm-primary);
+  text-decoration: underline;
+}

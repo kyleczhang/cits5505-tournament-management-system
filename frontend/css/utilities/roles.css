@@ -1,0 +1,58 @@
+/* ---------- ROLE GATING ---------- */
+/* Items marked organizer-only are hidden when the active role is 'user'. */
+body[data-ctm-role='user'] [data-role-gate='organizer'] {
+  display: none !important;
+}
+
+/* ---------- DEMO ROLE SWITCHER ---------- */
+.ctm-role-switcher {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 9998;
+  background: #fff;
+  border: 1px solid var(--ctm-border-strong);
+  border-radius: 999px;
+  box-shadow: var(--ctm-shadow-lg);
+  padding: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+.ctm-role-switcher .ctm-role-label {
+  padding-left: 0.6rem;
+  color: var(--ctm-muted);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+.ctm-role-switcher button {
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  font-weight: 600;
+  color: var(--ctm-muted);
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
+}
+.ctm-role-switcher button.is-active {
+  background: var(--ctm-primary);
+  color: #fff;
+}
+.ctm-role-switcher button:hover:not(.is-active) {
+  background: var(--ctm-bg-alt);
+  color: var(--ctm-text);
+}
+
+@media (max-width: 767px) {
+  .ctm-role-switcher {
+    right: 8px;
+    bottom: 8px;
+    font-size: 0.8rem;
+  }
+}
