@@ -1,0 +1,357 @@
+{% extends "base.html" %} {% block title %}{{ match.team_a.name }} vs {{
+match.team_b.name }} — Scorecard — CRIKTRACK{% endblock %} {% set status_badges
+= {'live': 'badge-live', 'upcoming': 'badge-upcoming', 'completed':
+'badge-completed'} %} {% set status_labels = {'live': 'Live', 'upcoming':
+'Upcoming', 'completed': 'Completed'} %} {% set innings_by_team = {} %} {% for
+inn in match.innings %}{% if innings_by_team.update({inn.batting_team_id: inn})
+%}{% endif %}{% endfor %} {% set inn_a = innings_by_team.get(match.team_a_id) %}
+{% set inn_b = innings_by_team.get(match.team_b_id) %} {% block content %}
+<section class="section">
+  <div class="container">
+    <nav aria-label="breadcrumb" class="mb-3">
+      <ol class="breadcrumb small">
+        <li class="breadcrumb-item">
+          <a class="link-primary" href="{{ url_for('tournaments.list_view') }}"
+            >Tournaments</a
+          >
+        </li>
+        <li class="breadcrumb-item">
+          <a
+            class="link-primary"
+            href="{{ url_for('tournaments.detail', tournament_id=tournament.id) }}"
+            >{{ tournament.name }}</a
+          >
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+          {{ match.team_a.name }} vs {{ match.team_b.name }}
+        </li>
+      </ol>
+    </nav>
+
+    <div class="scorecard-header">
+      <div
+        class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3"
+      >
+        <div>
+          <span
+            class="badge-ctm {{ status_badges.get(match.status.value, '') }}"
+            style="background: rgba(255, 255, 255, 0.2); color: #fff"
+            >{{ status_labels.get(match.status.value, match.status.value) }} •
+            {{ match.scheduled_at.strftime('%d %b %Y') }}</span
+          >
+          {% if match.venue %}
+          <p class="mb-1 mt-2 small muted">
+            {{ match.venue.name }}, {{ match.venue.address }}
+          </p>
+          {% endif %} {% if match.toss_winner and match.toss_decision %}
+          <p class="mb-1 mt-1 small muted">
+            {{ match.toss_winner.name }} won the toss and elected to {{
+            match.toss_decision.value }}
+          </p>
+          {% endif %}
+        </div>
+        {% if is_organiser %}
+        <a
+          class="btn btn-ctm-accent"
+          href="{{ url_for('matches.record', tournament_id=tournament.id, match_id=match.id) }}"
+          >Edit result</a
+        >
+        {% endif %}
+      </div>
+      <div class="row align-items-center g-3">
+        <div class="col-md-5">
+          <div class="d-flex align-items-center gap-3">
+            <span class="team-logo lg">{{ match.team_a.short_code }}</span>
+            <div>
+              <div class="muted small">{{ match.team_a.name }}</div>
+              {% if inn_a %}
+              <div class="innings-score">
+                {{ inn_a.runs }}<span style="font-size: 1.5rem; opacity: 0.8"
+                  >/{{ inn_a.wickets }}</span
+                >
+              </div>
+              <div class="muted small">{{ inn_a.overs }} overs</div>
+              {% else %}
+              <div class="innings-score muted">—</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="col-md-2 text-center">
+          <div
+            style="
+              font-family: var(--ctm-font-heading);
+              font-size: 1.8rem;
+              color: rgba(255, 255, 255, 0.6);
+            "
+          >
+            vs
+          </div>
+        </div>
+        <div class="col-md-5">
+          <div class="d-flex align-items-center gap-3 justify-content-md-end">
+            <div class="text-md-end">
+              <div class="muted small">{{ match.team_b.name }}</div>
+              {% if inn_b %}
+              <div class="innings-score">
+                {{ inn_b.runs }}<span style="font-size: 1.5rem; opacity: 0.8"
+                  >/{{ inn_b.wickets }}</span
+                >
+              </div>
+              <div class="muted small">{{ inn_b.overs }} overs</div>
+              {% else %}
+              <div class="innings-score muted">—</div>
+              {% endif %}
+            </div>
+            <span
+              class="team-logo lg"
+              style="background: linear-gradient(135deg, #1e40af, #3b82f6)"
+              >{{ match.team_b.short_code }}</span
+            >
+          </div>
+        </div>
+      </div>
+      {% if match.result_text %}
+      <hr
+        style="border-color: rgba(255, 255, 255, 0.2); margin: 1.5rem 0 1rem"
+      />
+      <div class="text-center">
+        <strong
+          style="
+            color: var(--ctm-accent);
+            font-family: var(--ctm-font-heading);
+            font-size: 1.5rem;
+            letter-spacing: 0.05em;
+          "
+          >{{ match.result_text }}</strong
+        >
+      </div>
+      {% endif %}
+    </div>
+
+    {% for inn in match.innings %}
+    <div class="innings-section">
+      <div class="innings-title">
+        <span
+          >{{ inn.batting_team.name }} innings —
+          <strong>{{ inn.runs }}/{{ inn.wickets }}</strong> ({{ inn.overs
+          }})</span
+        >
+        <span class="small muted">Batting</span>
+      </div>
+      <div class="table-responsive">
+        <table
+          class="ctm-table"
+          style="border: none; border-radius: 0; box-shadow: none"
+        >
+          <thead>
+            <tr>
+              <th>Batter</th>
+              <th>Dismissal</th>
+              <th>R</th>
+              <th>B</th>
+              <th>4s</th>
+              <th>6s</th>
+              <th>SR</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for b in inn.batting_entries %}
+            <tr>
+              <td>
+                <a
+                  class="link-primary"
+                  href="{{ url_for('players.stats', tournament_id=tournament.id, player_id=b.player.id) }}"
+                  ><strong>{{ b.player.name }}</strong></a
+                >
+              </td>
+              <td class="muted">
+                {{ b.dismissal or ('not out' if b.is_not_out else '—') }}
+              </td>
+              <td><strong>{{ b.runs }}</strong></td>
+              <td>{{ b.balls }}</td>
+              <td>{{ b.fours }}</td>
+              <td>{{ b.sixes }}</td>
+              <td>{{ b.strike_rate }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="7" class="text-center muted">
+                No batting recorded.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="innings-section">
+      <div class="innings-title">
+        <span>{{ inn.bowling_team.name }} — Bowling</span>
+      </div>
+      <div class="table-responsive">
+        <table
+          class="ctm-table"
+          style="border: none; border-radius: 0; box-shadow: none"
+        >
+          <thead>
+            <tr>
+              <th>Bowler</th>
+              <th>O</th>
+              <th>M</th>
+              <th>R</th>
+              <th>W</th>
+              <th>Econ</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for b in inn.bowling_entries %}
+            <tr>
+              <td>
+                <a
+                  class="link-primary"
+                  href="{{ url_for('players.stats', tournament_id=tournament.id, player_id=b.player.id) }}"
+                  ><strong>{{ b.player.name }}</strong></a
+                >
+              </td>
+              <td>{{ b.overs }}</td>
+              <td>{{ b.maidens }}</td>
+              <td>{{ b.runs }}</td>
+              <td><strong>{{ b.wickets }}</strong></td>
+              <td>{{ b.economy }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="6" class="text-center muted">
+                No bowling recorded.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% else %}
+    <div class="ctm-card text-center muted">No innings recorded yet.</div>
+    {% endfor %} {% if match.venue %}
+    <div class="ctm-map" aria-labelledby="match-venue-title">
+      <div class="ctm-map-header">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M12 22s7-6.2 7-12a7 7 0 10-14 0c0 5.8 7 12 7 12z"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linejoin="round"
+          />
+          <circle
+            cx="12"
+            cy="10"
+            r="2.5"
+            stroke="currentColor"
+            stroke-width="2"
+          />
+        </svg>
+        <div>
+          <div class="ctm-map-title" id="match-venue-title">
+            {{ match.venue.name }}
+          </div>
+          <div class="ctm-map-address">{{ match.venue.address }}</div>
+        </div>
+      </div>
+      <div
+        class="ctm-map-frame"
+        data-ctm-map
+        {%
+        if
+        match.venue.lat
+        is
+        not
+        none
+        %}data-lat="{{ match.venue.lat }}"
+        {%
+        endif
+        %}
+        {%
+        if
+        match.venue.lng
+        is
+        not
+        none
+        %}data-lng="{{ match.venue.lng }}"
+        {%
+        endif
+        %}
+        data-label="{{ match.venue.name }}"
+        data-address="{{ match.venue.address }}"
+      ></div>
+      <div class="ctm-map-provider"></div>
+    </div>
+    {% endif %}
+
+    <section
+      class="ctm-comments"
+      data-ctm-comments
+      data-match-id="{{ match.id }}"
+      aria-labelledby="match-comments-title"
+    >
+      <h3 id="match-comments-title">
+        Match discussion
+        <span class="ctm-comment-count" data-ctm-comment-count></span>
+      </h3>
+      <ul class="ctm-comment-list" data-ctm-comment-list></ul>
+      {% if current_user.is_authenticated %}
+      <form
+        class="ctm-comment-form"
+        data-ctm-comment-form
+        aria-label="Post a comment"
+      >
+        <div class="d-flex align-items-center gap-2 small muted">
+          <span class="avatar" data-ctm-current-avatar aria-hidden="true"
+            >{{ current_user.initials }}</span
+          >
+          <span
+            >Commenting as
+            <strong data-ctm-current-name
+              >{{ current_user.display_name }}</strong
+            ></span
+          >
+          {% if current_user.role.value == 'organizer' %}
+          <span class="ctm-badge-organizer" data-ctm-current-badge
+            >Organizer</span
+          >
+          {% endif %}
+        </div>
+        <label class="visually-hidden" for="match-comment-body">Comment</label>
+        <textarea
+          id="match-comment-body"
+          class="form-control"
+          rows="3"
+          placeholder="Share your thoughts on this match…"
+          required
+        ></textarea>
+        <div class="ctm-comment-meta">
+          <span data-ctm-comment-counter>0 / 500</span>
+          <button type="submit" class="btn btn-ctm-primary btn-sm">
+            Post comment
+          </button>
+        </div>
+      </form>
+      {% else %}
+      <p class="muted small mt-2">
+        <a href="{{ url_for('auth.login') }}" class="link-primary">Log in</a> to
+        join the discussion.
+      </p>
+      {% endif %}
+    </section>
+  </div>
+</section>
+{% endblock %} {% block scripts %}
+<script src="{{ url_for('static', filename='js/comments.js') }}"></script>
+{% endblock %}
