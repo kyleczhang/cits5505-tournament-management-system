@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}{{ player.name }} — Player Stats — CRIKTRACK{% endblock %}
+
+{% block content %}
+  <section class="section">
+    <div class="container">
+      <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+          <li class="breadcrumb-item"><a class="link-primary" href="{{ url_for('tournaments.detail', tournament_id=tournament.id) }}">{{ tournament.name }}</a></li>
+          <li class="breadcrumb-item active" aria-current="page">{{ player.name }}</li>
+        </ol>
+      </nav>
+
+      <div class="ctm-card mb-4" style="border-top:4px solid var(--ctm-accent);">
+        <div class="d-flex flex-wrap align-items-center gap-4">
+          <span class="avatar xl">{{ player.name | initials }}</span>
+          <div class="flex-grow-1">
+            <h1 class="mb-1">{{ player.name }}</h1>
+            <p class="mb-2 muted">{{ player.team.name }} • {{ player.role.value | replace('_', ' ') | title }}</p>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="badge-ctm badge-format">{{ tournament.name }}</span>
+            </div>
+          </div>
+          <div class="text-end">
+            <div class="muted small">Matches</div>
+            <div style="font-family:var(--ctm-font-heading); font-size:3rem; color:var(--ctm-primary); line-height:1;">{{ summary.matches }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+          <div class="stat-card"><div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 20l7-7 4 4 7-10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><div><div class="stat-value">{{ summary.runs }}</div><div class="stat-label">Total runs</div></div></div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(245,158,11,0.12); color:#B45309;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l2.5 6.5L21 9l-5 4.5L17.5 20 12 16.5 6.5 20 8 13.5 3 9l6.5-.5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div><div><div class="stat-value">{{ summary.average if summary.average is not none else '—' }}</div><div class="stat-label">Batting avg</div></div></div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(22,163,74,0.12); color:#15803D;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12l8-8 8 8-8 8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div><div><div class="stat-value">{{ summary.strike_rate }}</div><div class="stat-label">Strike rate</div></div></div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(124,58,237,0.12); color:#6D28D9;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></div><div><div class="stat-value">{{ summary.wickets }}</div><div class="stat-label">Wickets</div></div></div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-lg-5">
+          <div class="ctm-card h-100">
+            <h2 class="h5 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Career milestones</h2>
+            <ul class="list-unstyled d-flex flex-column gap-3 m-0">
+              <li class="d-flex justify-content-between"><span>50s in tournament</span><strong>{{ summary.fifties }}</strong></li>
+              <li class="d-flex justify-content-between"><span>100s in tournament</span><strong>{{ summary.hundreds }}</strong></li>
+              <li class="d-flex justify-content-between"><span>Highest score</span><strong>{{ summary.highest }}</strong></li>
+              <li class="d-flex justify-content-between"><span>Overs bowled</span><strong>{{ summary.overs }}</strong></li>
+              <li class="d-flex justify-content-between"><span>Bowling average</span><strong>{{ summary.bowling_avg if summary.bowling_avg is not none else '—' }}</strong></li>
+              <li class="d-flex justify-content-between"><span>Economy rate</span><strong>{{ summary.economy }}</strong></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-lg-7">
+          <div class="ctm-card h-100">
+            <h2 class="h5 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Match-by-match</h2>
+            <div class="table-responsive">
+              <table class="ctm-table" style="box-shadow:none;">
+                <thead><tr><th>Match</th><th>Runs (B)</th><th>Wkts</th><th>Overs</th></tr></thead>
+                <tbody>
+                  {% for row in history %}
+                    {% set m = row.match %}
+                    {% set opp = m.team_b if m.team_a_id == player.team_id else m.team_a %}
+                    <tr>
+                      <td><a class="link-primary" href="{{ url_for('matches.scorecard', tournament_id=tournament.id, match_id=m.id) }}">vs {{ opp.name }}</a></td>
+                      <td>
+                        {% if row.bat %}
+                          <strong{% if row.bat.runs >= 100 %} style="color:var(--ctm-accent);"{% endif %}>{{ row.bat.runs }}</strong> ({{ row.bat.balls }})
+                        {% else %}—{% endif %}
+                      </td>
+                      <td>{{ row.bowl.wickets if row.bowl else 0 }}</td>
+                      <td>{{ row.bowl.overs if row.bowl else 0 }}</td>
+                    </tr>
+                  {% else %}
+                    <tr><td colspan="4" class="text-center muted">No appearances recorded yet.</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if history %}
+        <div class="ctm-card mt-4">
+          <h2 class="h5 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Runs per match</h2>
+          {% set max_runs = (history | map(attribute='bat') | select | map(attribute='runs') | list | max) or 1 %}
+          <div class="d-flex align-items-end gap-3" style="height:180px;" aria-label="Bar chart of runs per match">
+            {% for row in history | reverse %}
+              {% set runs = row.bat.runs if row.bat else 0 %}
+              {% set pct = (runs / max_runs * 95) | round(0, 'floor') if max_runs else 0 %}
+              <div class="text-center flex-grow-1">
+                <div style="background:linear-gradient(180deg,var(--ctm-primary-light),var(--ctm-primary)); height:{{ pct }}%; min-height:4px; border-radius:6px 6px 0 0;" title="{{ runs }} runs"></div>
+                <div class="small muted mt-1">{{ runs }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}
