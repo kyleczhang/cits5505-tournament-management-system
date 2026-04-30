@@ -1,0 +1,403 @@
+{% extends "base.html" %} {% block title %}{{ tournament.name }} — CRIKTRACK{%
+endblock %} {% set status_badges = {'live': 'badge-live', 'upcoming':
+'badge-upcoming', 'completed': 'badge-completed'} %} {% set status_labels =
+{'live': 'Live', 'upcoming': 'Upcoming', 'completed': 'Completed'} %} {% block
+content %}
+<section
+  style="
+    background: linear-gradient(135deg, #0f766e, #0b5952);
+    color: #fff;
+    padding: 3rem 0 3.5rem;
+    position: relative;
+    overflow: hidden;
+  "
+>
+  <div
+    style="
+      position: absolute;
+      right: -120px;
+      top: -120px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(
+        circle,
+        rgba(245, 158, 11, 0.3),
+        transparent 70%
+      );
+    "
+  ></div>
+  <div class="container position-relative">
+    <nav aria-label="breadcrumb" class="mb-3">
+      <ol
+        class="breadcrumb small"
+        style="--bs-breadcrumb-divider-color: #cbd5e1"
+      >
+        <li class="breadcrumb-item">
+          <a
+            href="{{ url_for('tournaments.list_view') }}"
+            style="color: #cbd5e1"
+            >Tournaments</a
+          >
+        </li>
+        <li
+          class="breadcrumb-item active"
+          style="color: #fff"
+          aria-current="page"
+        >
+          {{ tournament.name }}
+        </li>
+      </ol>
+    </nav>
+    <div
+      class="d-flex flex-wrap justify-content-between align-items-start gap-3"
+    >
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span
+            class="badge-ctm {{ status_badges.get(tournament.status.value, '') }}"
+            >{{ status_labels.get(tournament.status.value,
+            tournament.status.value) }}</span
+          >
+          <span
+            class="badge-ctm"
+            style="background: rgba(255, 255, 255, 0.15); color: #fff"
+            >{{ tournament.format.value | replace('_', ' ') | title }}</span
+          >
+        </div>
+        <h1 class="mb-2" style="color: #fff">{{ tournament.name }}</h1>
+        {% if tournament.description %}
+        <p class="mb-0" style="color: rgba(255, 255, 255, 0.8)">
+          {{ tournament.description }}
+        </p>
+        {% endif %}
+        <div
+          class="d-flex flex-wrap gap-3 mt-3 small"
+          style="color: rgba(255, 255, 255, 0.85)"
+        >
+          <span class="d-inline-flex align-items-center gap-1">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
+              <rect
+                x="3"
+                y="5"
+                width="18"
+                height="16"
+                rx="2"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <path d="M3 9h18" stroke="currentColor" stroke-width="2" />
+            </svg>
+            {{ tournament.start_date | pretty_date }}
+          </span>
+          <span>•</span>
+          <span
+            >{{ tournament.team_count }} teams • {{ matches | length }}
+            matches</span
+          >
+          <span>•</span>
+          <span
+            >Organiser:
+            <a
+              class="link-light"
+              href="{{ url_for('users.profile', user_id=tournament.organiser_id) }}"
+              style="color: #fff; text-decoration: underline"
+              >{{ tournament.organiser.display_name }}</a
+            ></span
+          >
+        </div>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <button
+          class="btn btn-ctm-accent"
+          data-share="{{ url_for('tournaments.public', slug=tournament.share_slug, _external=True) }}"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            class="me-1"
+            aria-hidden="true"
+          >
+            <path
+              d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v14"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+          </svg>
+          Share
+        </button>
+        {% if is_organiser %}
+        <a
+          class="btn"
+          href="{{ url_for('users.dashboard') }}"
+          style="background: #fff; color: var(--ctm-primary); font-weight: 600"
+          >Manage</a
+        >
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <ul class="nav nav-pills nav-pills-ctm gap-2 mb-4" role="tablist">
+      <li class="nav-item">
+        <button
+          class="nav-link active"
+          data-bs-toggle="pill"
+          data-bs-target="#fixtures"
+          type="button"
+          role="tab"
+        >
+          Fixtures
+        </button>
+      </li>
+      <li class="nav-item">
+        <button
+          class="nav-link"
+          data-bs-toggle="pill"
+          data-bs-target="#standings"
+          type="button"
+          role="tab"
+        >
+          Points table
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <div class="tab-pane fade show active" id="fixtures" role="tabpanel">
+        <div class="d-flex flex-column gap-3">
+          {% for row in matches %} {% set m = row.match %}
+          <article class="match-row">
+            <div class="team">
+              <span class="team-logo">{{ m.team_a.short_code }}</span>
+              <div>
+                <div>{{ m.team_a.name }}</div>
+                {% if row.a_score %}
+                <div class="team-score">{{ row.a_score }}</div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="divider">
+              <div
+                class="badge-ctm {{ status_badges.get(m.status.value, '') }} mb-1"
+              >
+                {{ status_labels.get(m.status.value, m.status.value) }}
+              </div>
+              <div class="small muted">
+                {{ m.scheduled_at.strftime('%d %b %Y • %H:%M') }}
+              </div>
+              {% if m.status.value != 'upcoming' %}
+              <a
+                href="{{ url_for('matches.scorecard', tournament_id=tournament.id, match_id=m.id) }}"
+                class="small link-primary d-block mt-1"
+                >Scorecard →</a
+              >
+              {% endif %} {% if is_organiser %}
+              <a
+                href="{{ url_for('matches.record', tournament_id=tournament.id, match_id=m.id) }}"
+                class="small link-primary d-block"
+                >Enter result</a
+              >
+              {% endif %}
+            </div>
+            <div class="team right">
+              <div class="text-end">
+                <div>{{ m.team_b.name }}</div>
+                {% if row.b_score %}
+                <div class="team-score">{{ row.b_score }}</div>
+                {% endif %}
+              </div>
+              <span
+                class="team-logo"
+                style="background: linear-gradient(135deg, #1e40af, #3b82f6)"
+                >{{ m.team_b.short_code }}</span
+              >
+            </div>
+          </article>
+          {% else %}
+          <div class="ctm-card text-center muted">
+            No fixtures recorded yet.
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="standings" role="tabpanel">
+        <div class="table-responsive">
+          <table class="ctm-table">
+            <thead>
+              <tr>
+                <th style="width: 60px">#</th>
+                <th>Team</th>
+                <th>P</th>
+                <th>W</th>
+                <th>L</th>
+                <th>Points</th>
+                <th>NRR</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for team in teams %}
+              <tr>
+                <td class="rank{% if loop.index == 1 %} rank-1{% endif %}">
+                  {{ loop.index }}
+                </td>
+                <td class="team-chip">
+                  <span class="team-logo">{{ team.short_code }}</span>{{
+                  team.name }}
+                </td>
+                <td>{{ team.played }}</td>
+                <td>{{ team.won }}</td>
+                <td>{{ team.lost }}</td>
+                <td><strong>{{ team.points }}</strong></td>
+                <td>{{ '%+.2f' | format(team.nrr | float) }}</td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="7" class="text-center muted">No standings yet.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    {% if tournament.venue %}
+    <div class="row g-4 mt-1">
+      <div class="col-lg-12">
+        <div class="ctm-map" aria-labelledby="venue-title">
+          <div class="ctm-map-header">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 22s7-6.2 7-12a7 7 0 10-14 0c0 5.8 7 12 7 12z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linejoin="round"
+              />
+              <circle
+                cx="12"
+                cy="10"
+                r="2.5"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+            </svg>
+            <div>
+              <div class="ctm-map-title" id="venue-title">
+                {{ tournament.venue.name }}
+              </div>
+              <div class="ctm-map-address">{{ tournament.venue.address }}</div>
+            </div>
+          </div>
+          <div
+            class="ctm-map-frame"
+            data-ctm-map
+            {%
+            if
+            tournament.venue.lat
+            is
+            not
+            none
+            %}data-lat="{{ tournament.venue.lat }}"
+            {%
+            endif
+            %}
+            {%
+            if
+            tournament.venue.lng
+            is
+            not
+            none
+            %}data-lng="{{ tournament.venue.lng }}"
+            {%
+            endif
+            %}
+            data-label="{{ tournament.venue.name }}"
+            data-address="{{ tournament.venue.address }}"
+          ></div>
+          <div class="ctm-map-provider"></div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <section
+      class="ctm-comments"
+      data-ctm-comments
+      data-tournament-id="{{ tournament.id }}"
+      aria-labelledby="tournament-comments-title"
+    >
+      <h3 id="tournament-comments-title">
+        Discussion
+        <span class="ctm-comment-count" data-ctm-comment-count></span>
+      </h3>
+      <ul class="ctm-comment-list" data-ctm-comment-list></ul>
+      {% if current_user.is_authenticated %}
+      <form
+        class="ctm-comment-form"
+        data-ctm-comment-form
+        aria-label="Post a comment"
+      >
+        <div class="d-flex align-items-center gap-2 small muted">
+          <span class="avatar" data-ctm-current-avatar aria-hidden="true"
+            >{{ current_user.initials }}</span
+          >
+          <span
+            >Commenting as
+            <strong data-ctm-current-name
+              >{{ current_user.display_name }}</strong
+            ></span
+          >
+          {% if current_user.role.value == 'organizer' %}
+          <span class="ctm-badge-organizer" data-ctm-current-badge
+            >Organizer</span
+          >
+          {% endif %}
+        </div>
+        <label class="visually-hidden" for="tournament-comment-body"
+          >Comment</label
+        >
+        <textarea
+          id="tournament-comment-body"
+          class="form-control"
+          rows="3"
+          placeholder="Share your thoughts on this tournament…"
+          required
+        ></textarea>
+        <div class="ctm-comment-meta">
+          <span data-ctm-comment-counter>0 / 500</span>
+          <button type="submit" class="btn btn-ctm-primary btn-sm">
+            Post comment
+          </button>
+        </div>
+      </form>
+      {% else %}
+      <p class="muted small mt-2">
+        <a href="{{ url_for('auth.login') }}" class="link-primary">Log in</a> to
+        join the discussion.
+      </p>
+      {% endif %}
+    </section>
+  </div>
+</section>
+{% endblock %} {% block scripts %}
+<script src="{{ url_for('static', filename='js/comments.js') }}"></script>
+{% endblock %}

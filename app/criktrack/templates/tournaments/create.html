@@ -1,0 +1,140 @@
+{% extends "base.html" %} {% from "auth/_helpers.html" import field %} {% block
+title %}Create Tournament — CRIKTRACK{% endblock %} {% block content %}
+<section class="section">
+  <div class="container" style="max-width: 860px">
+    <nav aria-label="breadcrumb" class="mb-3">
+      <ol class="breadcrumb small">
+        <li class="breadcrumb-item">
+          <a class="link-primary" href="{{ url_for('users.dashboard') }}"
+            >Dashboard</a
+          >
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+          Create tournament
+        </li>
+      </ol>
+    </nav>
+    <h1 class="mb-2">Create a new tournament</h1>
+    <p class="lead mb-4">
+      Set up the basics — you can add teams and generate fixtures next.
+    </p>
+
+    <form method="post" class="ctm-card" novalidate>
+      {{ form.hidden_tag() }}
+
+      <div class="row g-3">
+        <div class="col-12">
+          {{ field(form.name, "Tournament name", placeholder="e.g. UWA Social
+          League 2026") }}
+        </div>
+        <div class="col-md-6">
+          {{ field(form.start_date, "Start date", type="date") }}
+        </div>
+        <div class="col-md-6">
+          <label for="{{ form.format.id }}" class="form-label">Format</label>
+          {{ form.format(class="form-select" + (" is-invalid" if
+          form.format.errors else "")) }} {% for err in form.format.errors %}
+          <div class="form-hint-error" role="alert">{{ err }}</div>
+          {% endfor %}
+        </div>
+        <div class="col-md-6">
+          {{ field(form.num_teams, "Number of teams", type="number") }}
+        </div>
+        <div class="col-md-6">
+          {{ field(form.overs, "Overs per innings", type="number",
+          hint="Typical: 20 (T20), 50 (ODI), 10 (Sixes).") }}
+        </div>
+        <div class="col-12">
+          <label for="{{ form.description.id }}" class="form-label"
+            >Description <span class="muted small">(optional)</span></label
+          >
+          {{ form.description(class="form-control" + (" is-invalid" if
+          form.description.errors else ""), rows=3, placeholder="Tell visitors
+          about this tournament…") }} {% for err in form.description.errors %}
+          <div class="form-hint-error" role="alert">{{ err }}</div>
+          {% endfor %}
+        </div>
+        <div class="col-md-6">
+          {{ field(form.venue_name, "Venue name (optional)", placeholder="e.g.
+          UWA Sports Park") }}
+        </div>
+        <div class="col-md-6">
+          {{ field(form.venue_address, "Venue address (optional)",
+          placeholder="Hackett Dr, Crawley WA 6009") }}
+        </div>
+      </div>
+
+      <hr class="my-4" />
+
+      <h2
+        class="h5 mb-3"
+        style="font-family: var(--ctm-font-body); font-weight: 700"
+      >
+        Teams
+      </h2>
+      <p class="small muted mb-3">
+        Add the teams that will play. You'll be able to assign players on the
+        next step.
+      </p>
+      <div id="teams-list" class="d-flex flex-column gap-2 mb-3">
+        {% set defaults = team_names if team_names else ['', ''] %} {% for tn in
+        defaults %}
+        <div class="input-group">
+          <span class="input-group-text">{{ loop.index }}</span>
+          <input
+            type="text"
+            name="team_name"
+            class="form-control"
+            placeholder="Team name"
+            value="{{ tn }}"
+            required
+          />
+          {% if not loop.first or loop.length > 2 %}
+          <button
+            type="button"
+            class="btn btn-ctm-ghost"
+            data-remove-row
+            aria-label="Remove team"
+          >
+            ×
+          </button>
+          {% endif %}
+        </div>
+        {% endfor %}
+        <div class="input-group" data-row-template style="display: none">
+          <span class="input-group-text">•</span>
+          <input
+            type="text"
+            name="team_name"
+            class="form-control"
+            placeholder="Team name"
+          />
+          <button
+            type="button"
+            class="btn btn-ctm-ghost"
+            data-remove-row
+            aria-label="Remove team"
+          >
+            ×
+          </button>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="btn btn-ctm-ghost btn-sm"
+        data-add-row
+        data-target="#teams-list"
+      >
+        + Add another team
+      </button>
+
+      <div class="d-flex gap-2 justify-content-end mt-4">
+        <a href="{{ url_for('users.dashboard') }}" class="btn btn-ctm-ghost"
+          >Cancel</a
+        >
+        {{ form.submit(class="btn btn-ctm-primary") }}
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}
