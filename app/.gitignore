@@ -1,25 +1,6 @@
-.env
-.env.*
-!.env.example
-*.pyc
-*.pyo
-__pycache__/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.tox/
-.venv/
-venv/
+# Shared editor/env/Python ignores live in the repo root .gitignore.
+# Keep only app-local runtime files here.
 instance/
-.DS_Store
 *.sqlite3
 *.sqlite3-journal
 *.db
-*.log
-.coverage
-.coverage.*
-htmlcov/
-*.egg-info/
-build/
-dist/
-.idea/
