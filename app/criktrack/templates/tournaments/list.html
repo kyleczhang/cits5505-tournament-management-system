@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Browse tournaments — CRIKTRACK{% endblock %}
+
+{% set cover_classes = {'live': '', 'upcoming': 'alt', 'completed': 'warm'} %}
+{% set status_badges = {'live': 'badge-live', 'upcoming': 'badge-upcoming', 'completed': 'badge-completed'} %}
+{% set status_labels = {'live': 'Live', 'upcoming': 'Upcoming', 'completed': 'Completed'} %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+      <div>
+        <span class="badge-ctm badge-format mb-2">Discover</span>
+        <h1 class="mb-1">Browse tournaments</h1>
+        <p class="muted m-0">Find tournaments by name, format or status.</p>
+      </div>
+      <a href="{{ url_for('tournaments.create') }}" class="btn btn-ctm-primary" data-role-gate="organizer">+ New
+        tournament</a>
+    </div>
+
+    <form class="ctm-card mb-4" method="get" action="{{ url_for('tournaments.list_view') }}">
+      <div class="row g-3 align-items-center">
+        <div class="col-md-6">
+          <label for="tournament-search" class="form-label">Search</label>
+          <div class="input-group">
+            <span class="input-group-text bg-white" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" />
+                <path d="M21 21l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </span>
+            <input type="search" id="tournament-search" name="q" value="{{ q }}" class="form-control"
+              placeholder="Tournament name…">
+            <button type="submit" class="btn btn-ctm-primary">Search</button>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label d-block">Status</label>
+          <div class="d-flex flex-wrap gap-2" role="group" aria-label="Status filter">
+            {% for key, label in [('all','All'),('upcoming','Upcoming'),('live','In
+            progress'),('completed','Completed')] %}
+            <a class="btn btn-ctm-ghost btn-sm{% if status == key %} active{% endif %}"
+              href="{{ url_for('tournaments.list_view', q=q or None, status=(None if key=='all' else key)) }}">{{ label
+              }}</a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <div class="row g-3" id="tournament-grid">
+      {% for t in tournaments %}
+      <div class="col-md-6 col-lg-4">
+        <a class="text-decoration-none" href="{{ url_for('tournaments.detail', tournament_id=t.id) }}">
+          <article class="tournament-card">
+            <div class="card-cover {{ cover_classes.get(t.status.value, '') }}">
+              <span class="status-pill badge-ctm {{ status_badges.get(t.status.value, '') }}">{{
+                status_labels.get(t.status.value, t.status.value) }}</span>
+              <h3>{{ t.name }}</h3>
+            </div>
+            <div class="card-body">
+              <div class="meta">
+                <span class="badge-ctm badge-format">{{ t.format.value | replace('_', ' ') | title }}</span>
+                <span>{{ t.team_count }} teams</span>
+              </div>
+              <div class="meta small">By {{ t.organiser.display_name }} • {{ t.start_date | pretty_date }}</div>
+            </div>
+          </article>
+        </a>
+      </div>
+      {% else %}
+      <div class="col-12">
+        <div class="ctm-card text-center muted">No tournaments match your filters.</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if pages > 1 %}
+    <nav aria-label="Tournament pages" class="mt-4">
+      <ul class="pagination justify-content-center">
+        <li class="page-item{% if page <= 1 %} disabled{% endif %}">
+          <a class="page-link"
+            href="{{ url_for('tournaments.list_view', q=q or None, status=(None if status=='all' else status), page=page-1) }}">Previous</a>
+        </li>
+        {% for p in range(1, pages + 1) %}
+        <li class="page-item{% if p == page %} active{% endif %}" {% if p==page %}aria-current="page" {% endif %}>
+          <a class="page-link"
+            href="{{ url_for('tournaments.list_view', q=q or None, status=(None if status=='all' else status), page=p) }}">{{
+            p }}</a>
+        </li>
+        {% endfor %}
+        <li class="page-item{% if page >= pages %} disabled{% endif %}">
+          <a class="page-link"
+            href="{{ url_for('tournaments.list_view', q=q or None, status=(None if status=='all' else status), page=page+1) }}">Next</a>
+        </li>
+      </ul>
+    </nav>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

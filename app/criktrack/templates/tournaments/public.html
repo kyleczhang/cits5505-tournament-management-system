@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}{{ tournament.name }} — Shared — CRIKTRACK{% endblock %}
+
+{% block content %}
+  <section style="background:linear-gradient(135deg,#0F766E,#0B5952); color:#fff; padding:3rem 0;">
+    <div class="container">
+      <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+        <div>
+          <span class="badge-ctm" style="background:rgba(255,255,255,0.2); color:#fff;">Public read-only view</span>
+          <h1 class="mt-3 mb-2" style="color:#fff;">{{ tournament.name }}</h1>
+          <p class="mb-0" style="color:rgba(255,255,255,0.85);">
+            Shared by {{ tournament.organiser.display_name }} •
+            {{ tournament.format.value | replace('_', ' ') | title }} •
+            {{ tournament.team_count }} teams
+          </p>
+        </div>
+        <button class="btn btn-ctm-accent" data-share="{{ url_for('tournaments.public', slug=tournament.share_slug, _external=True) }}">Copy share link</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div data-ctm-livefeed aria-label="Live cricket scores"></div>
+
+      <div class="row g-4">
+        <div class="col-lg-7">
+          <h2 class="h4 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Points table</h2>
+          <div class="table-responsive">
+            <table class="ctm-table">
+              <thead><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>Pts</th><th>NRR</th></tr></thead>
+              <tbody>
+                {% for team in teams %}
+                  <tr>
+                    <td class="rank{% if loop.index == 1 %} rank-1{% endif %}">{{ loop.index }}</td>
+                    <td class="team-chip"><span class="team-logo">{{ team.short_code }}</span>{{ team.name }}</td>
+                    <td>{{ team.played }}</td>
+                    <td>{{ team.won }}</td>
+                    <td><strong>{{ team.points }}</strong></td>
+                    <td>{{ '%+.2f' | format(team.nrr | float) }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="6" class="text-center muted">Standings coming soon.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <h2 class="h4 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">About</h2>
+          <div class="ctm-card">
+            <p class="m-0">{{ tournament.description or 'No description provided.' }}</p>
+            {% if tournament.venue %}
+              <hr>
+              <p class="small muted m-0"><strong>Venue:</strong> {{ tournament.venue.name }} — {{ tournament.venue.address }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <h2 class="h4 mt-5 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Recent results</h2>
+      <div class="d-flex flex-column gap-3">
+        {% for row in recent %}
+          {% set m = row.match %}
+          <article class="match-row">
+            <div class="team">
+              <span class="team-logo">{{ m.team_a.short_code }}</span>
+              {{ m.team_a.name }}
+              {% if row.a_score %}<span class="team-score ms-2">{{ row.a_score }}</span>{% endif %}
+            </div>
+            <div class="divider">
+              <div class="badge-ctm badge-completed mb-1">{{ m.scheduled_at.strftime('%d %b') }}</div>
+              {% if m.result_text %}<div class="small" style="color:var(--ctm-accent-dark);">{{ m.result_text }}</div>{% endif %}
+            </div>
+            <div class="team right">
+              {{ m.team_b.name }}
+              {% if row.b_score %}<span class="team-score ms-2">{{ row.b_score }}</span>{% endif %}
+              <span class="team-logo" style="background:linear-gradient(135deg,#1E40AF,#3B82F6);">{{ m.team_b.short_code }}</span>
+            </div>
+          </article>
+        {% else %}
+          <div class="ctm-card text-center muted">No completed matches yet.</div>
+        {% endfor %}
+      </div>
+
+      {% if not current_user.is_authenticated %}
+        <div class="ctm-card text-center mt-5" style="border-top:4px solid var(--ctm-accent);">
+          <h3 class="mb-2" style="font-family:var(--ctm-font-body); font-weight:700;">Want to run your own tournament?</h3>
+          <p class="muted mb-3">Join CRIKTRACK to create fixtures, enter scorecards and track live standings.</p>
+          <a href="{{ url_for('auth.register') }}" class="btn btn-ctm-accent">Create an account</a>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/livefeed.js') }}"></script>
+{% endblock %}
