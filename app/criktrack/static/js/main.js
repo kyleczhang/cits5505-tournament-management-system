@@ -9,8 +9,19 @@
   document.addEventListener('DOMContentLoaded', function () {
     const path = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
     document.querySelectorAll('.ctm-navbar .nav-link').forEach(function (link) {
+      const href = (link.getAttribute('href') || '').split('/').pop().toLowerCase();
       const target = (link.getAttribute('data-page') || '').toLowerCase();
-      if (target && path.startsWith(target)) link.classList.add('active');
+      if ((target && path.startsWith(target)) || (href && path.startsWith(href))) link.classList.add('active');
+
+      // Close mobile nav after selecting a link.
+      link.addEventListener('click', function () {
+        const collapse = document.querySelector('.navbar-collapse');
+        if (collapse && collapse.classList.contains('show')) {
+          collapse.classList.remove('show');
+          const toggler = document.querySelector('.navbar-toggler');
+          if (toggler) toggler.setAttribute('aria-expanded', 'false');
+        }
+      });
     });
   });
 

@@ -43,6 +43,11 @@
   --z-modal: 1050;
 }
 
+/* layout */
+:root {
+  --ctm-gap: 1rem;
+}
+
 /* Bootstrap overrides */
 .btn-primary,
 .bg-primary {
@@ -129,6 +134,27 @@ textarea:focus-visible {
 }
 
 /* ---------- NAVBAR ---------- */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  background: var(--ctm-primary);
+  color: #fff;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--ctm-radius-sm);
+  z-index: var(--z-nav);
+}
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  width: auto;
+  height: auto;
+  overflow: visible;
+}
+
 .ctm-navbar {
   background: #ffffff;
   border-bottom: 1px solid var(--ctm-border);
