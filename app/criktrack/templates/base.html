@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="{% block html_lang %}en{% endblock %}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -14,12 +14,12 @@
     <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
     {% block head_extra %}{% endblock %}
   </head>
-  <body data-ctm-role="{{ current_user.role.value if current_user.is_authenticated else 'user' }}">
+  <body class="{% block body_class %}{% endblock %}" data-ctm-role="{{ current_user.role.value if current_user.is_authenticated else 'user' }}">
     <a href="#main" class="skip-link">Skip to main content</a>
     {% include "partials/nav.html" %}
     {% include "partials/flash_messages.html" %}
 
-    <main id="main">
+    <main id="main" class="{% block main_class %}{% endblock %}">
       {% block content %}{% endblock %}
     </main>
 

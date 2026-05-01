@@ -4,7 +4,11 @@
     <div class="container">
       <div class="ctm-card">
         <h1>{{ heading or "Coming soon" }}</h1>
-        <p class="muted m-0">{{ message or "This page is part of a later milestone and is intentionally a placeholder." }}</p>
+        <p class="muted">{{ message or "This page is part of a later milestone and is intentionally a placeholder." }}</p>
+        {% if submessage %}
+          <p class="small muted m-0">{{ submessage }}</p>
+        {% endif %}
+        {% block stub_actions %}{% endblock %}
       </div>
     </div>
   </section>
