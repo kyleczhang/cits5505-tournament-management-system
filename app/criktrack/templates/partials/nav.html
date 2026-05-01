@@ -1,9 +1,5 @@
 {% set active_endpoint = request.endpoint or '' %}
-{% set is_dashboard = active_endpoint == 'users.dashboard' %}
-{% set is_tournaments = active_endpoint.startswith('tournaments.') %}
-{% set is_create = active_endpoint == 'tournaments.create' %}
-{% set is_profile = active_endpoint.startswith('users.profile') %}
-<nav class="ctm-navbar" aria-label="Primary">
+<nav class="ctm-navbar navbar navbar-expand-md" aria-label="Primary">
   <div class="container d-flex align-items-center justify-content-between">
     <a class="navbar-brand" href="{{ url_for('landing') }}" aria-label="Cricket Tournament Manager — home">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -18,10 +14,10 @@
     <div class="collapse navbar-collapse justify-content-end" id="mainNav">
       <ul class="navbar-nav d-flex flex-md-row gap-md-1 align-items-md-center">
         {% if current_user.is_authenticated %}
-          <li class="nav-item"><a class="nav-link {% if is_dashboard %}active{% endif %}" href="{{ url_for('users.dashboard') }}">Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link {% if is_tournaments %}active{% endif %}" href="{{ url_for('tournaments.list_view') }}">Tournaments</a></li>
-          <li class="nav-item" data-role-gate="organizer"><a class="nav-link {% if is_create %}active{% endif %}" href="{{ url_for('tournaments.create') }}">Create</a></li>
-          <li class="nav-item"><a class="nav-link {% if is_profile %}active{% endif %}" href="{{ url_for('users.profile', user_id=current_user.id) }}">Profile</a></li>
+          <li class="nav-item"><a class="nav-link {% if active_endpoint == 'users.dashboard' %}active{% endif %}" href="{{ url_for('users.dashboard') }}">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link {% if active_endpoint == 'tournaments.list_view' %}active{% endif %}" href="{{ url_for('tournaments.list_view') }}">Tournaments</a></li>
+          <li class="nav-item" data-role-gate="organizer"><a class="nav-link {% if active_endpoint == 'tournaments.create' %}active{% endif %}" href="{{ url_for('tournaments.create') }}">Create</a></li>
+          <li class="nav-item"><a class="nav-link {% if active_endpoint == 'users.profile' %}active{% endif %}" href="{{ url_for('users.profile', user_id=current_user.id) }}">Profile</a></li>
           <li class="nav-item ms-md-2">
             <form method="post" action="{{ url_for('auth.logout') }}" class="d-inline">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

@@ -207,6 +207,22 @@ textarea:focus-visible {
   background: var(--ctm-bg-alt);
   color: var(--ctm-primary-dark);
 }
+.btn-ctm-ghost.is-following {
+  background: var(--ctm-accent);
+  border-color: var(--ctm-accent);
+  color: #fff;
+}
+.btn-ctm-ghost.is-following:hover {
+  background: var(--ctm-accent-dark, var(--ctm-accent));
+  color: #fff;
+}
+.ctm-follow-icon {
+  padding: 0.35rem 0.5rem;
+  line-height: 1;
+}
+.is-following .ctm-follow-star {
+  fill: currentColor;
+}
 
 .btn-ctm-outline {
   background: transparent;
@@ -1070,7 +1086,7 @@ body[data-ctm-role='user'] [data-role-gate='organizer'] {
   display: none !important;
 }
 
-/* ---------- DEMO ROLE SWITCHER (checkpoint 2 only) ---------- */
+/* ---------- DEMO ROLE SWITCHER ---------- */
 .ctm-role-switcher {
   position: fixed;
   right: 16px;

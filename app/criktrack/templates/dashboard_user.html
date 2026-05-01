@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — CRIKTRACK{% endblock %}
+
+{% set cover_classes = {'live': '', 'upcoming': 'alt', 'completed': 'warm'} %}
+{% set status_badges = {'live': 'badge-live', 'upcoming': 'badge-upcoming', 'completed': 'badge-completed'} %}
+
+{% block content %}
+  <section class="section" style="padding-top:2.5rem;">
+    <div class="container">
+      <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+        <div>
+          <span class="badge-ctm badge-format mb-2">
+            {% if viewing_as_fan %}Fan view{% else %}Your dashboard{% endif %}
+          </span>
+          <h1 class="mb-1">Hi {{ current_user.display_name.split()[0] }}, what's on today?</h1>
+          <p class="muted m-0">Live action, upcoming fixtures and the conversations you've joined.</p>
+        </div>
+        {% if viewing_as_fan %}
+          <a href="{{ url_for('users.dashboard') }}" class="btn btn-ctm-ghost">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="me-1" aria-hidden="true"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Back to organiser workspace
+          </a>
+        {% else %}
+          <a href="{{ url_for('tournaments.list_view') }}" class="btn btn-ctm-ghost">Browse all tournaments →</a>
+        {% endif %}
+      </div>
+
+      <div class="ctm-card mb-4" style="background:linear-gradient(135deg,#0F766E 0%,#0B5952 100%); color:#fff; border:none;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h5 m-0" style="color:#fff; font-family:var(--ctm-font-body); font-weight:700;">Live cricket around the world</h2>
+          <span class="small" style="color:rgba(255,255,255,0.7);">Auto-refreshing</span>
+        </div>
+        <div data-ctm-livefeed aria-label="Live cricket scores"></div>
+      </div>
+
+      {% if following.any %}
+        <div class="row g-3 mb-4">
+          {% if following.tournaments %}
+            <div class="col-md-4">
+              <div class="ctm-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h3 class="h6 m-0" style="font-family:var(--ctm-font-body); font-weight:700;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="me-1" aria-hidden="true" style="vertical-align:-2px; color:var(--ctm-accent);"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                    Tournaments you follow
+                  </h3>
+                  <span class="small muted">{{ following.tournaments | length }}</span>
+                </div>
+                <ul class="list-unstyled d-flex flex-column gap-2 m-0">
+                  {% for f in following.tournaments %}
+                    <li>
+                      <a href="{{ url_for('tournaments.detail', tournament_id=f.tournament.id) }}" class="link-primary text-decoration-none"><strong>{{ f.tournament.name }}</strong></a>
+                      <div class="small muted">
+                        <span class="badge-ctm badge-{{ f.tournament.status.value }}">{{ f.tournament.status.value | capitalize }}</span>
+                        {% if f.latest %}
+                          • {{ f.latest.team_a.short_code }} vs {{ f.latest.team_b.short_code }}
+                          {% if f.latest.status.value == 'completed' and f.latest.winner %}
+                            • {{ f.latest.winner.short_code }} won
+                          {% endif %}
+                        {% endif %}
+                      </div>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          {% endif %}
+
+          {% if following.teams %}
+            <div class="col-md-4">
+              <div class="ctm-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h3 class="h6 m-0" style="font-family:var(--ctm-font-body); font-weight:700;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="me-1" aria-hidden="true" style="vertical-align:-2px; color:var(--ctm-accent);"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                    Teams you follow
+                  </h3>
+                  <span class="small muted">{{ following.teams | length }}</span>
+                </div>
+                <ul class="list-unstyled d-flex flex-column gap-2 m-0">
+                  {% for f in following.teams %}
+                    <li>
+                      <a href="{{ url_for('tournaments.detail', tournament_id=f.team.tournament_id) }}" class="link-primary text-decoration-none"><strong>{{ f.team.name }}</strong></a>
+                      <div class="small muted">
+                        {{ f.team.played }}P • {{ f.team.won }}W • {{ f.team.points }} pts
+                        {% if f.next %}
+                          • Next: vs {% if f.next.team_a_id == f.team.id %}{{ f.next.team_b.short_code }}{% else %}{{ f.next.team_a.short_code }}{% endif %}
+                          {{ f.next.scheduled_at.strftime('%d %b') }}
+                        {% endif %}
+                      </div>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          {% endif %}
+
+          {% if following.players %}
+            <div class="col-md-4">
+              <div class="ctm-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h3 class="h6 m-0" style="font-family:var(--ctm-font-body); font-weight:700;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="me-1" aria-hidden="true" style="vertical-align:-2px; color:var(--ctm-accent);"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                    Players you follow
+                  </h3>
+                  <span class="small muted">{{ following.players | length }}</span>
+                </div>
+                <ul class="list-unstyled d-flex flex-column gap-2 m-0">
+                  {% for f in following.players %}
+                    <li>
+                      <a href="{{ url_for('players.stats', tournament_id=f.player.team.tournament_id, player_id=f.player.id) }}" class="link-primary text-decoration-none"><strong>{{ f.player.name }}</strong></a>
+                      <div class="small muted">{{ f.player.team.name }} • {{ f.player.role.value | replace('_', ' ') | title }}</div>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <div class="row g-4 mb-4">
+        <div class="col-lg-7">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h4 m-0" style="font-family:var(--ctm-font-body); font-weight:700;">Happening on CRIKTRACK</h2>
+          </div>
+          <div class="row g-3">
+            {% for t in ongoing_tournaments %}
+              <div class="col-md-6">
+                <a class="text-decoration-none" href="{{ url_for('tournaments.detail', tournament_id=t.id) }}">
+                  <article class="tournament-card">
+                    <div class="card-cover {{ cover_classes.get(t.status.value, '') }}">
+                      <span class="status-pill badge-ctm {{ status_badges.get(t.status.value, '') }}">{{ t.status.value | capitalize }}</span>
+                      <h3>{{ t.name }}</h3>
+                    </div>
+                    <div class="card-body">
+                      <div class="meta"><span class="badge-ctm badge-format">{{ t.format.value | replace('_', ' ') | title }}</span><span>{{ t.team_count }} teams</span></div>
+                      <div class="meta">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="currentColor" stroke-width="2"/></svg>
+                        Organised by {{ t.organiser.display_name }}
+                      </div>
+                    </div>
+                  </article>
+                </a>
+              </div>
+            {% else %}
+              <div class="col-12">
+                <div class="ctm-card text-center muted">No tournaments running right now — check back soon.</div>
+              </div>
+            {% endfor %}
+          </div>
+
+          {% if upcoming_tournaments %}
+            <h2 class="h5 mt-4 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Starting soon</h2>
+            <div class="ctm-card">
+              <ul class="list-unstyled d-flex flex-column gap-3 m-0">
+                {% for t in upcoming_tournaments %}
+                  <li class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <a href="{{ url_for('tournaments.detail', tournament_id=t.id) }}" class="link-primary text-decoration-none"><strong>{{ t.name }}</strong></a>
+                      <div class="small muted">{{ t.format.value | replace('_', ' ') | title }} • {{ t.team_count }} teams</div>
+                    </div>
+                    <span class="small muted">{{ t.start_date | pretty_date }}</span>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="col-lg-5">
+          <div class="ctm-card mb-3">
+            <h3 class="h5 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Latest results</h3>
+            <ul class="list-unstyled d-flex flex-column gap-3 m-0">
+              {% for m in recent_results %}
+                <li>
+                  <div class="d-flex justify-content-between">
+                    <strong>{{ m.winner.name if m.winner else m.team_a.name }} <span class="muted">beat</span> {{ m.team_b.name if (m.winner and m.winner.id == m.team_a_id) else m.team_a.name }}</strong>
+                    <span class="small muted">{{ m.scheduled_at.strftime('%d %b') }}</span>
+                  </div>
+                  <div class="small muted">{{ m.tournament.name }}</div>
+                  <a href="{{ url_for('matches.scorecard', tournament_id=m.tournament_id, match_id=m.id) }}" class="small link-primary">View scorecard →</a>
+                </li>
+              {% else %}
+                <li class="muted small">No completed matches yet.</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <div class="ctm-card mb-3">
+            <h3 class="h5 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Continue the conversation</h3>
+            <ul class="list-unstyled d-flex flex-column gap-3 m-0">
+              {% for c in conversations %}
+                <li>
+                  <div class="d-flex justify-content-between align-items-start gap-2">
+                    <a href="{{ c.url }}" class="link-primary text-decoration-none flex-grow-1"><strong>{{ c.title }}</strong></a>
+                    {% if c.new_count %}
+                      <span class="badge-ctm badge-live">{{ c.new_count }} new</span>
+                    {% endif %}
+                  </div>
+                  <div class="small muted">{{ c.context }}</div>
+                  {% if c.latest_body %}
+                    <div class="small mt-1" style="color:var(--ctm-text);">
+                      <strong>{{ c.latest_author }}:</strong> {{ c.latest_body | truncate(100) }}
+                    </div>
+                  {% endif %}
+                </li>
+              {% else %}
+                <li class="muted small">Comment on a match or tournament to see updates here.</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          {% if profile_completion.percent < 100 %}
+            <div class="ctm-card" style="border-left:4px solid var(--ctm-accent);">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h3 class="h6 m-0" style="font-family:var(--ctm-font-body); font-weight:700;">Complete your profile</h3>
+                <span class="small muted">{{ profile_completion.done }}/{{ profile_completion.total }}</span>
+              </div>
+              <div class="progress mb-2" style="height:6px;">
+                <div class="progress-bar" role="progressbar" style="width: {{ profile_completion.percent }}%; background:var(--ctm-accent);" aria-valuenow="{{ profile_completion.percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+              <p class="small muted mb-2">Add {{ profile_completion.missing | join(', ') | lower }} so others know who you are.</p>
+              <a href="{{ url_for('users.profile_edit') }}" class="btn btn-ctm-accent btn-sm">Edit profile</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/livefeed.js') }}"></script>
+{% endblock %}
