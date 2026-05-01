@@ -6,9 +6,11 @@ from flask import abort, render_template
 from sqlalchemy.orm import joinedload
 
 from ..extensions import db
+from ..follows.services import is_following
 from ..models import (
     BattingEntry,
     BowlingEntry,
+    FollowTarget,
     Innings,
     Match,
     Player,
@@ -96,4 +98,5 @@ def stats(tournament_id: int, player_id: int):
         player=player,
         summary=summary,
         history=history,
+        is_following_player=is_following(FollowTarget.PLAYER, player.id),
     )

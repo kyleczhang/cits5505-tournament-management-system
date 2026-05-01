@@ -5,8 +5,10 @@ from flask_login import current_user, login_required
 
 from ..decorators import require_role
 from ..extensions import db
+from ..follows.services import followed_ids, is_following
 from ..integrations.geocoding import geocode_address
 from ..models import (
+    FollowTarget,
     Match,
     MatchStatus,
     Team,
@@ -156,6 +158,10 @@ def detail(tournament_id: int):
             current_user.is_authenticated
             and current_user.id == tournament.organiser_id
         ),
+        is_following_tournament=is_following(
+            FollowTarget.TOURNAMENT, tournament.id
+        ),
+        followed_team_ids=followed_ids(FollowTarget.TEAM),
     )
 
 
