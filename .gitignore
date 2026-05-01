@@ -1,6 +1,61 @@
-# Repo-wide editor and local tooling
+# -------- OS --------
+.DS_Store
+
+# -------- Editors / IDEs --------
 .vscode/
 .idea/
-.claude/
-CLAUDE.md
-.DS_Store
+*.swp
+*.swo
+*.swn
+*~
+*.bak
+.history/
+
+# -------- AI / assistant tooling --------
+.claude
+.aider*
+.continue/
+
+# -------- Env files (keep .env.example tracked) --------
+.env
+.env.*
+!.env.example
+
+# -------- Logs / misc output --------
+*.log
+logs/
+tmp/
+.cache/
+
+# -------- Formatter / linter caches --------
+.prettier-cache
+.eslintcache
+
+# -------- Python / test artifacts --------
+.venv/
+venv/
+.python-version
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.nox/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+.wdm/
+*.egg-info/
+build/
+dist/
+
+# -------- App runtime data --------
+instance/
+*.sqlite3
+*.sqlite3-journal
+*.db
+
+a.*
