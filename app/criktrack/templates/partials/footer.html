@@ -1,0 +1,36 @@
+<footer class="ctm-footer" role="contentinfo">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="brand-block mb-2">CRIKTRACK</div>
+        <p class="mb-0">Run your cricket tournament from draw to trophy. Fixtures, scorecards, standings, and player stats in one place.</p>
+      </div>
+      <div class="col-6 col-md-4 col-lg-2">
+        <h5>Product</h5>
+        <ul class="list-unstyled m-0 d-flex flex-column gap-2">
+          <li><a href="{{ url_for('tournaments.list_view') }}">Tournaments</a></li>
+          <li><a href="{{ url_for('tournaments.create') }}">Create</a></li>
+          <li><a href="{{ url_for('users.dashboard') }}">Dashboard</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md-4 col-lg-2">
+        <h5>Account</h5>
+        <ul class="list-unstyled m-0 d-flex flex-column gap-2">
+          <li><a href="{{ url_for('auth.login') }}">Log in</a></li>
+          <li><a href="{{ url_for('auth.register') }}">Sign up</a></li>
+          {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('users.profile', user_id=current_user.id) }}">Profile</a></li>
+          {% endif %}
+        </ul>
+      </div>
+      <div class="col-md-4 col-lg-4">
+        <h5>Team</h5>
+        <p class="mb-0">Built by the CITS5505 Agile team — Hafiz, Leon, Cheng. UWA, 2026.</p>
+      </div>
+    </div>
+    <div class="copy d-flex flex-column flex-md-row justify-content-between gap-2">
+      <span>&copy; 2026 CRIKTRACK — CITS5505 Group Project</span>
+      <span><a href="{{ url_for('landing') }}">Back to top</a></span>
+    </div>
+  </div>
+</footer>
