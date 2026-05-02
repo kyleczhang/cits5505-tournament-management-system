@@ -5,10 +5,7 @@ from flask_login import current_user, login_required
 
 from ..decorators import require_role
 from ..extensions import db
-from ..follows.services import followed_ids, is_following
-from ..integrations.geocoding import geocode_address
 from ..models import (
-    FollowTarget,
     Match,
     MatchStatus,
     Team,
@@ -17,6 +14,7 @@ from ..models import (
     TournamentStatus,
     Venue,
 )
+from ..integrations.geocoding import geocode_address
 from . import bp
 from .forms import TournamentCreateForm
 

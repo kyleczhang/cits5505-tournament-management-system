@@ -1,5 +1,5 @@
 from flask import Blueprint
 
-bp = Blueprint("tournaments", __name__)
+bp = Blueprint("users", __name__)
 
 from . import routes  # noqa: E402,F401

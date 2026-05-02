@@ -9,8 +9,19 @@
   document.addEventListener('DOMContentLoaded', function () {
     const path = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
     document.querySelectorAll('.ctm-navbar .nav-link').forEach(function (link) {
+      const href = (link.getAttribute('href') || '').split('/').pop().toLowerCase();
       const target = (link.getAttribute('data-page') || '').toLowerCase();
-      if (target && path.startsWith(target)) link.classList.add('active');
+      if ((target && path.startsWith(target)) || (href && path.startsWith(href))) link.classList.add('active');
+
+      // Close mobile nav after selecting a link.
+      link.addEventListener('click', function () {
+        const collapse = document.querySelector('.navbar-collapse');
+        if (collapse && collapse.classList.contains('show')) {
+          collapse.classList.remove('show');
+          const toggler = document.querySelector('.navbar-toggler');
+          if (toggler) toggler.setAttribute('aria-expanded', 'false');
+        }
+      });
     });
   });
 
@@ -165,6 +176,35 @@
           prompt('Copy this link:', url);
         }
       });
+    });
+
+    // Expose minimal design tokens and helpers to other scripts.
+    try {
+      const styles = getComputedStyle(document.documentElement);
+      window.ctmConfig = {
+        colors: {
+          primary: styles.getPropertyValue('--ctm-primary').trim(),
+          accent: styles.getPropertyValue('--ctm-accent').trim(),
+        },
+        tokens: {
+          gap: styles.getPropertyValue('--ctm-gap').trim() || '1rem'
+        }
+      };
+    } catch (e) {
+      window.ctmConfig = {};
+    }
+
+    // Keyboard helper: close mobile nav on Escape and allow quick focus to main.
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape') {
+        const collapse = document.querySelector('.navbar-collapse');
+        if (collapse && collapse.classList.contains('show')) {
+          collapse.classList.remove('show');
+          const toggler = document.querySelector('.navbar-toggler');
+          if (toggler) toggler.setAttribute('aria-expanded', 'false');
+        }
+      }
+      // (g then m) quick nav could be layered here later.
     });
   });
 })();
