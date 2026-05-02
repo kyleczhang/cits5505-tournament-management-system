@@ -37,14 +37,21 @@
     const list = (payload && payload.data) || [];
     container.innerHTML = '';
 
+    const sourceText =
+      meta.source === 'mock'
+        ? '<em>sample — backend proxy pending</em>'
+        : meta.source === 'cache'
+          ? '<em>CricketData.org · cached</em>'
+          : meta.source === 'stale'
+            ? '<em>CricketData.org · stale cache</em>'
+            : '<a href="https://cricketdata.org/" target="_blank" rel="noopener">CricketData.org</a>';
+
     const head = document.createElement('div');
     head.className = 'ctm-live-head';
     head.innerHTML =
       '<h3 class="ctm-live-title"><span class="ctm-live-dot" aria-hidden="true"></span>Live cricket</h3>' +
       '<span class="ctm-live-source">Data: ' +
-      (meta.source === 'mock'
-        ? '<em>sample — backend proxy pending</em>'
-        : '<a href="https://cricketdata.org/" target="_blank" rel="noopener">CricketData.org</a>') +
+      sourceText +
       (meta.updatedAt
         ? ' · updated ' + meta.updatedAt.toLocaleTimeString()
         : '') +
@@ -81,16 +88,33 @@
     return fetch(endpoint, { headers: { Accept: 'application/json' } })
       .then(function (r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.json();
+        return r.json().then(function (payload) {
+          return {
+            payload: payload,
+            headers: r.headers,
+          };
+        });
       });
+  }
+
+  function sourceFromHeaders(headers) {
+    if (!headers) return 'live';
+    if (headers.get('X-CTM-Cache') === 'HIT') return 'cache';
+    if (headers.get('X-CTM-Stale') === '1') return 'stale';
+    const source = headers.get('X-CTM-Source');
+    if (source === 'mock') return 'mock';
+    return 'live';
   }
 
   function load(container) {
     const cfg = window.CTM_CONFIG || {};
     const endpoint = cfg.liveFeedEndpoint;
     fetchLive(endpoint)
-      .then(function (payload) {
-        renderPayload(container, payload, { source: 'api', updatedAt: new Date() });
+      .then(function (result) {
+        renderPayload(container, result.payload, {
+          source: sourceFromHeaders(result.headers),
+          updatedAt: new Date(),
+        });
       })
       .catch(function () {
         const fallback = (window.CTM_MOCK && window.CTM_MOCK.liveFeed) || { data: [] };
