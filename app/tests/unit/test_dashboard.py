@@ -65,21 +65,15 @@ def test_organizer_dashboard_renders_workspace(client, app, make_user, login):
     assert "Record now" in body
 
 
-def test_organizer_record_cta_points_to_record_route(
-    client, app, make_user, login
-):
+def test_organizer_record_cta_points_to_record_route(client, app, make_user, login):
     _, tournament, _, _, _, match = _seed(make_user)
     login("org@example.com")
     body = client.get("/dashboard").data.decode()
-    record_url = (
-        f"/tournaments/{tournament.id}/matches/{match.id}/record"
-    )
+    record_url = f"/tournaments/{tournament.id}/matches/{match.id}/record"
     assert record_url in body
 
 
-def test_organizer_fan_view_renders_user_dashboard(
-    client, app, make_user, login
-):
+def test_organizer_fan_view_renders_user_dashboard(client, app, make_user, login):
     _seed(make_user)
     login("org@example.com")
     body = client.get("/dashboard?as=fan").data.decode()
@@ -102,21 +96,21 @@ def test_following_widgets_render_when_user_follows_targets(
 ):
     _, tournament, team, player, _, _ = _seed(make_user)
     fan = make_user("fan@example.com")
-    db.session.add_all([
-        Follow(
-            user_id=fan.id,
-            target_type=FollowTarget.TOURNAMENT,
-            target_id=tournament.id,
-        ),
-        Follow(
-            user_id=fan.id, target_type=FollowTarget.TEAM, target_id=team.id
-        ),
-        Follow(
-            user_id=fan.id,
-            target_type=FollowTarget.PLAYER,
-            target_id=player.id,
-        ),
-    ])
+    db.session.add_all(
+        [
+            Follow(
+                user_id=fan.id,
+                target_type=FollowTarget.TOURNAMENT,
+                target_id=tournament.id,
+            ),
+            Follow(user_id=fan.id, target_type=FollowTarget.TEAM, target_id=team.id),
+            Follow(
+                user_id=fan.id,
+                target_type=FollowTarget.PLAYER,
+                target_id=player.id,
+            ),
+        ]
+    )
     db.session.commit()
 
     login("fan@example.com")
@@ -129,9 +123,7 @@ def test_following_widgets_render_when_user_follows_targets(
     assert player.name in body
 
 
-def test_dashboard_skips_teamless_followed_player(
-    client, app, make_user, login
-):
+def test_dashboard_skips_teamless_followed_player(client, app, make_user, login):
     """Player with NULL team_id must not crash the followed-players widget."""
     _, _, _, _, teamless, _ = _seed(make_user)
     fan = make_user("fan@example.com")

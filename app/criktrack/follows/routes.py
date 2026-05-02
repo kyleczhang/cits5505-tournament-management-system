@@ -76,7 +76,10 @@ def status():
         target_id = int(raw_id)
     except (TypeError, ValueError):
         abort(400)
-    exists = Follow.query.filter_by(
-        user_id=current_user.id, target_type=target_type, target_id=target_id
-    ).first() is not None
+    exists = (
+        Follow.query.filter_by(
+            user_id=current_user.id, target_type=target_type, target_id=target_id
+        ).first()
+        is not None
+    )
     return jsonify({"following": exists})

@@ -22,8 +22,7 @@ def _load(tournament_id: int, match_id: int) -> tuple[Tournament, Match]:
 def scorecard(tournament_id: int, match_id: int):
     tournament, match = _load(tournament_id, match_id)
     is_organiser = (
-        current_user.is_authenticated
-        and current_user.id == tournament.organiser_id
+        current_user.is_authenticated and current_user.id == tournament.organiser_id
     )
     return render_template(
         "matches/scorecard.html",
@@ -52,14 +51,16 @@ def record(tournament_id: int, match_id: int):
         except ValidationError as exc:
             return jsonify({"errors": exc.errors}), 400
         save_result(match, normalised)
-        return jsonify({
-            "ok": True,
-            "redirect": url_for(
-                "matches.scorecard",
-                tournament_id=tournament.id,
-                match_id=match.id,
-            ),
-        })
+        return jsonify(
+            {
+                "ok": True,
+                "redirect": url_for(
+                    "matches.scorecard",
+                    tournament_id=tournament.id,
+                    match_id=match.id,
+                ),
+            }
+        )
 
     return render_template(
         "matches/record.html",
