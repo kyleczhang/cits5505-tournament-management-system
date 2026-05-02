@@ -27,8 +27,7 @@ def stats(tournament_id: int, player_id: int):
         abort(404)
 
     bat_entries = (
-        BattingEntry.query
-        .join(Innings, BattingEntry.innings_id == Innings.id)
+        BattingEntry.query.join(Innings, BattingEntry.innings_id == Innings.id)
         .join(Match, Innings.match_id == Match.id)
         .options(joinedload(BattingEntry.innings).joinedload(Innings.match))
         .filter(
@@ -38,8 +37,7 @@ def stats(tournament_id: int, player_id: int):
         .all()
     )
     bowl_entries = (
-        BowlingEntry.query
-        .join(Innings, BowlingEntry.innings_id == Innings.id)
+        BowlingEntry.query.join(Innings, BowlingEntry.innings_id == Innings.id)
         .join(Match, Innings.match_id == Match.id)
         .options(joinedload(BowlingEntry.innings).joinedload(Innings.match))
         .filter(
@@ -61,20 +59,28 @@ def stats(tournament_id: int, player_id: int):
     total_conceded = sum(b.runs for b in bowl_entries)
 
     summary = {
-        "matches": len({b.innings.match_id for b in bat_entries}
-                       | {b.innings.match_id for b in bowl_entries}),
+        "matches": len(
+            {b.innings.match_id for b in bat_entries}
+            | {b.innings.match_id for b in bowl_entries}
+        ),
         "runs": total_runs,
         "balls": total_balls,
         "dismissals": dismissals,
         "average": round(total_runs / dismissals, 2) if dismissals else None,
-        "strike_rate": round((total_runs / total_balls) * 100, 1) if total_balls else 0.0,
+        "strike_rate": round((total_runs / total_balls) * 100, 1)
+        if total_balls
+        else 0.0,
         "fifties": fifties,
         "hundreds": hundreds,
         "highest": highest,
         "wickets": total_wickets,
         "overs": float(total_overs),
-        "economy": round(float(total_conceded) / float(total_overs), 2) if total_overs else 0.0,
-        "bowling_avg": round(total_conceded / total_wickets, 2) if total_wickets else None,
+        "economy": round(float(total_conceded) / float(total_overs), 2)
+        if total_overs
+        else 0.0,
+        "bowling_avg": round(total_conceded / total_wickets, 2)
+        if total_wickets
+        else None,
     }
 
     matches_played: dict[int, dict] = {}

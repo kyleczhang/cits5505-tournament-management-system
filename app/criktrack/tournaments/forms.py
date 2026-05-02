@@ -40,9 +40,7 @@ class TournamentCreateForm(FlaskForm):
         validators=[Optional(), NumberRange(min=1, max=50)],
         default=20,
     )
-    venue_name = StringField(
-        "Venue name", validators=[Optional(), Length(max=160)]
-    )
+    venue_name = StringField("Venue name", validators=[Optional(), Length(max=160)])
     venue_address = StringField(
         "Venue address", validators=[Optional(), Length(max=255)]
     )

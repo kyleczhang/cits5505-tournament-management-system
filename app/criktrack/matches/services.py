@@ -26,7 +26,9 @@ class ValidationError(Exception):
         self.errors = errors
 
 
-def _to_int(value: Any, key: str, errors: dict[str, str], min_value: int = 0) -> int | None:
+def _to_int(
+    value: Any, key: str, errors: dict[str, str], min_value: int = 0
+) -> int | None:
     try:
         val = int(value)
     except (TypeError, ValueError):
@@ -105,7 +107,9 @@ def validate_payload(payload: dict, match: Match) -> dict:
             errors[f"{prefix}.batting_team_id"] = "Must select a batting team."
             continue
         if bat_team_id not in team_ids:
-            errors[f"{prefix}.batting_team_id"] = "Batting team must be one of the two teams."
+            errors[f"{prefix}.batting_team_id"] = (
+                "Batting team must be one of the two teams."
+            )
             continue
         bowl_team_id = (
             match.team_b_id if bat_team_id == match.team_a_id else match.team_a_id
@@ -149,22 +153,26 @@ def validate_payload(payload: dict, match: Match) -> dict:
             }
             cleaned_bowling.append(entry)
 
-        cleaned_innings.append({
-            "batting_team_id": bat_team_id,
-            "bowling_team_id": bowl_team_id,
-            "runs": runs or 0,
-            "wickets": wickets or 0,
-            "overs": overs or Decimal("0"),
-            "batting": cleaned_batting,
-            "bowling": cleaned_bowling,
-        })
+        cleaned_innings.append(
+            {
+                "batting_team_id": bat_team_id,
+                "bowling_team_id": bowl_team_id,
+                "runs": runs or 0,
+                "wickets": wickets or 0,
+                "overs": overs or Decimal("0"),
+                "batting": cleaned_batting,
+                "bowling": cleaned_bowling,
+            }
+        )
 
     if errors:
         raise ValidationError(errors)
 
     return {
         "toss_winner_id": int(toss_winner) if toss_winner not in (None, "") else None,
-        "toss_decision": TossDecision(toss_decision) if toss_decision in ("bat", "bowl") else None,
+        "toss_decision": TossDecision(toss_decision)
+        if toss_decision in ("bat", "bowl")
+        else None,
         "winner_id": int(winner_id) if winner_id not in (None, "") else None,
         "result_text": (result.get("result_text") or "").strip() or None,
         "innings": cleaned_innings,
@@ -177,9 +185,7 @@ def save_result(match: Match, normalised: dict) -> Match:
     match.toss_decision = normalised["toss_decision"]
     match.winner_id = normalised["winner_id"]
     match.result_text = normalised["result_text"]
-    match.status = (
-        MatchStatus.COMPLETED if match.winner_id else MatchStatus.LIVE
-    )
+    match.status = MatchStatus.COMPLETED if match.winner_id else MatchStatus.LIVE
 
     # Wipe existing innings (cascade clears batting/bowling entries).
     for inn in list(match.innings):
@@ -201,27 +207,31 @@ def save_result(match: Match, normalised: dict) -> Match:
 
         for b in payload["batting"]:
             player = _player_for(b["player_name"], payload["batting_team_id"])
-            db.session.add(BattingEntry(
-                innings_id=inn.id,
-                player_id=player.id,
-                runs=b["runs"] or 0,
-                balls=b["balls"] or 0,
-                fours=b["fours"],
-                sixes=b["sixes"],
-                dismissal=b["dismissal"],
-                is_not_out=b["is_not_out"],
-            ))
+            db.session.add(
+                BattingEntry(
+                    innings_id=inn.id,
+                    player_id=player.id,
+                    runs=b["runs"] or 0,
+                    balls=b["balls"] or 0,
+                    fours=b["fours"],
+                    sixes=b["sixes"],
+                    dismissal=b["dismissal"],
+                    is_not_out=b["is_not_out"],
+                )
+            )
 
         for b in payload["bowling"]:
             player = _player_for(b["player_name"], payload["bowling_team_id"])
-            db.session.add(BowlingEntry(
-                innings_id=inn.id,
-                player_id=player.id,
-                overs=b["overs"] or Decimal("0"),
-                maidens=b["maidens"],
-                runs=b["runs"] or 0,
-                wickets=b["wickets"] or 0,
-            ))
+            db.session.add(
+                BowlingEntry(
+                    innings_id=inn.id,
+                    player_id=player.id,
+                    overs=b["overs"] or Decimal("0"),
+                    maidens=b["maidens"],
+                    runs=b["runs"] or 0,
+                    wickets=b["wickets"] or 0,
+                )
+            )
 
     db.session.commit()
     _recompute_standings(match)

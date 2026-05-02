@@ -42,9 +42,7 @@ def dashboard():
         "my_tournaments": len(organised),
         "upcoming_matches": len(upcoming_matches),
         "recent_results": len(recent_results),
-        "total_players": sum(
-            len(team.players) for t in organised for team in t.teams
-        ),
+        "total_players": sum(len(team.players) for t in organised for team in t.teams),
     }
 
     return render_template(
@@ -67,8 +65,7 @@ def profile(user_id: int):
     stats = {
         "tournaments_organised": len(organised),
         "matches_recorded": Match.query.filter(
-            Match.tournament_id.in_([t.id for t in organised])
-            if organised else False,
+            Match.tournament_id.in_([t.id for t in organised]) if organised else False,
             Match.status == MatchStatus.COMPLETED,
         ).count(),
         "titles_won": sum(
