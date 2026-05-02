@@ -97,6 +97,13 @@
           <div class="ctm-card text-center muted">No completed matches yet.</div>
         {% endfor %}
       </div>
+      </div>
+
+      <section class="ctm-comments mt-5" data-ctm-comments data-tournament-id="{{ tournament.id }}" aria-labelledby="tournament-comments-title">
+        <h3 id="tournament-comments-title">Discussion <span class="ctm-comment-count" data-ctm-comment-count></span></h3>
+        <ul class="ctm-comment-list" data-ctm-comment-list></ul>
+        <p class="muted small mt-2">This is a public read-only view. <a href="{{ url_for('auth.login') }}" class="link-primary">Log in</a> to join the discussion.</p>
+      </section>
 
       {% if not current_user.is_authenticated %}
         <div class="ctm-card text-center mt-5" style="border-top:4px solid var(--ctm-accent);">
@@ -111,4 +118,5 @@
 
 {% block scripts %}
   <script src="{{ url_for('static', filename='js/livefeed.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/comments.js') }}"></script>
 {% endblock %}
