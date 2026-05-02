@@ -353,5 +353,6 @@ inn in match.innings %}{% if innings_by_team.update({inn.batting_team_id: inn})
   </div>
 </section>
 {% endblock %} {% block scripts %}
+<script src="{{ url_for('static', filename='js/livefeed.js') }}"></script>
 <script src="{{ url_for('static', filename='js/comments.js') }}"></script>
 {% endblock %}
