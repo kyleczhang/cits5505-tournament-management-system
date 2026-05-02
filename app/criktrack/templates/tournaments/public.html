@@ -1,4 +1,18 @@
 {% extends "base.html" %}
+{% block title %}Tournament Public View{% endblock %}
+{% block content %}
+<main class="container tournament-public">
+  <h1 id="tournament-title">Tournament Title</h1>
+  <section id="tournament-details">
+    <p>Details will appear here. This is a scaffold for PR3.</p>
+  </section>
+  <div id="comments-hook"></div>
+</main>
+
+<script src="{{ url_for('static', filename='js/mockdata.js') }}"></script>
+<script src="{{ url_for('static', filename='js/maps.js') }}"></script>
+{% endblock %}
+{% extends "base.html" %}
 
 {% block title %}{{ tournament.name }} — Shared — CRIKTRACK{% endblock %}
 
