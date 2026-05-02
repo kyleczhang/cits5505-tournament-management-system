@@ -1,0 +1,39 @@
+{# Render a follow toggle button.
+   Args:
+     target_type: one of 'tournament' | 'team' | 'player'
+     target_id:   numeric id of the target row
+     following:   bool (server-rendered initial state)
+     size:        optional bootstrap size suffix, e.g. 'sm' (default '')
+     compact:     if true, render an icon-only star toggle
+#}
+{% if current_user.is_authenticated %}
+  {% set _btn_size = 'btn-' ~ size if size else '' %}
+  {% if compact %}
+    <button type="button"
+            class="btn btn-ctm-ghost ctm-follow-icon {{ _btn_size }} {% if following %}is-following{% endif %}"
+            data-ctm-follow
+            data-target-type="{{ target_type }}"
+            data-target-id="{{ target_id }}"
+            data-following="{{ '1' if following else '0' }}"
+            aria-pressed="{{ 'true' if following else 'false' }}"
+            aria-label="{{ 'Unfollow' if following else 'Follow' }}"
+            title="{{ 'Unfollow' if following else 'Follow' }}">
+      <svg class="ctm-follow-star" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  {% else %}
+    <button type="button"
+            class="btn btn-ctm-ghost {{ _btn_size }} {% if following %}is-following{% endif %}"
+            data-ctm-follow
+            data-target-type="{{ target_type }}"
+            data-target-id="{{ target_id }}"
+            data-following="{{ '1' if following else '0' }}"
+            aria-pressed="{{ 'true' if following else 'false' }}">
+      <svg class="ctm-follow-star me-1" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+      </svg>
+      <span data-ctm-follow-label>{{ 'Following' if following else 'Follow' }}</span>
+    </button>
+  {% endif %}
+{% endif %}

@@ -38,6 +38,9 @@ class User(db.Model, UserMixin):
         "Tournament", back_populates="organiser", lazy="dynamic"
     )
     comments = db.relationship("Comment", back_populates="user", lazy="dynamic")
+    follows = db.relationship(
+        "Follow", back_populates="user", lazy="dynamic", cascade="all, delete-orphan"
+    )
 
     # ---- password helpers -------------------------------------------------
     def set_password(self, password: str) -> None:

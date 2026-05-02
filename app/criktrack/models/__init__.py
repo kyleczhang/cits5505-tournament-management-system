@@ -1,6 +1,7 @@
 """ORM models. Imported by `criktrack/__init__.py` so SQLAlchemy registers them."""
 
 from .comment import Comment
+from .follow import Follow, FollowTarget
 from .match import (
     BattingEntry,
     BowlingEntry,
@@ -18,6 +19,8 @@ __all__ = [
     "BattingEntry",
     "BowlingEntry",
     "Comment",
+    "Follow",
+    "FollowTarget",
     "Innings",
     "Match",
     "MatchStatus",
