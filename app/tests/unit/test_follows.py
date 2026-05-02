@@ -20,9 +20,7 @@ from criktrack.models import (
 
 
 def _scaffold():
-    organiser = User(
-        email="org@example.com", display_name="Org", role=Role.ORGANIZER
-    )
+    organiser = User(email="org@example.com", display_name="Org", role=Role.ORGANIZER)
     organiser.set_password("secret123")
     db.session.add(organiser)
     db.session.flush()
@@ -60,9 +58,7 @@ def test_follow_requires_authentication(client, app):
 def test_follow_unknown_target_type_rejected(client, app, make_user, login):
     make_user("fan@example.com")
     login("fan@example.com")
-    resp = client.post(
-        "/api/follow", json={"targetType": "match", "targetId": 1}
-    )
+    resp = client.post("/api/follow", json={"targetType": "match", "targetId": 1})
     assert resp.status_code == 400
 
 
@@ -101,9 +97,7 @@ def test_unfollow_removes_row(client, app, make_user, login):
     make_user("fan@example.com")
     login("fan@example.com")
 
-    client.post(
-        "/api/follow", json={"targetType": "team", "targetId": team.id}
-    )
+    client.post("/api/follow", json={"targetType": "team", "targetId": team.id})
     assert Follow.query.count() == 1
 
     resp = client.delete(
@@ -125,9 +119,7 @@ def test_status_endpoint_reports_follow_state(client, app, make_user, login):
     )
     assert pre.get_json() == {"following": False}
 
-    client.post(
-        "/api/follow", json={"targetType": "player", "targetId": player.id}
-    )
+    client.post("/api/follow", json={"targetType": "player", "targetId": player.id})
 
     post = client.get(
         "/api/follow/status",

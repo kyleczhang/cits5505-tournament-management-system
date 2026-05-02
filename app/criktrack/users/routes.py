@@ -68,9 +68,7 @@ def _render_organizer_dashboard():
         "my_tournaments": len(organised),
         "upcoming_matches": len(upcoming_matches),
         "recent_results": len(recent_results),
-        "total_players": sum(
-            len(team.players) for t in organised for team in t.teams
-        ),
+        "total_players": sum(len(team.players) for t in organised for team in t.teams),
     }
 
     return render_template(
@@ -219,16 +217,12 @@ def _build_following():
             .all()
         )
         next_fixtures = _next_fixture_per_team([r.id for r in rows])
-        teams = [
-            {"team": t, "next": next_fixtures.get(t.id)} for t in rows
-        ]
+        teams = [{"team": t, "next": next_fixtures.get(t.id)} for t in rows]
 
     players = []
     if player_ids:
         rows = (
-            Player.query.filter(
-                Player.id.in_(player_ids), Player.team_id.is_not(None)
-            )
+            Player.query.filter(Player.id.in_(player_ids), Player.team_id.is_not(None))
             .limit(6)
             .all()
         )
@@ -306,13 +300,11 @@ def _build_conversations():
                 .order_by(Comment.created_at.desc())
                 .first()
             )
-            new_count = (
-                Comment.query.filter(
-                    Comment.match_id == match.id,
-                    Comment.created_at > c.created_at,
-                    Comment.user_id != current_user.id,
-                ).count()
-            )
+            new_count = Comment.query.filter(
+                Comment.match_id == match.id,
+                Comment.created_at > c.created_at,
+                Comment.user_id != current_user.id,
+            ).count()
             threads.append(
                 {
                     "title": f"{match.team_a.name} vs {match.team_b.name}",
@@ -336,20 +328,16 @@ def _build_conversations():
                 .order_by(Comment.created_at.desc())
                 .first()
             )
-            new_count = (
-                Comment.query.filter(
-                    Comment.tournament_id == tournament.id,
-                    Comment.created_at > c.created_at,
-                    Comment.user_id != current_user.id,
-                ).count()
-            )
+            new_count = Comment.query.filter(
+                Comment.tournament_id == tournament.id,
+                Comment.created_at > c.created_at,
+                Comment.user_id != current_user.id,
+            ).count()
             threads.append(
                 {
                     "title": tournament.name,
                     "context": "Tournament discussion",
-                    "url": url_for(
-                        "tournaments.detail", tournament_id=tournament.id
-                    ),
+                    "url": url_for("tournaments.detail", tournament_id=tournament.id),
                     "latest_author": latest.user.display_name if latest else None,
                     "latest_body": latest.body if latest else None,
                     "new_count": new_count,
@@ -388,8 +376,7 @@ def profile(user_id: int):
     stats = {
         "tournaments_organised": len(organised),
         "matches_recorded": Match.query.filter(
-            Match.tournament_id.in_([t.id for t in organised])
-            if organised else False,
+            Match.tournament_id.in_([t.id for t in organised]) if organised else False,
             Match.status == MatchStatus.COMPLETED,
         ).count(),
         "titles_won": sum(

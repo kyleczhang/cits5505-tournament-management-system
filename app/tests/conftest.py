@@ -41,8 +41,12 @@ def client(app):
 
 @pytest.fixture
 def make_user(app):
-    def _make(email: str, password: str = "secret123", role: Role = Role.USER,
-              display_name: str = "Test User") -> User:
+    def _make(
+        email: str,
+        password: str = "secret123",
+        role: Role = Role.USER,
+        display_name: str = "Test User",
+    ) -> User:
         user = User(email=email.lower(), display_name=display_name, role=role)
         user.set_password(password)
         _db.session.add(user)
@@ -61,4 +65,5 @@ def login(client):
             follow_redirects=False,
         )
         assert resp.status_code in (302, 303), resp.data
+
     return _login

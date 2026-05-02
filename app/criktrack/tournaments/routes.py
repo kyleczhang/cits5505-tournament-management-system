@@ -42,9 +42,7 @@ def list_view():
         query = query.filter(Tournament.status == TournamentStatus(status_arg))
 
     total = query.count()
-    tournaments = (
-        query.offset((page - 1) * _PAGE_SIZE).limit(_PAGE_SIZE).all()
-    )
+    tournaments = query.offset((page - 1) * _PAGE_SIZE).limit(_PAGE_SIZE).all()
     pages = max(1, (total + _PAGE_SIZE - 1) // _PAGE_SIZE)
 
     return render_template(
@@ -63,7 +61,9 @@ def list_view():
 @require_role("organizer")
 def create():
     form = TournamentCreateForm()
-    team_names_raw = request.form.getlist("team_name") if request.method == "POST" else []
+    team_names_raw = (
+        request.form.getlist("team_name") if request.method == "POST" else []
+    )
     team_names = [n.strip() for n in team_names_raw if (n or "").strip()]
 
     if form.validate_on_submit():
@@ -130,11 +130,13 @@ def _match_payload(matches: list[Match]) -> list[dict]:
         innings = {i.batting_team_id: i for i in m.innings}
         a = innings.get(m.team_a_id)
         b = innings.get(m.team_b_id)
-        payload.append({
-            "match": m,
-            "a_score": f"{a.runs}/{a.wickets}" if a else None,
-            "b_score": f"{b.runs}/{b.wickets}" if b else None,
-        })
+        payload.append(
+            {
+                "match": m,
+                "a_score": f"{a.runs}/{a.wickets}" if a else None,
+                "b_score": f"{b.runs}/{b.wickets}" if b else None,
+            }
+        )
     return payload
 
 
@@ -155,26 +157,19 @@ def detail(tournament_id: int):
         teams=standings,
         matches=_match_payload(matches),
         is_organiser=(
-            current_user.is_authenticated
-            and current_user.id == tournament.organiser_id
+            current_user.is_authenticated and current_user.id == tournament.organiser_id
         ),
-        is_following_tournament=is_following(
-            FollowTarget.TOURNAMENT, tournament.id
-        ),
+        is_following_tournament=is_following(FollowTarget.TOURNAMENT, tournament.id),
         followed_team_ids=followed_ids(FollowTarget.TEAM),
     )
 
 
 @bp.route("/<slug>/share")
 def public(slug: str):
-    tournament = (
-        Tournament.query.filter_by(share_slug=slug).first() or abort(404)
-    )
+    tournament = Tournament.query.filter_by(share_slug=slug).first() or abort(404)
     standings = _ordered_teams(tournament)
     recent = (
-        Match.query.filter_by(
-            tournament_id=tournament.id, status=MatchStatus.COMPLETED
-        )
+        Match.query.filter_by(tournament_id=tournament.id, status=MatchStatus.COMPLETED)
         .order_by(Match.scheduled_at.desc())
         .limit(5)
         .all()
