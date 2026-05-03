@@ -25,10 +25,12 @@ def test_geocode_returns_none_without_key(app):
 
 def test_geocode_parses_successful_response(app):
     app.config["GOOGLE_MAPS_GEOCODING_API_KEY"] = "test-key"
-    resp = _fake({
-        "status": "OK",
-        "results": [{"geometry": {"location": {"lat": -31.98, "lng": 115.82}}}],
-    })
+    resp = _fake(
+        {
+            "status": "OK",
+            "results": [{"geometry": {"location": {"lat": -31.98, "lng": 115.82}}}],
+        }
+    )
     with app.app_context(), patch.object(geocoding.requests, "get", return_value=resp):
         assert geocoding.geocode_address("UWA Sports Park") == (-31.98, 115.82)
 
@@ -42,8 +44,9 @@ def test_geocode_returns_none_on_zero_results(app):
 
 def test_geocode_returns_none_on_network_failure(app):
     app.config["GOOGLE_MAPS_GEOCODING_API_KEY"] = "test-key"
-    with app.app_context(), patch.object(
-        geocoding.requests, "get", side_effect=requests.Timeout("boom")
+    with (
+        app.app_context(),
+        patch.object(geocoding.requests, "get", side_effect=requests.Timeout("boom")),
     ):
         assert geocoding.geocode_address("UWA") is None
 

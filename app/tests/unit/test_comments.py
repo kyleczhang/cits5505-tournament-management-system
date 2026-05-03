@@ -17,9 +17,7 @@ from criktrack.models import (
 
 
 def _scaffold(organiser_email: str = "org@example.com"):
-    organiser = User(
-        email=organiser_email, display_name="Org", role=Role.ORGANIZER
-    )
+    organiser = User(email=organiser_email, display_name="Org", role=Role.ORGANIZER)
     organiser.set_password("secret123")
     db.session.add(organiser)
     db.session.flush()
