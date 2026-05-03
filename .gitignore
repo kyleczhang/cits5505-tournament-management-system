@@ -15,8 +15,6 @@
 .claude
 .aider*
 .continue/
-CLAUDE.md
-AGENTS.md
 
 # -------- Env files (keep .env.example tracked) --------
 .env
