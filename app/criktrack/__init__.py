@@ -10,6 +10,8 @@ from .filters import register_filters
 
 def create_app(config_class: type[BaseConfig] | None = None) -> Flask:
     """Create and configure the Flask application instance."""
+    # Set instance_relative_config to True to resolve relative config files from
+    # the instance folder.
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(config_class or get_config())
 

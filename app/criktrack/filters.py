@@ -12,7 +12,7 @@ from flask import Flask
 
 
 def register_filters(app: Flask) -> None:
-    """Register all project-specific Jinja filters on the Flask app."""
+    """Register all project specific Jinja filters on the Flask app."""
     app.jinja_env.filters["initials"] = initials
     # Deprecated.
     app.jinja_env.filters["relative_time"] = relative_time
@@ -26,6 +26,8 @@ def initials(name: str | None) -> str:
     parts = [p for p in name.strip().split() if p]
     if len(parts) == 1:
         return parts[0][:2].upper()
+    # Use the first letter of the first and last name parts,
+    # which is a common convention for initials.
     return (parts[0][0] + parts[-1][0]).upper()
 
 
