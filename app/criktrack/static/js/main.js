@@ -41,8 +41,12 @@
       });
       form.addEventListener('submit', function (e) {
         let ok = true;
+        let firstInvalid = null;
         form.querySelectorAll('input, select, textarea').forEach(function (f) {
-          if (!validateField(f)) ok = false;
+          if (!validateField(f)) {
+            ok = false;
+            if (!firstInvalid) firstInvalid = f;
+          }
         });
         // Password confirm check.
         const pwd = form.querySelector('input[name="password"]');
@@ -50,16 +54,23 @@
         if (pwd && cf && pwd.value !== cf.value) {
           setInvalid(cf, 'Passwords do not match.');
           ok = false;
+          if (!firstInvalid) firstInvalid = cf;
         }
-        if (!ok) { e.preventDefault(); return; }
+        if (!ok) {
+          e.preventDefault();
+          if (firstInvalid && typeof firstInvalid.focus === 'function') firstInvalid.focus();
+          return;
+        }
         // Simulate async submit (no real backend yet).
         e.preventDefault();
         const submitBtn = form.querySelector('button[type="submit"]');
+        form.setAttribute('aria-busy', 'true');
         if (submitBtn) {
           submitBtn.disabled = true;
           const original = submitBtn.innerHTML;
           submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Submitting…';
           setTimeout(function () {
+            form.removeAttribute('aria-busy');
             submitBtn.disabled = false;
             submitBtn.innerHTML = original;
             showToast('Form submitted successfully (mock).');
@@ -93,11 +104,21 @@
     field.classList.add('is-invalid');
     field.setAttribute('aria-invalid', 'true');
     const hint = field.parentElement.querySelector('.form-hint-error');
-    if (hint) { hint.textContent = msg; hint.classList.add('show'); hint.setAttribute('role', 'alert'); }
+    if (hint) {
+      if (!hint.id) {
+        const base = field.id || field.name || 'ctm-field';
+        hint.id = base + '-error';
+      }
+      field.setAttribute('aria-describedby', hint.id);
+      hint.textContent = msg;
+      hint.classList.add('show');
+      hint.setAttribute('role', 'alert');
+    }
   }
   function setValid(field) {
     field.classList.remove('is-invalid');
     field.removeAttribute('aria-invalid');
+    field.removeAttribute('aria-describedby');
     const hint = field.parentElement.querySelector('.form-hint-error');
     if (hint) { hint.classList.remove('show'); hint.textContent = ''; }
   }
