@@ -9,6 +9,7 @@ from .filters import register_filters
 
 
 def create_app(config_class: type[BaseConfig] | None = None) -> Flask:
+    """Create and configure the Flask application instance."""
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(config_class or get_config())
 
@@ -27,7 +28,7 @@ def create_app(config_class: type[BaseConfig] | None = None) -> Flask:
     _register_security_headers(app)
 
     @app.route("/")
-    def landing():  # noqa: WPS430 — small inline route is fine
+    def landing():
         return render_template("landing.html")
 
     return app
