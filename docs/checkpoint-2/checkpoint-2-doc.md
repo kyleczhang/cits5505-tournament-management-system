@@ -95,3 +95,33 @@ The **Cricket Tournament Management System** is a web application that allows us
 | Backend  | Python, Flask, Jinja2                        |
 | DB | SQLite via SQLAlchemy                        |
 | Testing  | pytest, Selenium                             |
+
+## 6 Maps, Accessibility, and UI Polish Notes
+
+### 6.1 Maps and Shared Client Wiring
+
+- `maps.js` is now loaded globally via the shared base template.
+- The maps module docs now describe provider fallback behavior clearly:
+	- Use Google Maps when `CTM_CONFIG.googleMapsApiKey` exists.
+	- Fall back to OpenStreetMap when the key is absent or the API load fails.
+
+### 6.2 Accessibility and Keyboard Behavior
+
+- Added landmark and ARIA improvements across landing, dashboard, tournament list, and public tournament templates.
+- Improved keyboard behavior in shared JS:
+	- Escape closes mobile nav and active Bootstrap modal.
+	- Tab focus is trapped inside active modals.
+	- Enter activates focused custom `role="button"` controls.
+
+### 6.3 Form and UI Polish
+
+- Enhanced form validation UX with first-invalid focus, `aria-busy` submit state, and `aria-describedby` error wiring.
+- Added responsive polish for hero, match rows, table spacing, and role switcher behavior on smaller screens.
+
+### 6.4 Regression Pass Notes
+
+- Cleaned stale scaffold fragments from tournament list/public templates to prevent duplicate template blocks.
+- Unit test smoke command run:
+	- `python -m pytest app/tests/unit -q`
+- Current failure is pre-existing and outside these frontend polish changes:
+	- `ImportError: cannot import name 'bp' from 'criktrack.matches'` during app bootstrap.

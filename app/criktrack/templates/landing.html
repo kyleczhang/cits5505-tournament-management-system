@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <section class="ctm-hero">
+  <section class="ctm-hero" role="region" aria-labelledby="landing-hero-title">
     <div class="container">
       <div class="row align-items-center g-5">
         <div class="col-lg-7">
           <span class="badge-ctm badge-format mb-3">For clubs, leagues and social teams</span>
-          <h1 class="mb-3">
+          <h1 id="landing-hero-title" class="mb-3">
             Run your cricket tournament
             <span class="accent">from draw to trophy.</span>
           </h1>
@@ -55,11 +55,11 @@
     </div>
   </section>
 
-  <section class="section">
+  <section class="section" role="region" aria-labelledby="landing-features-title">
     <div class="container">
       <div class="text-center mb-5">
         <div class="divider-gold mx-auto mb-3"></div>
-        <h2>Everything an organiser needs.</h2>
+        <h2 id="landing-features-title">Everything an organiser needs.</h2>
         <p class="lead mx-auto" style="max-width: 640px">
           From knockout draws to round-robin standings, CRIKTRACK handles the admin so you can focus on the cricket.
         </p>
@@ -89,7 +89,7 @@
     </div>
   </section>
 
-  <section class="section" style="background: #0f172a; color: #fff">
+  <section class="section" style="background: #0f172a; color: #fff" role="region" aria-label="Platform statistics">
     <div class="container">
       <div class="row text-center g-4">
         {% for stat in [('120+', 'Matches recorded'), ('28', 'Active tournaments'), ('600+', 'Players tracked'), ('100%', 'Free for clubs')] %}

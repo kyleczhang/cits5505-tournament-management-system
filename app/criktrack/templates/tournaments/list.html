@@ -1,18 +1,4 @@
 {% extends "base.html" %}
-{% block title %}Tournaments{% endblock %}
-{% block content %}
-<section class="container">
-  <h1>Tournaments</h1>
-  <div id="tournament-list" class="tournament-list">
-    <!-- Tournament cards will be rendered here -->
-    <p class="muted">No tournaments yet — this is a scaffold for PR3.</p>
-  </div>
-</section>
-
-<script src="{{ url_for('static', filename='js/mockdata.js') }}"></script>
-<script src="{{ url_for('static', filename='js/maps.js') }}"></script>
-{% endblock %}
-{% extends "base.html" %}
 
 {% block title %}Browse tournaments — CRIKTRACK{% endblock %}
 
@@ -29,7 +15,7 @@
         <h1 class="mb-1">Browse tournaments</h1>
         <p class="muted m-0">Find tournaments by name, format or status.</p>
       </div>
-      <a href="{{ url_for('tournaments.create') }}" class="btn btn-ctm-primary" data-role-gate="organizer">+ New
+      <a href="{{ url_for('tournaments.create') }}" class="btn btn-ctm-primary" data-role-gate="organizer" aria-label="Create a new tournament">+ New
         tournament</a>
     </div>
 
@@ -46,7 +32,7 @@
             </span>
             <input type="search" id="tournament-search" name="q" value="{{ q }}" class="form-control"
               placeholder="Tournament name…">
-            <button type="submit" class="btn btn-ctm-primary">Search</button>
+            <button type="submit" class="btn btn-ctm-primary" aria-label="Search tournaments">Search</button>
           </div>
         </div>
         <div class="col-md-6">
@@ -63,9 +49,9 @@
       </div>
     </form>
 
-    <div class="row g-3" id="tournament-grid">
+    <div class="row g-3" id="tournament-grid" role="list" aria-label="Tournament results">
       {% for t in tournaments %}
-      <div class="col-md-6 col-lg-4">
+      <div class="col-md-6 col-lg-4" role="listitem">
         <a class="text-decoration-none" href="{{ url_for('tournaments.detail', tournament_id=t.id) }}">
           <article class="tournament-card">
             <div class="card-cover {{ cover_classes.get(t.status.value, '') }}">
