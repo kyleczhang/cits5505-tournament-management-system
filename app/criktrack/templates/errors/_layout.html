@@ -1,18 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Error — CRIKTRACK{% endblock %}
-
 {% block content %}
   <section class="section">
-    <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-md-8">
-          <article class="ctm-card text-center">
-            <h1 class="mb-2">{{ heading }}</h1>
-            <p class="muted mb-3">{{ message }}</p>
-            <a href="{{ url_for('landing') }}" class="btn btn-secondary">Back to home</a>
-          </article>
-        </div>
+    <div class="container text-center">
+      <div class="ctm-card mx-auto" style="max-width: 560px; padding: 3rem 2rem;">
+        <div style="font-family: var(--ctm-font-heading); font-size: 5rem; line-height: 1; color: var(--ctm-primary);">{{ status_code }}</div>
+        <h1 class="mt-3 mb-2">{{ heading }}</h1>
+        <p class="muted mb-4">{{ message }}</p>
+        <a href="{{ url_for('landing') }}" class="btn btn-ctm-primary">Back to home</a>
       </div>
     </div>
   </section>

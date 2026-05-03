@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Record result — {{ match.team_a.name }} vs {{ match.team_b.name }} — CRIKTRACK{% endblock %}
+
+{% set inn_by_team = {} %}
+{% for inn in match.innings %}{% if inn_by_team.update({inn.batting_team_id: inn}) %}{% endif %}{% endfor %}
+{% set inn_a = inn_by_team.get(match.team_a_id) %}
+{% set inn_b = inn_by_team.get(match.team_b_id) %}
+
+{% block content %}
+  <section class="section">
+    <div class="container" style="max-width:960px;">
+      <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+          <li class="breadcrumb-item"><a class="link-primary" href="{{ url_for('tournaments.detail', tournament_id=tournament.id) }}">{{ tournament.name }}</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Record result</li>
+        </ol>
+      </nav>
+      <h1 class="mb-2">Enter / edit match result</h1>
+      <p class="lead mb-4">{{ match.team_a.name }} vs {{ match.team_b.name }} — {{ match.scheduled_at.strftime('%d %b %Y') }}</p>
+
+      <form id="record-form" class="ctm-card" novalidate
+            data-match-id="{{ match.id }}"
+            data-team-a-id="{{ match.team_a_id }}"
+            data-team-b-id="{{ match.team_b_id }}"
+            data-record-url="{{ url_for('matches.record', tournament_id=tournament.id, match_id=match.id) }}">
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label for="toss_winner" class="form-label">Toss winner</label>
+            <select id="toss_winner" name="toss_winner" class="form-select">
+              <option value="">— none —</option>
+              <option value="{{ match.team_a_id }}" {% if match.toss_winner_id == match.team_a_id %}selected{% endif %}>{{ match.team_a.name }}</option>
+              <option value="{{ match.team_b_id }}" {% if match.toss_winner_id == match.team_b_id %}selected{% endif %}>{{ match.team_b.name }}</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="toss_decision" class="form-label">Decision</label>
+            <select id="toss_decision" name="toss_decision" class="form-select">
+              <option value="">— none —</option>
+              <option value="bat" {% if match.toss_decision and match.toss_decision.value == 'bat' %}selected{% endif %}>Bat first</option>
+              <option value="bowl" {% if match.toss_decision and match.toss_decision.value == 'bowl' %}selected{% endif %}>Bowl first</option>
+            </select>
+          </div>
+        </div>
+
+        <ul class="nav nav-pills nav-pills-ctm gap-2 mb-3" role="tablist">
+          <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#inn1" type="button" role="tab">Innings 1 — {{ match.team_a.name }}</button></li>
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#inn2" type="button" role="tab">Innings 2 — {{ match.team_b.name }}</button></li>
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#result" type="button" role="tab">Result</button></li>
+        </ul>
+
+        <div class="tab-content">
+          {% for ctx in [
+            {'pane':'inn1', 'team': match.team_a, 'opp': match.team_b, 'innings': inn_a},
+            {'pane':'inn2', 'team': match.team_b, 'opp': match.team_a, 'innings': inn_b},
+          ] %}
+            <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="{{ ctx.pane }}" role="tabpanel"
+                 data-innings-pane data-batting-team-id="{{ ctx.team.id }}">
+              <div class="row g-3 mb-3">
+                <div class="col-md-3">
+                  <label class="form-label">Total runs</label>
+                  <input type="number" class="form-control" data-field="runs" value="{{ ctx.innings.runs if ctx.innings else 0 }}" min="0">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Wickets</label>
+                  <input type="number" class="form-control" data-field="wickets" value="{{ ctx.innings.wickets if ctx.innings else 0 }}" min="0" max="10">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Overs bowled</label>
+                  <input type="number" step="0.1" class="form-control" data-field="overs" value="{{ ctx.innings.overs if ctx.innings else 0 }}" min="0">
+                </div>
+              </div>
+
+              <h3 class="h6 mb-2" style="font-family:var(--ctm-font-body); font-weight:700;">Batting ({{ ctx.team.name }})</h3>
+              <div class="d-flex flex-column gap-2 mb-3" data-batting-list>
+                {% set bat_entries = ctx.innings.batting_entries if ctx.innings else [] %}
+                {% if bat_entries %}
+                  {% for b in bat_entries %}
+                    <div class="row g-2 align-items-center" data-row>
+                      <div class="col-md-4"><input type="text" class="form-control" data-field="player_name" value="{{ b.player.name }}" placeholder="Batter name"></div>
+                      <div class="col-md-3"><input type="text" class="form-control" data-field="dismissal" value="{{ b.dismissal or '' }}" placeholder="Dismissal"></div>
+                      <div class="col-md-2"><input type="number" class="form-control" data-field="runs" value="{{ b.runs }}" placeholder="Runs"></div>
+                      <div class="col-md-2"><input type="number" class="form-control" data-field="balls" value="{{ b.balls }}" placeholder="Balls"></div>
+                      <div class="col-md-1"><button type="button" class="btn btn-ctm-ghost w-100" data-remove-row aria-label="Remove">×</button></div>
+                    </div>
+                  {% endfor %}
+                {% else %}
+                  <div class="row g-2 align-items-center" data-row>
+                    <div class="col-md-4"><input type="text" class="form-control" data-field="player_name" placeholder="Batter name"></div>
+                    <div class="col-md-3"><input type="text" class="form-control" data-field="dismissal" placeholder="Dismissal"></div>
+                    <div class="col-md-2"><input type="number" class="form-control" data-field="runs" placeholder="Runs"></div>
+                    <div class="col-md-2"><input type="number" class="form-control" data-field="balls" placeholder="Balls"></div>
+                    <div class="col-md-1"><button type="button" class="btn btn-ctm-ghost w-100" data-remove-row aria-label="Remove">×</button></div>
+                  </div>
+                {% endif %}
+              </div>
+              <button type="button" class="btn btn-ctm-ghost btn-sm mb-3" data-add-batter>+ Add batter</button>
+
+              <h3 class="h6 mb-2" style="font-family:var(--ctm-font-body); font-weight:700;">Bowling ({{ ctx.opp.name }})</h3>
+              <div class="d-flex flex-column gap-2 mb-3" data-bowling-list data-bowling-team-id="{{ ctx.opp.id }}">
+                {% set bowl_entries = ctx.innings.bowling_entries if ctx.innings else [] %}
+                {% if bowl_entries %}
+                  {% for b in bowl_entries %}
+                    <div class="row g-2 align-items-center" data-row>
+                      <div class="col-md-4"><input type="text" class="form-control" data-field="player_name" value="{{ b.player.name }}" placeholder="Bowler"></div>
+                      <div class="col-md-2"><input type="number" step="0.1" class="form-control" data-field="overs" value="{{ b.overs }}" placeholder="Overs"></div>
+                      <div class="col-md-2"><input type="number" class="form-control" data-field="runs" value="{{ b.runs }}" placeholder="Runs"></div>
+                      <div class="col-md-2"><input type="number" class="form-control" data-field="wickets" value="{{ b.wickets }}" placeholder="Wkts"></div>
+                      <div class="col-md-2"><button type="button" class="btn btn-ctm-ghost w-100" data-remove-row aria-label="Remove">Remove</button></div>
+                    </div>
+                  {% endfor %}
+                {% else %}
+                  <div class="row g-2 align-items-center" data-row>
+                    <div class="col-md-4"><input type="text" class="form-control" data-field="player_name" placeholder="Bowler"></div>
+                    <div class="col-md-2"><input type="number" step="0.1" class="form-control" data-field="overs" placeholder="Overs"></div>
+                    <div class="col-md-2"><input type="number" class="form-control" data-field="runs" placeholder="Runs"></div>
+                    <div class="col-md-2"><input type="number" class="form-control" data-field="wickets" placeholder="Wkts"></div>
+                    <div class="col-md-2"><button type="button" class="btn btn-ctm-ghost w-100" data-remove-row aria-label="Remove">Remove</button></div>
+                  </div>
+                {% endif %}
+              </div>
+              <button type="button" class="btn btn-ctm-ghost btn-sm" data-add-bowler>+ Add bowler</button>
+            </div>
+          {% endfor %}
+
+          <div class="tab-pane fade" id="result" role="tabpanel">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="winner" class="form-label">Winner</label>
+                <select id="winner" name="winner" class="form-select">
+                  <option value="">— not decided —</option>
+                  <option value="{{ match.team_a_id }}" {% if match.winner_id == match.team_a_id %}selected{% endif %}>{{ match.team_a.name }}</option>
+                  <option value="{{ match.team_b_id }}" {% if match.winner_id == match.team_b_id %}selected{% endif %}>{{ match.team_b.name }}</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="result_text" class="form-label">Result text</label>
+                <input type="text" id="result_text" name="result_text" class="form-control" value="{{ match.result_text or '' }}" placeholder="e.g. Crusaders won by 17 runs">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="record-errors" class="form-hint-error mt-3" role="alert" style="display:none;"></div>
+
+        <div class="d-flex gap-2 justify-content-end mt-4">
+          <a href="{{ url_for('tournaments.detail', tournament_id=tournament.id) }}" class="btn btn-ctm-ghost">Cancel</a>
+          <button type="submit" class="btn btn-ctm-primary">Save result</button>
+        </div>
+      </form>
+    </div>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/record.js') }}"></script>
+{% endblock %}
