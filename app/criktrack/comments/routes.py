@@ -41,9 +41,7 @@ def list_match(match_id: int):
 def create_match(match_id: int):
     db.session.get(Match, match_id) or abort(404)
     body = _ensure_body()
-    comment = Comment(
-        match_id=match_id, user_id=current_user.id, body=body
-    )
+    comment = Comment(match_id=match_id, user_id=current_user.id, body=body)
     db.session.add(comment)
     db.session.commit()
     return jsonify(comment.to_dict()), 201
@@ -64,9 +62,7 @@ def list_tournament(tournament_id: int):
 def create_tournament(tournament_id: int):
     db.session.get(Tournament, tournament_id) or abort(404)
     body = _ensure_body()
-    comment = Comment(
-        tournament_id=tournament_id, user_id=current_user.id, body=body
-    )
+    comment = Comment(tournament_id=tournament_id, user_id=current_user.id, body=body)
     db.session.add(comment)
     db.session.commit()
     return jsonify(comment.to_dict()), 201

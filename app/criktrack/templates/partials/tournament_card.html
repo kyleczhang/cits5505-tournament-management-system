@@ -1,9 +1,0 @@
-<article class="tournament-card">
-  <h2 class="tournament-card__title">{{ tournament.title or 'Untitled Tournament' }}</h2>
-  <p class="tournament-card__meta">
-    <span class="date">{{ tournament.date or 'TBD' }}</span>
-    <span class="location">{{ tournament.location or 'Unknown' }}</span>
-  </p>
-  <p class="tournament-card__summary">{{ tournament.summary or '' }}</p>
-  <a class="tournament-card__link" href="{{ url_for('tournaments.public', tournament_id=tournament.id) }}">View public page</a>
-</article>

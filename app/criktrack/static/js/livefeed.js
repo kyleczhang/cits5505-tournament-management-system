@@ -32,15 +32,6 @@
     const list = (payload && payload.data) || [];
     container.innerHTML = '';
 
-    const sourceText =
-      meta.source === 'mock'
-        ? '<em>sample — backend proxy pending</em>'
-        : meta.source === 'cache'
-          ? '<em>CricketData.org · cached</em>'
-          : meta.source === 'stale'
-            ? '<em>CricketData.org · stale cache</em>'
-            : '<a href="https://cricketdata.org/" target="_blank" rel="noopener">CricketData.org</a>';
-
     const head = document.createElement('div');
     head.className = 'ctm-live-head';
     const sourceLabel =
@@ -109,15 +100,6 @@
         });
       },
     );
-  }
-
-  function sourceFromHeaders(headers) {
-    if (!headers) return 'live';
-    if (headers.get('X-CTM-Cache') === 'HIT') return 'cache';
-    if (headers.get('X-CTM-Stale') === '1') return 'stale';
-    const source = headers.get('X-CTM-Source');
-    if (source === 'mock') return 'mock';
-    return 'live';
   }
 
   function load(container) {

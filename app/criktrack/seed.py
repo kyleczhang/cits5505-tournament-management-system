@@ -1,8 +1,6 @@
-"""`flask seed` — load demo fixtures derived from the frontend's CTM_MOCK."""
+"""`flask seed` — load demo fixtures for local development."""
 
 from __future__ import annotations
-
-from datetime import UTC, date, datetime
 
 import click
 from flask.cli import with_appcontext
@@ -14,17 +12,245 @@ from .models import (
     Comment,
     Innings,
     Match,
-    MatchStatus,
     Player,
     PlayerRole,
-    Role,
     Team,
     Tournament,
-    TournamentFormat,
-    TournamentStatus,
     User,
     Venue,
 )
+from .seed_data import SEED_COMMENTS, SEED_TOURNAMENTS, SEED_USERS, SEED_VENUES
+
+_DEFAULT_ORGANISER_KEY = "cheng"
+
+
+def _team_short_code(name: str) -> str:
+    cleaned = "".join(c for c in name.upper() if c.isalpha())
+    return (cleaned[:3] or "TBD")[:4]
+
+
+def _seed_users() -> dict[str, User]:
+    users_by_key: dict[str, User] = {}
+    for payload in SEED_USERS:
+        user = User(
+            email=payload["email"],
+            display_name=payload["display_name"],
+            role=payload["role"],
+            bio=payload.get("bio"),
+            location=payload.get("location"),
+        )
+        user.set_password(payload["password"])
+        db.session.add(user)
+        users_by_key[payload["key"]] = user
+    db.session.flush()
+    return users_by_key
+
+
+def _seed_venues() -> dict[str, Venue]:
+    venues_by_key: dict[str, Venue] = {}
+    for key, payload in SEED_VENUES.items():
+        venue = Venue(**payload)
+        db.session.add(venue)
+        venues_by_key[key] = venue
+    db.session.flush()
+    return venues_by_key
+
+
+def _seed_teams(
+    tournament: Tournament,
+    team_rows: list[dict],
+) -> dict[str, Team]:
+    teams_by_name: dict[str, Team] = {}
+    for row in team_rows:
+        team = Team(
+            tournament_id=tournament.id,
+            name=row["name"],
+            short_code=row.get("short_code") or _team_short_code(row["name"]),
+            played=row["played"],
+            won=row["won"],
+            lost=row["lost"],
+            points=row["points"],
+            nrr=row["nrr"],
+        )
+        db.session.add(team)
+        teams_by_name[row["name"]] = team
+    db.session.flush()
+    return teams_by_name
+
+
+def _ensure_player(
+    players_by_team: dict[str, dict[str, Player]],
+    team: Team,
+    player_name: str,
+) -> Player:
+    team_players = players_by_team.setdefault(team.name, {})
+    existing = team_players.get(player_name)
+    if existing is not None:
+        return existing
+
+    player = Player(team_id=team.id, name=player_name, role=PlayerRole.ALL_ROUNDER)
+    db.session.add(player)
+    db.session.flush()
+    team_players[player_name] = player
+    return player
+
+
+def _seed_rosters(
+    roster_data: dict[str, list[dict]],
+    teams_by_name: dict[str, Team],
+) -> dict[str, dict[str, Player]]:
+    players_by_team: dict[str, dict[str, Player]] = {}
+    for team_name, players in roster_data.items():
+        team = teams_by_name[team_name]
+        players_by_name: dict[str, Player] = {}
+        for payload in players:
+            player = Player(
+                team_id=team.id,
+                name=payload["name"],
+                role=payload["role"],
+            )
+            db.session.add(player)
+            players_by_name[payload["name"]] = player
+        players_by_team[team_name] = players_by_name
+    db.session.flush()
+    return players_by_team
+
+
+def _seed_match(
+    tournament: Tournament,
+    match_data: dict,
+    teams_by_name: dict[str, Team],
+    players_by_team: dict[str, dict[str, Player]],
+    venues_by_key: dict[str, Venue],
+) -> Match:
+    team_a = teams_by_name[match_data["team_a"]]
+    team_b = teams_by_name[match_data["team_b"]]
+    venue = venues_by_key.get(match_data.get("venue_key")) or tournament.venue
+    winner = (
+        teams_by_name.get(match_data["winner"]) if match_data.get("winner") else None
+    )
+    toss_winner = (
+        teams_by_name.get(match_data["toss_winner"])
+        if match_data.get("toss_winner")
+        else None
+    )
+
+    match = Match(
+        tournament_id=tournament.id,
+        venue_id=venue.id if venue else None,
+        team_a_id=team_a.id,
+        team_b_id=team_b.id,
+        scheduled_at=match_data["scheduled_at"],
+        status=match_data["status"],
+        winner_id=winner.id if winner else None,
+        result_text=match_data.get("result_text"),
+        toss_winner_id=toss_winner.id if toss_winner else None,
+        toss_decision=match_data.get("toss_decision"),
+    )
+    db.session.add(match)
+    db.session.flush()
+
+    for idx, innings_data in enumerate(match_data.get("innings", []), start=1):
+        batting_team = teams_by_name[innings_data["batting_team"]]
+        bowling_team = teams_by_name[innings_data["bowling_team"]]
+        innings = Innings(
+            match_id=match.id,
+            inning_number=idx,
+            batting_team_id=batting_team.id,
+            bowling_team_id=bowling_team.id,
+            runs=innings_data["runs"],
+            wickets=innings_data["wickets"],
+            overs=innings_data["overs"],
+        )
+        db.session.add(innings)
+        db.session.flush()
+
+        for batting in innings_data.get("batting", []):
+            player = _ensure_player(
+                players_by_team, batting_team, batting["player_name"]
+            )
+            db.session.add(
+                BattingEntry(
+                    innings_id=innings.id,
+                    player_id=player.id,
+                    runs=batting["runs"],
+                    balls=batting["balls"],
+                    fours=batting["fours"],
+                    sixes=batting["sixes"],
+                    dismissal=batting["dismissal"],
+                    is_not_out=batting["is_not_out"],
+                )
+            )
+
+        for bowling in innings_data.get("bowling", []):
+            player = _ensure_player(
+                players_by_team, bowling_team, bowling["player_name"]
+            )
+            db.session.add(
+                BowlingEntry(
+                    innings_id=innings.id,
+                    player_id=player.id,
+                    overs=bowling["overs"],
+                    maidens=bowling["maidens"],
+                    runs=bowling["runs"],
+                    wickets=bowling["wickets"],
+                )
+            )
+
+    db.session.flush()
+    return match
+
+
+def _seed_tournaments(
+    users_by_key: dict[str, User],
+    venues_by_key: dict[str, Venue],
+) -> dict[str, Match]:
+    matches_by_key: dict[str, Match] = {}
+
+    for payload in SEED_TOURNAMENTS:
+        tournament = Tournament(
+            name=payload["name"],
+            description=payload.get("description"),
+            format=payload["format"],
+            status=payload["status"],
+            start_date=payload["start_date"],
+            team_count=payload["team_count"],
+            organiser_id=users_by_key[_DEFAULT_ORGANISER_KEY].id,
+            venue_id=venues_by_key[payload["venue_key"]].id,
+        )
+        db.session.add(tournament)
+        db.session.flush()
+
+        teams_by_name = _seed_teams(tournament, payload["teams"])
+        players_by_team = _seed_rosters(payload.get("rosters", {}), teams_by_name)
+
+        for match_payload in payload.get("matches", []):
+            match = _seed_match(
+                tournament,
+                match_payload,
+                teams_by_name,
+                players_by_team,
+                venues_by_key,
+            )
+            if match_payload.get("key"):
+                matches_by_key[match_payload["key"]] = match
+
+    return matches_by_key
+
+
+def _seed_comments(
+    users_by_key: dict[str, User],
+    matches_by_key: dict[str, Match],
+) -> None:
+    for payload in SEED_COMMENTS:
+        db.session.add(
+            Comment(
+                match_id=matches_by_key[payload["match_key"]].id,
+                user_id=users_by_key[payload["user_key"]].id,
+                body=payload["body"],
+                created_at=payload["created_at"],
+            )
+        )
 
 
 @click.command("seed")
@@ -42,321 +268,10 @@ def seed_cli(reset: bool):
         click.echo("Already seeded — pass --reset to re-seed.")
         return
 
-    organiser = User(
-        email="cheng@example.com",
-        display_name="Cheng Zhang",
-        role=Role.ORGANIZER,
-        bio="Club cricketer from Perth. Organiser of the UWA Social League.",
-        location="Perth, WA",
-    )
-    organiser.set_password("password123")
-
-    user = User(
-        email="priya@example.com",
-        display_name="Priya Menon",
-        role=Role.USER,
-        bio="Fan of short-format cricket. Follows local WA leagues.",
-        location="Perth, WA",
-    )
-    user.set_password("password123")
-
-    daniel = User(
-        email="daniel@example.com",
-        display_name="Daniel Park",
-        role=Role.USER,
-        bio="Off-spinner.",
-        location="Perth, WA",
-    )
-    daniel.set_password("password123")
-
-    db.session.add_all([organiser, user, daniel])
-    db.session.flush()
-
-    venue = Venue(
-        name="UWA Sports Park",
-        address="Hackett Dr, Crawley WA 6009, Australia",
-        lat=-31.9833,
-        lng=115.8167,
-    )
-    db.session.add(venue)
-    db.session.flush()
-
-    tournament = Tournament(
-        name="UWA Social League 2026",
-        description="Friendly weekly 20-over matches between UWA clubs.",
-        format=TournamentFormat.ROUND_ROBIN,
-        status=TournamentStatus.LIVE,
-        start_date=date(2026, 3, 15),
-        team_count=6,
-        organiser_id=organiser.id,
-        venue_id=venue.id,
-    )
-    db.session.add(tournament)
-    db.session.flush()
-
-    # A handful more tournaments for the dashboard / list page.
-    extras = [
-        (
-            "Perth Autumn Knockout",
-            TournamentFormat.KNOCKOUT,
-            TournamentStatus.UPCOMING,
-            date(2026, 5, 2),
-            8,
-        ),
-        (
-            "Fremantle T20 Cup",
-            TournamentFormat.GROUP_STAGE,
-            TournamentStatus.COMPLETED,
-            date(2025, 11, 10),
-            12,
-        ),
-        (
-            "Cottesloe Beach Sixes",
-            TournamentFormat.ROUND_ROBIN,
-            TournamentStatus.UPCOMING,
-            date(2026, 6, 20),
-            4,
-        ),
-        (
-            "Nedlands Invitational",
-            TournamentFormat.KNOCKOUT,
-            TournamentStatus.COMPLETED,
-            date(2025, 9, 1),
-            8,
-        ),
-        (
-            "Swan Valley Shield",
-            TournamentFormat.GROUP_STAGE,
-            TournamentStatus.LIVE,
-            date(2026, 2, 1),
-            10,
-        ),
-    ]
-    for name, fmt, status, sd, tc in extras:
-        db.session.add(
-            Tournament(
-                name=name,
-                format=fmt,
-                status=status,
-                start_date=sd,
-                team_count=tc,
-                organiser_id=organiser.id,
-            )
-        )
-
-    teams_seed = [
-        ("Crawley Crusaders", "CRU", 5, 5, 0, 10, 2.15),
-        ("Nedlands Knights", "NED", 5, 3, 2, 6, 0.82),
-        ("Claremont Comets", "CLA", 5, 3, 2, 6, 0.41),
-        ("Shenton Sharks", "SHE", 5, 2, 3, 4, -0.30),
-        ("Fremantle Falcons", "FRE", 5, 1, 4, 2, -1.25),
-        ("Perth Panthers", "PER", 5, 1, 4, 2, -1.84),
-    ]
-    teams = []
-    for name, short, p, w, l, pts, nrr in teams_seed:
-        t = Team(
-            tournament_id=tournament.id,
-            name=name,
-            short_code=short,
-            played=p,
-            won=w,
-            lost=l,
-            points=pts,
-            nrr=nrr,
-        )
-        db.session.add(t)
-        teams.append(t)
-    db.session.flush()
-
-    cru, ned, *_rest = teams
-
-    cru_players_seed = [
-        ("Aarav Patel", PlayerRole.BATTER),
-        ("James Butler", PlayerRole.ALL_ROUNDER),
-        ("Ethan Wu", PlayerRole.BATTER),
-        ("Noah Smith", PlayerRole.ALL_ROUNDER),
-        ("Jacob Lim", PlayerRole.BOWLER),
-        ("Arjun Rao", PlayerRole.ALL_ROUNDER),
-        ("Daniel Park", PlayerRole.WICKET_KEEPER),
-    ]
-    ned_players_seed = [
-        ("Liam O'Connor", PlayerRole.BATTER),
-        ("Ravi Singh", PlayerRole.ALL_ROUNDER),
-        ("Sachin Rao", PlayerRole.BOWLER),
-        ("Ben Cooper", PlayerRole.BATTER),
-        ("Matt Hayes", PlayerRole.BOWLER),
-        ("Imran Khan", PlayerRole.BOWLER),
-    ]
-    cru_players = [Player(team_id=cru.id, name=n, role=r) for n, r in cru_players_seed]
-    ned_players = [Player(team_id=ned.id, name=n, role=r) for n, r in ned_players_seed]
-    db.session.add_all(cru_players + ned_players)
-    db.session.flush()
-    cru_by_name = {p.name: p for p in cru_players}
-    ned_by_name = {p.name: p for p in ned_players}
-
-    # The completed seed match: Crusaders vs Knights (CTM_MOCK.match #501)
-    match = Match(
-        tournament_id=tournament.id,
-        venue_id=venue.id,
-        team_a_id=cru.id,
-        team_b_id=ned.id,
-        scheduled_at=datetime(2026, 4, 12, 14, 0),
-        status=MatchStatus.COMPLETED,
-        winner_id=cru.id,
-        result_text="Crawley Crusaders won by 17 runs",
-    )
-    db.session.add(match)
-    db.session.flush()
-
-    cru_innings = Innings(
-        match_id=match.id,
-        inning_number=1,
-        batting_team_id=cru.id,
-        bowling_team_id=ned.id,
-        runs=182,
-        wickets=6,
-        overs=20.0,
-    )
-    ned_innings = Innings(
-        match_id=match.id,
-        inning_number=2,
-        batting_team_id=ned.id,
-        bowling_team_id=cru.id,
-        runs=165,
-        wickets=9,
-        overs=20.0,
-    )
-    db.session.add_all([cru_innings, ned_innings])
-    db.session.flush()
-
-    cru_batting = [
-        ("Aarav Patel", 78, 52, 8, 3, "c Rao b Khan", False),
-        ("James Butler", 45, 38, 5, 1, "b Khan", False),
-        ("Ethan Wu", 22, 18, 2, 0, "run out", False),
-        ("Noah Smith", 14, 9, 1, 1, "c & b Singh", False),
-        ("Jacob Lim", 12, 8, 1, 0, "not out", True),
-        ("Arjun Rao", 4, 5, 0, 0, "b Khan", False),
-        ("Daniel Park", 2, 2, 0, 0, "not out", True),
-    ]
-    for name, r, b, fours, sixes, dismissal, no in cru_batting:
-        db.session.add(
-            BattingEntry(
-                innings_id=cru_innings.id,
-                player_id=cru_by_name[name].id,
-                runs=r,
-                balls=b,
-                fours=fours,
-                sixes=sixes,
-                dismissal=dismissal,
-                is_not_out=no,
-            )
-        )
-
-    ned_bowling = [
-        ("Imran Khan", 4.0, 0, 28, 3),
-        ("Ravi Singh", 4.0, 0, 34, 1),
-        ("Sachin Rao", 4.0, 0, 41, 0),
-        ("Ben Cooper", 4.0, 0, 39, 1),
-        ("Matt Hayes", 4.0, 0, 40, 0),
-    ]
-    for name, ov, m, r, w in ned_bowling:
-        db.session.add(
-            BowlingEntry(
-                innings_id=cru_innings.id,
-                player_id=ned_by_name[name].id,
-                overs=ov,
-                maidens=m,
-                runs=r,
-                wickets=w,
-            )
-        )
-
-    ned_batting = [
-        ("Liam O'Connor", 62, 44, 6, 2, "c Butler b Park", False),
-        ("Ravi Singh", 33, 28, 3, 1, "b Lim", False),
-        ("Sachin Rao", 21, 20, 2, 0, "c Wu b Butler", False),
-        ("Ben Cooper", 18, 14, 1, 1, "lbw b Lim", False),
-        ("Matt Hayes", 10, 11, 1, 0, "c Smith b Butler", False),
-        ("Imran Khan", 9, 8, 0, 0, "not out", True),
-    ]
-    for name, r, b, fours, sixes, dismissal, no in ned_batting:
-        db.session.add(
-            BattingEntry(
-                innings_id=ned_innings.id,
-                player_id=ned_by_name[name].id,
-                runs=r,
-                balls=b,
-                fours=fours,
-                sixes=sixes,
-                dismissal=dismissal,
-                is_not_out=no,
-            )
-        )
-
-    cru_bowling = [
-        ("Daniel Park", 4.0, 0, 29, 2),
-        ("Jacob Lim", 4.0, 1, 22, 3),
-        ("James Butler", 4.0, 0, 34, 2),
-        ("Arjun Rao", 4.0, 0, 38, 1),
-        ("Noah Smith", 4.0, 0, 42, 1),
-    ]
-    for name, ov, m, r, w in cru_bowling:
-        db.session.add(
-            BowlingEntry(
-                innings_id=ned_innings.id,
-                player_id=cru_by_name[name].id,
-                overs=ov,
-                maidens=m,
-                runs=r,
-                wickets=w,
-            )
-        )
-
-    # Two more (upcoming + live) so the fixtures view has variety.
-    db.session.add(
-        Match(
-            tournament_id=tournament.id,
-            venue_id=venue.id,
-            team_a_id=teams[0].id,
-            team_b_id=teams[2].id,
-            scheduled_at=datetime(2026, 4, 21, 18, 30),
-            status=MatchStatus.LIVE,
-        )
-    )
-    db.session.add(
-        Match(
-            tournament_id=tournament.id,
-            venue_id=venue.id,
-            team_a_id=teams[4].id,
-            team_b_id=teams[5].id,
-            scheduled_at=datetime(2026, 4, 19, 14, 0),
-            status=MatchStatus.UPCOMING,
-        )
-    )
-
-    # Comments — one organiser, two users.
-    db.session.add_all(
-        [
-            Comment(
-                match_id=match.id,
-                user_id=organiser.id,
-                body="Great hitting from Aarav today — 78 off 52 set the tone.",
-                created_at=datetime(2026, 4, 12, 12, 5, tzinfo=UTC),
-            ),
-            Comment(
-                match_id=match.id,
-                user_id=user.id,
-                body="Knights really needed one more partnership in the middle overs.",
-                created_at=datetime(2026, 4, 12, 12, 22, tzinfo=UTC),
-            ),
-            Comment(
-                match_id=match.id,
-                user_id=daniel.id,
-                body="Pitch was drying out by the second innings — tough to chase 183.",
-                created_at=datetime(2026, 4, 13, 0, 41, tzinfo=UTC),
-            ),
-        ]
-    )
+    users_by_key = _seed_users()
+    venues_by_key = _seed_venues()
+    matches_by_key = _seed_tournaments(users_by_key, venues_by_key)
+    _seed_comments(users_by_key, matches_by_key)
 
     db.session.commit()
     click.echo(

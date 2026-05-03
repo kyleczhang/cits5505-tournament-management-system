@@ -1,3 +1,9 @@
+"""Jinja template filters used across CRIKTRACK templates.
+
+This module centralises small presentation helpers that format values for
+server-rendered templates, such as user initials and human friendly dates.
+"""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
@@ -6,12 +12,15 @@ from flask import Flask
 
 
 def register_filters(app: Flask) -> None:
+    """Register all project-specific Jinja filters on the Flask app."""
     app.jinja_env.filters["initials"] = initials
+    # Deprecated.
     app.jinja_env.filters["relative_time"] = relative_time
     app.jinja_env.filters["pretty_date"] = pretty_date
 
 
 def initials(name: str | None) -> str:
+    """Return a short uppercase initials string derived from a display name."""
     if not name:
         return "??"
     parts = [p for p in name.strip().split() if p]
@@ -21,6 +30,7 @@ def initials(name: str | None) -> str:
 
 
 def relative_time(value: datetime | None) -> str:
+    """Format a datetime as a compact relative time string for recent events."""
     if not value:
         return ""
     if value.tzinfo is None:
@@ -39,6 +49,7 @@ def relative_time(value: datetime | None) -> str:
 
 
 def pretty_date(value) -> str:
+    """Format a date-like object as ``DD Mon YYYY`` for template display."""
     if not value:
         return ""
     if isinstance(value, datetime):

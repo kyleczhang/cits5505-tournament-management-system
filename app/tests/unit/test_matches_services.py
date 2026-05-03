@@ -22,9 +22,7 @@ from criktrack.models import (
 
 
 def _scaffold(app):
-    organiser = User(
-        email="o@example.com", display_name="Org", role=Role.ORGANIZER
-    )
+    organiser = User(email="o@example.com", display_name="Org", role=Role.ORGANIZER)
     organiser.set_password("secret123")
     db.session.add(organiser)
     db.session.flush()
@@ -86,9 +84,16 @@ def test_save_result_marks_match_completed_and_updates_standings(app):
     payload = {
         "result": {"winner_team_id": team_a.id, "result_text": "Aces won by 20 runs"},
         "innings": [
-            {"batting_team_id": team_a.id, "runs": 180, "wickets": 6, "overs": "20.0",
-             "batting": [{"player_name": "Kyle", "runs": 45, "balls": 30}],
-             "bowling": [{"player_name": "Max", "overs": "4.0", "runs": 40, "wickets": 2}]},
+            {
+                "batting_team_id": team_a.id,
+                "runs": 180,
+                "wickets": 6,
+                "overs": "20.0",
+                "batting": [{"player_name": "Kyle", "runs": 45, "balls": 30}],
+                "bowling": [
+                    {"player_name": "Max", "overs": "4.0", "runs": 40, "wickets": 2}
+                ],
+            },
             {"batting_team_id": team_b.id, "runs": 160, "wickets": 9, "overs": "20.0"},
         ],
     }
@@ -112,22 +117,43 @@ def test_save_result_marks_match_completed_and_updates_standings(app):
 
 def test_save_result_replaces_previous_innings(app):
     _, _, team_a, team_b, match = _scaffold(app)
-    first = validate_payload({
-        "result": {"winner_team_id": team_a.id},
-        "innings": [
-            {"batting_team_id": team_a.id, "runs": 100, "wickets": 8, "overs": "20.0"},
-            {"batting_team_id": team_b.id, "runs": 90, "wickets": 10, "overs": "18.0"},
-        ],
-    }, match)
+    first = validate_payload(
+        {
+            "result": {"winner_team_id": team_a.id},
+            "innings": [
+                {
+                    "batting_team_id": team_a.id,
+                    "runs": 100,
+                    "wickets": 8,
+                    "overs": "20.0",
+                },
+                {
+                    "batting_team_id": team_b.id,
+                    "runs": 90,
+                    "wickets": 10,
+                    "overs": "18.0",
+                },
+            ],
+        },
+        match,
+    )
     save_result(match, first)
     assert len(match.innings) == 2
 
-    second = validate_payload({
-        "result": {"winner_team_id": team_b.id},
-        "innings": [
-            {"batting_team_id": team_b.id, "runs": 150, "wickets": 5, "overs": "20.0"},
-        ],
-    }, match)
+    second = validate_payload(
+        {
+            "result": {"winner_team_id": team_b.id},
+            "innings": [
+                {
+                    "batting_team_id": team_b.id,
+                    "runs": 150,
+                    "wickets": 5,
+                    "overs": "20.0",
+                },
+            ],
+        },
+        match,
+    )
     save_result(match, second)
     db.session.refresh(match)
     assert len(match.innings) == 1

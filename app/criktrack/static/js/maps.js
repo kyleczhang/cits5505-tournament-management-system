@@ -1,23 +1,15 @@
 /* Venue map renderer.
 
-   This module provides a single map entry point for all tournament pages.
+   Each page that wants a map drops this shell into the DOM:
 
-   Required DOM shell:
      <div class="ctm-map-frame" data-ctm-map
-          data-lat="-31.98" data-lng="115.82" data-label="UWA Sports Park"></div>
+          data-lat="-31.98" data-lng="115.82" data-label="UWA Sports Park">
+     </div>
 
-   Provider selection flow:
-   1) Read `window.CTM_CONFIG.googleMapsApiKey` from the Flask base template.
-   2) If key exists, lazy-load Google Maps once, then render interactive marker.
-   3) If key is missing or Google fails to load, render OpenStreetMap iframe.
-
-   Why this fallback exists:
-   - Local/dev environments should still show venue maps without a paid key.
-   - Public pages remain usable even when third-party script loading is blocked.
-
-   Public API:
-   - `window.ctmMaps.render()` re-renders all elements with `data-ctm-map`.
-*/
+   If CTM_CONFIG.googleMapsApiKey is set, we load the Google Maps JS API
+   once and draw a real marker. Otherwise we render an OpenStreetMap iframe
+   so the prototype works without a billing account. The backend proxy and
+   real API key arrive in Checkpoint 3 (Section 13.1). */
 
 (function () {
   'use strict';
