@@ -7,7 +7,7 @@ PIP := $(PYTHON) -m pip
 FLASK := cd $(APP_DIR) && .venv/bin/flask --app run:app
 PYTEST := cd $(APP_DIR) && .venv/bin/python -m pytest
 
-.DEFAULT_GOAL := help
+.DEFAULT_GOAL := run
 
 .PHONY: help venv install install-dev env setup setup-dev run test test-unit test-selenium db-upgrade db-migrate seed seed-reset clean
 
