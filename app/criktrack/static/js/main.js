@@ -5,6 +5,15 @@
 (function () {
   'use strict';
 
+  function closeMobileNav() {
+    const collapse = document.querySelector('.navbar-collapse');
+    if (collapse && collapse.classList.contains('show')) {
+      collapse.classList.remove('show');
+      const toggler = document.querySelector('.navbar-toggler');
+      if (toggler) toggler.setAttribute('aria-expanded', 'false');
+    }
+  }
+
   // Highlight the current nav link based on the page filename.
   document.addEventListener('DOMContentLoaded', function () {
     const path = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
@@ -15,12 +24,7 @@
 
       // Close mobile nav after selecting a link.
       link.addEventListener('click', function () {
-        const collapse = document.querySelector('.navbar-collapse');
-        if (collapse && collapse.classList.contains('show')) {
-          collapse.classList.remove('show');
-          const toggler = document.querySelector('.navbar-toggler');
-          if (toggler) toggler.setAttribute('aria-expanded', 'false');
-        }
+        closeMobileNav();
       });
     });
   });
@@ -197,14 +201,49 @@
     // Keyboard helper: close mobile nav on Escape and allow quick focus to main.
     document.addEventListener('keydown', function (ev) {
       if (ev.key === 'Escape') {
-        const collapse = document.querySelector('.navbar-collapse');
-        if (collapse && collapse.classList.contains('show')) {
-          collapse.classList.remove('show');
-          const toggler = document.querySelector('.navbar-toggler');
-          if (toggler) toggler.setAttribute('aria-expanded', 'false');
+        closeMobileNav();
+
+        const activeModal = document.querySelector('.modal.show');
+        if (activeModal && window.bootstrap && window.bootstrap.Modal) {
+          const modal = window.bootstrap.Modal.getOrCreateInstance(activeModal);
+          modal.hide();
         }
       }
-      // (g then m) quick nav could be layered here later.
+
+      // Keep keyboard focus inside the active modal while tabbing.
+      if (ev.key === 'Tab') {
+        const activeModal = document.querySelector('.modal.show');
+        if (!activeModal) return;
+
+        const focusables = activeModal.querySelectorAll(
+          'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusables.length) return;
+
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (ev.shiftKey && document.activeElement === first) {
+          ev.preventDefault();
+          last.focus();
+        } else if (!ev.shiftKey && document.activeElement === last) {
+          ev.preventDefault();
+          first.focus();
+        }
+      }
+
+      // Make custom role="button" elements keyboard-activatable with Enter.
+      if (ev.key === 'Enter') {
+        const el = document.activeElement;
+        if (
+          el &&
+          el.getAttribute &&
+          el.getAttribute('role') === 'button' &&
+          !el.hasAttribute('disabled')
+        ) {
+          ev.preventDefault();
+          el.click();
+        }
+      }
     });
   });
 })();
