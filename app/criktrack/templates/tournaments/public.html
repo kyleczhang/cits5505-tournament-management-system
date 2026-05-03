@@ -15,7 +15,7 @@
             {{ tournament.team_count }} teams
           </p>
         </div>
-        <button class="btn btn-ctm-accent" data-share="{{ url_for('tournaments.public', slug=tournament.share_slug, _external=True) }}">Copy share link</button>
+        <button class="btn btn-ctm-accent" data-share="{{ url_for('tournaments.public', slug=tournament.share_slug, _external=True) }}" aria-label="Copy public tournament share link">Copy share link</button>
       </div>
     </div>
   </section>
@@ -29,6 +29,7 @@
           <h2 class="h4 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Points table</h2>
           <div class="table-responsive">
             <table class="ctm-table">
+              <caption class="visually-hidden">Tournament points table standings</caption>
               <thead><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>Pts</th><th>NRR</th></tr></thead>
               <tbody>
                 {% for team in teams %}
@@ -60,10 +61,10 @@
       </div>
 
       <h2 class="h4 mt-5 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Recent results</h2>
-      <div class="d-flex flex-column gap-3">
+      <div class="d-flex flex-column gap-3" role="list" aria-label="Recent match results">
         {% for row in recent %}
           {% set m = row.match %}
-          <article class="match-row">
+          <article class="match-row" role="listitem">
             <div class="team">
               <span class="team-logo">{{ m.team_a.short_code }}</span>
               {{ m.team_a.name }}
@@ -86,7 +87,7 @@
 
       <section class="ctm-comments mt-5" data-ctm-comments data-tournament-id="{{ tournament.id }}" aria-labelledby="tournament-comments-title">
         <h3 id="tournament-comments-title">Discussion <span class="ctm-comment-count" data-ctm-comment-count></span></h3>
-        <ul class="ctm-comment-list" data-ctm-comment-list></ul>
+        <ul class="ctm-comment-list" data-ctm-comment-list aria-live="polite"></ul>
         <p class="muted small mt-2">This is a public read-only view. <a href="{{ url_for('auth.login') }}" class="link-primary">Log in</a> to join the discussion.</p>
       </section>
 
