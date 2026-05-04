@@ -14,7 +14,7 @@
     <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
     {% block head_extra %}{% endblock %}
   </head>
-  <body data-ctm-role="{{ current_user.role.value if current_user.is_authenticated else 'user' }}">
+  <body id="top" data-ctm-role="{{ current_user.role.value if current_user.is_authenticated else 'user' }}">
     <a href="#main" class="skip-link">Skip to main content</a>
     {% include "partials/nav.html" %}
     {% include "partials/flash_messages.html" %}
