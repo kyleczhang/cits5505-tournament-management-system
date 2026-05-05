@@ -6,6 +6,7 @@ from flask_wtf import FlaskForm
 from wtforms import (
     DateField,
     IntegerField,
+    SelectMultipleField,
     SelectField,
     StringField,
     SubmitField,
@@ -32,15 +33,13 @@ class TournamentCreateForm(FlaskForm):
         validators=[DataRequired()],
     )
     start_date = DateField("Start date", validators=[DataRequired()])
-    num_teams = IntegerField(
-        "Number of teams",
-        validators=[DataRequired(), NumberRange(min=2, max=32)],
-        default=6,
-    )
     overs = IntegerField(
         "Overs per innings",
         validators=[Optional(), NumberRange(min=1, max=50)],
         default=20,
+    )
+    team_ids = SelectMultipleField(
+        "Participating teams", coerce=int, validators=[DataRequired()]
     )
     venue_name = StringField("Venue name", validators=[Optional(), Length(max=160)])
     venue_address = StringField(

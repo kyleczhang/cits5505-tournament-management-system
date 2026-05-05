@@ -18,6 +18,7 @@ from ..models import (
     Player,
     Role,
     Team,
+    TournamentTeam,
     Tournament,
     TournamentStatus,
     User,
@@ -75,7 +76,9 @@ def _render_organizer_dashboard():
         "my_tournaments": len(organised),
         "upcoming_matches": len(upcoming_matches),
         "recent_results": len(recent_results),
-        "total_players": sum(len(team.players) for t in organised for team in t.teams),
+        "total_players": sum(
+            len(entry.team.players) for t in organised for entry in t.tournament_teams
+        ),
     }
 
     return render_template(
@@ -220,21 +223,28 @@ def _build_following():
     if team_ids:
         rows = (
             Team.query.filter(Team.id.in_(team_ids))
-            .order_by(Team.points.desc())
+            .order_by(Team.name.asc())
             .limit(6)
             .all()
         )
         next_fixtures = _next_fixture_per_team([r.id for r in rows])
-        teams = [{"team": t, "next": next_fixtures.get(t.id)} for t in rows]
+        latest_entries = _latest_tournament_entry_per_team([r.id for r in rows])
+        teams = [
+            {"team": t, "entry": latest_entries.get(t.id), "next": next_fixtures.get(t.id)}
+            for t in rows
+        ]
 
     players = []
     if player_ids:
-        rows = (
-            Player.query.filter(Player.id.in_(player_ids), Player.team_id.is_not(None))
-            .limit(6)
-            .all()
-        )
-        players = [{"player": p} for p in rows if p.team is not None]
+        rows = Player.query.filter(Player.id.in_(player_ids), Player.team_id.is_not(None)).limit(6).all()
+        players = []
+        for p in rows:
+            if p.team is None:
+                continue
+            latest_entry = _latest_tournament_entry_per_team([p.team_id]).get(p.team_id)
+            if latest_entry is None:
+                continue
+            players.append({"player": p, "tournament_id": latest_entry.tournament_id})
 
     return {
         "tournaments": tournaments,
@@ -274,6 +284,21 @@ def _next_fixture_per_team(team_ids):
         for tid in (m.team_a_id, m.team_b_id):
             if tid in team_ids and tid not in out:
                 out[tid] = m
+    return out
+
+
+def _latest_tournament_entry_per_team(team_ids):
+    if not team_ids:
+        return {}
+    rows = (
+        TournamentTeam.query.join(Tournament, TournamentTeam.tournament_id == Tournament.id)
+        .filter(TournamentTeam.team_id.in_(team_ids))
+        .order_by(Tournament.start_date.desc())
+        .all()
+    )
+    out: dict[int, TournamentTeam] = {}
+    for row in rows:
+        out.setdefault(row.team_id, row)
     return out
 
 

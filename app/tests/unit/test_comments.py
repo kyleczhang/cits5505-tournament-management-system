@@ -9,6 +9,7 @@ from criktrack.models import (
     Match,
     Role,
     Team,
+    TournamentTeam,
     Tournament,
     TournamentFormat,
     TournamentStatus,
@@ -34,10 +35,16 @@ def _scaffold(organiser_email: str = "org@example.com"):
     db.session.add(tournament)
     db.session.flush()
 
-    team_a = Team(tournament_id=tournament.id, name="A", short_code="AAA")
-    team_b = Team(tournament_id=tournament.id, name="B", short_code="BBB")
+    team_a = Team(organiser_id=organiser.id, name="A", short_code="AAA")
+    team_b = Team(organiser_id=organiser.id, name="B", short_code="BBB")
     db.session.add_all([team_a, team_b])
     db.session.flush()
+    db.session.add_all(
+        [
+            TournamentTeam(tournament_id=tournament.id, team_id=team_a.id),
+            TournamentTeam(tournament_id=tournament.id, team_id=team_b.id),
+        ]
+    )
 
     match = Match(
         tournament_id=tournament.id,

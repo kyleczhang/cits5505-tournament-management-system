@@ -79,9 +79,17 @@
                 <ul class="list-unstyled d-flex flex-column gap-2 m-0">
                   {% for f in following.teams %}
                     <li>
-                      <a href="{{ url_for('tournaments.detail', tournament_id=f.team.tournament_id) }}" class="link-primary text-decoration-none"><strong>{{ f.team.name }}</strong></a>
+                      {% if f.entry %}
+                        <a href="{{ url_for('tournaments.detail', tournament_id=f.entry.tournament_id) }}" class="link-primary text-decoration-none"><strong>{{ f.team.name }}</strong></a>
+                      {% else %}
+                        <strong>{{ f.team.name }}</strong>
+                      {% endif %}
                       <div class="small muted">
-                        {{ f.team.played }}P • {{ f.team.won }}W • {{ f.team.points }} pts
+                        {% if f.entry %}
+                          {{ f.entry.played }}P • {{ f.entry.won }}W • {{ f.entry.points }} pts
+                        {% else %}
+                          No tournament registration yet
+                        {% endif %}
                         {% if f.next %}
                           • Next: vs {% if f.next.team_a_id == f.team.id %}{{ f.next.team_b.short_code }}{% else %}{{ f.next.team_a.short_code }}{% endif %}
                           {{ f.next.scheduled_at.strftime('%d %b') }}
@@ -107,7 +115,7 @@
                 <ul class="list-unstyled d-flex flex-column gap-2 m-0">
                   {% for f in following.players %}
                     <li>
-                      <a href="{{ url_for('players.stats', tournament_id=f.player.team.tournament_id, player_id=f.player.id) }}" class="link-primary text-decoration-none"><strong>{{ f.player.name }}</strong></a>
+                      <a href="{{ url_for('players.stats', tournament_id=f.tournament_id, player_id=f.player.id) }}" class="link-primary text-decoration-none"><strong>{{ f.player.name }}</strong></a>
                       <div class="small muted">{{ f.player.team.name }} • {{ f.player.role.value | replace('_', ' ') | title }}</div>
                     </li>
                   {% endfor %}

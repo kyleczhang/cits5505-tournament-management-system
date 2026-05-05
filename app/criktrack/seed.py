@@ -15,6 +15,7 @@ from .models import (
     Player,
     PlayerRole,
     Team,
+    TournamentTeam,
     Tournament,
     User,
     Venue,
@@ -58,23 +59,30 @@ def _seed_venues() -> dict[str, Venue]:
     return venues_by_key
 
 
-def _seed_teams(
-    tournament: Tournament,
-    team_rows: list[dict],
-) -> dict[str, Team]:
+def _seed_teams(tournament: Tournament, team_rows: list[dict]) -> dict[str, Team]:
     teams_by_name: dict[str, Team] = {}
+    organiser_id = tournament.organiser_id
     for row in team_rows:
-        team = Team(
-            tournament_id=tournament.id,
-            name=row["name"],
-            short_code=row.get("short_code") or _team_short_code(row["name"]),
-            played=row["played"],
-            won=row["won"],
-            lost=row["lost"],
-            points=row["points"],
-            nrr=row["nrr"],
+        team = Team.query.filter_by(organiser_id=organiser_id, name=row["name"]).first()
+        if team is None:
+            team = Team(
+                organiser_id=organiser_id,
+                name=row["name"],
+                short_code=row.get("short_code") or _team_short_code(row["name"]),
+            )
+            db.session.add(team)
+            db.session.flush()
+        db.session.add(
+            TournamentTeam(
+                tournament_id=tournament.id,
+                team_id=team.id,
+                played=row.get("played", 0),
+                won=row.get("won", 0),
+                lost=row.get("lost", 0),
+                points=row.get("points", 0),
+                nrr=row.get("nrr", 0),
+            )
         )
-        db.session.add(team)
         teams_by_name[row["name"]] = team
     db.session.flush()
     return teams_by_name

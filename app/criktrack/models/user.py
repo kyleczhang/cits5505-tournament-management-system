@@ -43,6 +43,7 @@ class User(db.Model, UserMixin):
     organised_tournaments = db.relationship(
         "Tournament", back_populates="organiser", lazy="dynamic"
     )
+    teams = db.relationship("Team", back_populates="organiser", lazy="dynamic")
     comments = db.relationship("Comment", back_populates="user", lazy="dynamic")
     follows = db.relationship(
         "Follow", back_populates="user", lazy="dynamic", cascade="all, delete-orphan"

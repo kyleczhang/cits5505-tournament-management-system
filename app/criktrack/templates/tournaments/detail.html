@@ -136,7 +136,7 @@
               {% for team in teams %}
               <tr>
                 <td class="rank{% if loop.index == 1 %} rank-1{% endif %}">{{ loop.index }}</td>
-                <td class="team-chip"><span class="team-logo">{{ team.short_code }}</span>{{ team.name }}</td>
+                <td class="team-chip"><span class="team-logo">{{ team.team.short_code }}</span>{{ team.team.name }}</td>
                 <td>{{ team.played }}</td>
                 <td>{{ team.won }}</td>
                 <td>{{ team.lost }}</td>
@@ -144,7 +144,7 @@
                 <td>{{ '%+.2f' | format(team.nrr | float) }}</td>
                 {% if current_user.is_authenticated %}
                 <td>
-                  {% with target_type='team', target_id=team.id, following=(team.id in followed_team_ids), compact=True,
+                  {% with target_type='team', target_id=team.team.id, following=(team.team.id in followed_team_ids), compact=True,
                   size='sm' %}
                   {% include "partials/follow_button.html" %}
                   {% endwith %}

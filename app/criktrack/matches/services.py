@@ -16,6 +16,7 @@ from ..models import (
     MatchStatus,
     Player,
     Team,
+    TournamentTeam,
     TossDecision,
 )
 
@@ -273,10 +274,10 @@ def _recompute_standings(match: Match) -> None:
     (runs_against/overs_against), rounded to two decimals.
     """
     tournament_id = match.tournament_id
-    teams = Team.query.filter_by(tournament_id=tournament_id).all()
-    team_by_id = {t.id: t for t in teams}
+    rows = TournamentTeam.query.filter_by(tournament_id=tournament_id).all()
+    team_by_id = {row.team_id: row for row in rows}
     # Zero out every team first so deletions/edits can't leave stale totals behind.
-    for t in teams:
+    for t in rows:
         t.played = t.won = t.lost = t.points = 0
         t.nrr = 0
 
@@ -286,10 +287,10 @@ def _recompute_standings(match: Match) -> None:
         .all()
     )
 
-    runs_for: dict[int, Decimal] = {t.id: Decimal(0) for t in teams}
-    runs_against: dict[int, Decimal] = {t.id: Decimal(0) for t in teams}
-    overs_for: dict[int, Decimal] = {t.id: Decimal(0) for t in teams}
-    overs_against: dict[int, Decimal] = {t.id: Decimal(0) for t in teams}
+    runs_for: dict[int, Decimal] = {t.team_id: Decimal(0) for t in rows}
+    runs_against: dict[int, Decimal] = {t.team_id: Decimal(0) for t in rows}
+    overs_for: dict[int, Decimal] = {t.team_id: Decimal(0) for t in rows}
+    overs_against: dict[int, Decimal] = {t.team_id: Decimal(0) for t in rows}
 
     for m in completed:
         if m.team_a_id not in team_by_id or m.team_b_id not in team_by_id:
@@ -311,9 +312,9 @@ def _recompute_standings(match: Match) -> None:
                 runs_against[inn.bowling_team_id] += Decimal(inn.runs)
                 overs_against[inn.bowling_team_id] += Decimal(inn.overs)
 
-    for t in teams:
-        rf, of = runs_for[t.id], overs_for[t.id]
-        ra, oa = runs_against[t.id], overs_against[t.id]
+    for t in rows:
+        rf, of = runs_for[t.team_id], overs_for[t.team_id]
+        ra, oa = runs_against[t.team_id], overs_against[t.team_id]
         rf_rate = (rf / of) if of else Decimal(0)
         ra_rate = (ra / oa) if oa else Decimal(0)
         t.nrr = round(float(rf_rate - ra_rate), 2)

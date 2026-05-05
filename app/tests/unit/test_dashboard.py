@@ -14,6 +14,7 @@ from criktrack.models import (
     PlayerRole,
     Role,
     Team,
+    TournamentTeam,
     Tournament,
     TournamentFormat,
     TournamentStatus,
@@ -35,10 +36,16 @@ def _seed(make_user):
     )
     db.session.add(tournament)
     db.session.flush()
-    team_a = Team(tournament_id=tournament.id, name="Alpha", short_code="ALP")
-    team_b = Team(tournament_id=tournament.id, name="Bravo", short_code="BRV")
+    team_a = Team(organiser_id=organiser.id, name="Alpha", short_code="ALP")
+    team_b = Team(organiser_id=organiser.id, name="Bravo", short_code="BRV")
     db.session.add_all([team_a, team_b])
     db.session.flush()
+    db.session.add_all(
+        [
+            TournamentTeam(tournament_id=tournament.id, team_id=team_a.id),
+            TournamentTeam(tournament_id=tournament.id, team_id=team_b.id),
+        ]
+    )
     player = Player(team_id=team_a.id, name="Aarav", role=PlayerRole.BATTER)
     teamless = Player(team_id=None, name="Free Agent", role=PlayerRole.BATTER)
     match = Match(

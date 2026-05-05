@@ -14,6 +14,7 @@ from criktrack.models import (
     MatchStatus,
     Role,
     Team,
+    TournamentTeam,
     Tournament,
     TournamentFormat,
     TournamentStatus,
@@ -39,10 +40,13 @@ def _scaffold(app):
     db.session.add(tournament)
     db.session.flush()
 
-    team_a = Team(tournament_id=tournament.id, name="Aces", short_code="ACE")
-    team_b = Team(tournament_id=tournament.id, name="Bolts", short_code="BOL")
+    team_a = Team(organiser_id=organiser.id, name="Aces", short_code="ACE")
+    team_b = Team(organiser_id=organiser.id, name="Bolts", short_code="BOL")
     db.session.add_all([team_a, team_b])
     db.session.flush()
+    entry_a = TournamentTeam(tournament_id=tournament.id, team_id=team_a.id)
+    entry_b = TournamentTeam(tournament_id=tournament.id, team_id=team_b.id)
+    db.session.add_all([entry_a, entry_b])
 
     match = Match(
         tournament_id=tournament.id,
@@ -107,13 +111,17 @@ def test_save_result_marks_match_completed_and_updates_standings(app):
     assert match.result_text == "Aces won by 20 runs"
     assert len(match.innings) == 2
 
-    db.session.refresh(team_a)
-    db.session.refresh(team_b)
-    assert team_a.played == 1 and team_a.won == 1 and team_a.points == 2
-    assert team_b.played == 1 and team_b.lost == 1 and team_b.points == 0
+    entry_a = TournamentTeam.query.filter_by(
+        tournament_id=tournament.id, team_id=team_a.id
+    ).first()
+    entry_b = TournamentTeam.query.filter_by(
+        tournament_id=tournament.id, team_id=team_b.id
+    ).first()
+    assert entry_a.played == 1 and entry_a.won == 1 and entry_a.points == 2
+    assert entry_b.played == 1 and entry_b.lost == 1 and entry_b.points == 0
     # NRR: winner's runs-for > runs-against -> positive
-    assert Decimal(team_a.nrr) > 0
-    assert Decimal(team_b.nrr) < 0
+    assert Decimal(entry_a.nrr) > 0
+    assert Decimal(entry_b.nrr) < 0
 
 
 def test_save_result_replaces_previous_innings(app):

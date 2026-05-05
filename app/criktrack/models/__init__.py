@@ -11,7 +11,8 @@ from .match import (
     TossDecision,
 )
 from .player import Player, PlayerRole
-from .tournament import Team, Tournament, TournamentFormat, TournamentStatus
+from .team import Team, TournamentTeam
+from .tournament import Tournament, TournamentFormat, TournamentStatus
 from .user import Role, User
 from .venue import Venue
 
@@ -28,6 +29,7 @@ __all__ = [
     "PlayerRole",
     "Role",
     "Team",
+    "TournamentTeam",
     "TossDecision",
     "Tournament",
     "TournamentFormat",
