@@ -59,20 +59,6 @@ def _to_decimal(value: Any, key: str, errors: dict[str, str]) -> Decimal | None:
     return val
 
 
-def _player_for(name: str, team_id: int) -> Player:
-    """Return the existing player by (name, team) or create one."""
-    cleaned = (name or "").strip()
-    if not cleaned:
-        raise ValueError("Player name required.")
-    existing = Player.query.filter_by(team_id=team_id, name=cleaned).first()
-    if existing:
-        return existing
-    player = Player(team_id=team_id, name=cleaned)
-    db.session.add(player)
-    db.session.flush()
-    return player
-
-
 def validate_payload(payload: dict, match: Match) -> dict:
     """Return a normalised payload or raise ValidationError.
 
@@ -86,6 +72,11 @@ def validate_payload(payload: dict, match: Match) -> dict:
         raise ValidationError({"_": "Invalid payload."})
 
     team_ids = {match.team_a_id, match.team_b_id}
+    roster_rows = Player.query.filter(Player.team_id.in_(team_ids)).all()
+    roster_ids = {
+        team_id: {player.id for player in roster_rows if player.team_id == team_id}
+        for team_id in team_ids
+    }
 
     toss = payload.get("toss") or {}
     toss_winner = toss.get("winner_team_id")
@@ -137,11 +128,17 @@ def validate_payload(payload: dict, match: Match) -> dict:
         cleaned_batting = []
         for bidx, b in enumerate(inn.get("batting", []) or []):
             bp = f"{prefix}.batting.{bidx}"
-            name = (b.get("player_name") or "").strip()
-            if not name:
+            player_id = b.get("player_id")
+            if player_id in (None, ""):
+                continue
+            player_id = _to_int(player_id, f"{bp}.player_id", errors, min_value=1)
+            if player_id is None:
+                continue
+            if player_id not in roster_ids.get(bat_team_id, set()):
+                errors[f"{bp}.player_id"] = "Player must belong to the batting team."
                 continue
             entry = {
-                "player_name": name,
+                "player_id": player_id,
                 "runs": _to_int(b.get("runs", 0), f"{bp}.runs", errors),
                 "balls": _to_int(b.get("balls", 0), f"{bp}.balls", errors),
                 "fours": _to_int(b.get("fours", 0), f"{bp}.fours", errors) or 0,
@@ -154,11 +151,17 @@ def validate_payload(payload: dict, match: Match) -> dict:
         cleaned_bowling = []
         for bidx, b in enumerate(inn.get("bowling", []) or []):
             bp = f"{prefix}.bowling.{bidx}"
-            name = (b.get("player_name") or "").strip()
-            if not name:
+            player_id = b.get("player_id")
+            if player_id in (None, ""):
+                continue
+            player_id = _to_int(player_id, f"{bp}.player_id", errors, min_value=1)
+            if player_id is None:
+                continue
+            if player_id not in roster_ids.get(bowl_team_id, set()):
+                errors[f"{bp}.player_id"] = "Player must belong to the bowling team."
                 continue
             entry = {
-                "player_name": name,
+                "player_id": player_id,
                 "overs": _to_decimal(b.get("overs", 0), f"{bp}.overs", errors),
                 "maidens": _to_int(b.get("maidens", 0), f"{bp}.maidens", errors) or 0,
                 "runs": _to_int(b.get("runs", 0), f"{bp}.runs", errors),
@@ -232,7 +235,7 @@ def save_result(match: Match, normalised: dict) -> Match:
         db.session.flush()
 
         for b in payload["batting"]:
-            player = _player_for(b["player_name"], payload["batting_team_id"])
+            player = db.session.get(Player, b["player_id"])
             db.session.add(
                 BattingEntry(
                     innings_id=inn.id,
@@ -247,7 +250,7 @@ def save_result(match: Match, normalised: dict) -> Match:
             )
 
         for b in payload["bowling"]:
-            player = _player_for(b["player_name"], payload["bowling_team_id"])
+            player = db.session.get(Player, b["player_id"])
             db.session.add(
                 BowlingEntry(
                     innings_id=inn.id,

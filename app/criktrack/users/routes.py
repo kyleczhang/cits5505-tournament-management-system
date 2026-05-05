@@ -147,7 +147,7 @@ def _build_needs_attention(organised, organised_ids):
                     "kind": "schedule",
                     "label": f"{t.name} has no fixtures",
                     "hint": "Schedule the opening matches",
-                    "url": url_for("tournaments.detail", tournament_id=t.id),
+                    "url": url_for("matches.create", tournament_id=t.id),
                     "cta": "Schedule",
                 }
             )

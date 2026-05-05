@@ -12,6 +12,8 @@ from criktrack.matches.services import ValidationError, save_result, validate_pa
 from criktrack.models import (
     Match,
     MatchStatus,
+    Player,
+    PlayerRole,
     Role,
     Team,
     TournamentTeam,
@@ -48,6 +50,11 @@ def _scaffold(app):
     entry_b = TournamentTeam(tournament_id=tournament.id, team_id=team_b.id)
     db.session.add_all([entry_a, entry_b])
 
+    batter = Player(team_id=team_a.id, name="Kyle", role=PlayerRole.BATTER)
+    bowler = Player(team_id=team_b.id, name="Max", role=PlayerRole.BOWLER)
+    db.session.add_all([batter, bowler])
+    db.session.flush()
+
     match = Match(
         tournament_id=tournament.id,
         team_a_id=team_a.id,
@@ -56,11 +63,11 @@ def _scaffold(app):
     )
     db.session.add(match)
     db.session.commit()
-    return organiser, tournament, team_a, team_b, match
+    return organiser, tournament, team_a, team_b, batter, bowler, match
 
 
 def test_validate_rejects_invalid_winner(app):
-    _, _, team_a, team_b, match = _scaffold(app)
+    _, _, team_a, team_b, _, _, match = _scaffold(app)
     payload = {
         "result": {"winner_team_id": 9999},
         "innings": [
@@ -73,7 +80,7 @@ def test_validate_rejects_invalid_winner(app):
 
 
 def test_validate_rejects_wickets_over_ten(app):
-    _, _, team_a, _, match = _scaffold(app)
+    _, _, team_a, _, _, _, match = _scaffold(app)
     payload = {
         "innings": [
             {"batting_team_id": team_a.id, "runs": 100, "wickets": 11, "overs": "20.0"}
@@ -85,7 +92,7 @@ def test_validate_rejects_wickets_over_ten(app):
 
 
 def test_save_result_marks_match_completed_and_updates_standings(app):
-    _, tournament, team_a, team_b, match = _scaffold(app)
+    _, tournament, team_a, team_b, batter, bowler, match = _scaffold(app)
     payload = {
         "result": {"winner_team_id": team_a.id, "result_text": "Aces won by 20 runs"},
         "innings": [
@@ -94,9 +101,9 @@ def test_save_result_marks_match_completed_and_updates_standings(app):
                 "runs": 180,
                 "wickets": 6,
                 "overs": "20.0",
-                "batting": [{"player_name": "Kyle", "runs": 45, "balls": 30}],
+                "batting": [{"player_id": batter.id, "runs": 45, "balls": 30}],
                 "bowling": [
-                    {"player_name": "Max", "overs": "4.0", "runs": 40, "wickets": 2}
+                    {"player_id": bowler.id, "overs": "4.0", "runs": 40, "wickets": 2}
                 ],
             },
             {"batting_team_id": team_b.id, "runs": 160, "wickets": 9, "overs": "20.0"},
@@ -125,7 +132,7 @@ def test_save_result_marks_match_completed_and_updates_standings(app):
 
 
 def test_save_result_replaces_previous_innings(app):
-    _, _, team_a, team_b, match = _scaffold(app)
+    _, _, team_a, team_b, _, _, match = _scaffold(app)
     first = validate_payload(
         {
             "result": {"winner_team_id": team_a.id},
@@ -167,3 +174,21 @@ def test_save_result_replaces_previous_innings(app):
     db.session.refresh(match)
     assert len(match.innings) == 1
     assert match.winner_id == team_b.id
+
+
+def test_validate_rejects_player_from_wrong_team(app):
+    _, _, team_a, team_b, _, bowler, match = _scaffold(app)
+    payload = {
+        "innings": [
+            {
+                "batting_team_id": team_a.id,
+                "runs": 100,
+                "wickets": 5,
+                "overs": "20.0",
+                "batting": [{"player_id": bowler.id, "runs": 25, "balls": 20}],
+            }
+        ]
+    }
+    with pytest.raises(ValidationError) as exc:
+        validate_payload(payload, match)
+    assert "innings.0.batting.0.player_id" in exc.value.errors

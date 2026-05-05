@@ -23,7 +23,8 @@
             data-match-id="{{ match.id }}"
             data-team-a-id="{{ match.team_a_id }}"
             data-team-b-id="{{ match.team_b_id }}"
-            data-record-url="{{ url_for('matches.record', tournament_id=tournament.id, match_id=match.id) }}">
+            data-record-url="{{ url_for('matches.record', tournament_id=tournament.id, match_id=match.id) }}"
+            data-rosters='{{ roster_payload | tojson }}'>
 
         <div class="row g-3 mb-4">
           <div class="col-md-6">
@@ -73,12 +74,19 @@
               </div>
 
               <h3 class="h6 mb-2" style="font-family:var(--ctm-font-body); font-weight:700;">Batting ({{ ctx.team.name }})</h3>
-              <div class="d-flex flex-column gap-2 mb-3" data-batting-list>
+              <div class="d-flex flex-column gap-2 mb-3" data-batting-list data-team-id="{{ ctx.team.id }}">
                 {% set bat_entries = ctx.innings.batting_entries if ctx.innings else [] %}
                 {% if bat_entries %}
                   {% for b in bat_entries %}
                     <div class="row g-2 align-items-center" data-row>
-                      <div class="col-md-4"><input type="text" class="form-control" data-field="player_name" value="{{ b.player.name }}" placeholder="Batter name"></div>
+                      <div class="col-md-4">
+                        <select class="form-select" data-field="player_id">
+                          <option value="">Select batter</option>
+                          {% for player in team_rosters[ctx.team.id] %}
+                            <option value="{{ player.id }}" {% if player.id == b.player_id %}selected{% endif %}>{{ player.name }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
                       <div class="col-md-3"><input type="text" class="form-control" data-field="dismissal" value="{{ b.dismissal or '' }}" placeholder="Dismissal"></div>
                       <div class="col-md-2"><input type="number" class="form-control" data-field="runs" value="{{ b.runs }}" placeholder="Runs"></div>
                       <div class="col-md-2"><input type="number" class="form-control" data-field="balls" value="{{ b.balls }}" placeholder="Balls"></div>
@@ -87,7 +95,14 @@
                   {% endfor %}
                 {% else %}
                   <div class="row g-2 align-items-center" data-row>
-                    <div class="col-md-4"><input type="text" class="form-control" data-field="player_name" placeholder="Batter name"></div>
+                    <div class="col-md-4">
+                      <select class="form-select" data-field="player_id">
+                        <option value="">Select batter</option>
+                        {% for player in team_rosters[ctx.team.id] %}
+                          <option value="{{ player.id }}">{{ player.name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
                     <div class="col-md-3"><input type="text" class="form-control" data-field="dismissal" placeholder="Dismissal"></div>
                     <div class="col-md-2"><input type="number" class="form-control" data-field="runs" placeholder="Runs"></div>
                     <div class="col-md-2"><input type="number" class="form-control" data-field="balls" placeholder="Balls"></div>
@@ -98,12 +113,19 @@
               <button type="button" class="btn btn-ctm-ghost btn-sm mb-3" data-add-batter>+ Add batter</button>
 
               <h3 class="h6 mb-2" style="font-family:var(--ctm-font-body); font-weight:700;">Bowling ({{ ctx.opp.name }})</h3>
-              <div class="d-flex flex-column gap-2 mb-3" data-bowling-list data-bowling-team-id="{{ ctx.opp.id }}">
+              <div class="d-flex flex-column gap-2 mb-3" data-bowling-list data-team-id="{{ ctx.opp.id }}">
                 {% set bowl_entries = ctx.innings.bowling_entries if ctx.innings else [] %}
                 {% if bowl_entries %}
                   {% for b in bowl_entries %}
                     <div class="row g-2 align-items-center" data-row>
-                      <div class="col-md-4"><input type="text" class="form-control" data-field="player_name" value="{{ b.player.name }}" placeholder="Bowler"></div>
+                      <div class="col-md-4">
+                        <select class="form-select" data-field="player_id">
+                          <option value="">Select bowler</option>
+                          {% for player in team_rosters[ctx.opp.id] %}
+                            <option value="{{ player.id }}" {% if player.id == b.player_id %}selected{% endif %}>{{ player.name }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
                       <div class="col-md-2"><input type="number" step="0.1" class="form-control" data-field="overs" value="{{ b.overs }}" placeholder="Overs"></div>
                       <div class="col-md-2"><input type="number" class="form-control" data-field="runs" value="{{ b.runs }}" placeholder="Runs"></div>
                       <div class="col-md-2"><input type="number" class="form-control" data-field="wickets" value="{{ b.wickets }}" placeholder="Wkts"></div>
@@ -112,7 +134,14 @@
                   {% endfor %}
                 {% else %}
                   <div class="row g-2 align-items-center" data-row>
-                    <div class="col-md-4"><input type="text" class="form-control" data-field="player_name" placeholder="Bowler"></div>
+                    <div class="col-md-4">
+                      <select class="form-select" data-field="player_id">
+                        <option value="">Select bowler</option>
+                        {% for player in team_rosters[ctx.opp.id] %}
+                          <option value="{{ player.id }}">{{ player.name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
                     <div class="col-md-2"><input type="number" step="0.1" class="form-control" data-field="overs" placeholder="Overs"></div>
                     <div class="col-md-2"><input type="number" class="form-control" data-field="runs" placeholder="Runs"></div>
                     <div class="col-md-2"><input type="number" class="form-control" data-field="wickets" placeholder="Wkts"></div>
