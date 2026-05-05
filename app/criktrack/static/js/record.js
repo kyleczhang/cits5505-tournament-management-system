@@ -40,14 +40,31 @@
       });
     }
 
-    form.querySelector('#toss_winner').addEventListener('change', function () {
+    function clearAllFields() {
+      form.querySelectorAll('[data-innings-pane]').forEach(function (pane) {
+        pane.querySelectorAll(':scope > .row [data-field]').forEach(function (input) {
+          input.value = 0;
+        });
+        const battingList = pane.querySelector('[data-batting-list]');
+        if (battingList) {
+          battingList.innerHTML = templateRow('batter', battingList.getAttribute('data-team-id'));
+        }
+        const bowlingList = pane.querySelector('[data-bowling-list]');
+        if (bowlingList) {
+          bowlingList.innerHTML = templateRow('bowler', bowlingList.getAttribute('data-team-id'));
+        }
+      });
+      form.querySelector('#winner').value = '';
+      form.querySelector('#result_text').value = '';
+    }
+
+    function onTossChange() {
+      clearAllFields();
       refreshInningsLabels();
       refreshSummary();
-    });
-    form.querySelector('#toss_decision').addEventListener('change', function () {
-      refreshInningsLabels();
-      refreshSummary();
-    });
+    }
+    form.querySelector('#toss_winner').addEventListener('change', onTossChange);
+    form.querySelector('#toss_decision').addEventListener('change', onTossChange);
 
     function paneScore(pane) {
       const get = function (field) {
