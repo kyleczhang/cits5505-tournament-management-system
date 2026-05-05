@@ -40,8 +40,95 @@
       });
     }
 
-    form.querySelector('#toss_winner').addEventListener('change', refreshInningsLabels);
-    form.querySelector('#toss_decision').addEventListener('change', refreshInningsLabels);
+    form.querySelector('#toss_winner').addEventListener('change', function () {
+      refreshInningsLabels();
+      refreshSummary();
+    });
+    form.querySelector('#toss_decision').addEventListener('change', function () {
+      refreshInningsLabels();
+      refreshSummary();
+    });
+
+    function paneScore(pane) {
+      const get = function (field) {
+        const el = pane.querySelector(':scope > .row [data-field="' + field + '"]');
+        return el ? parseFloat(el.value) || 0 : 0;
+      };
+      return {
+        teamId: parseInt(pane.getAttribute('data-batting-team-id'), 10),
+        teamName: pane.getAttribute('data-team-name'),
+        runs: Math.floor(get('runs')),
+        wickets: Math.floor(get('wickets')),
+        overs: get('overs'),
+      };
+    }
+
+    function refreshSummary() {
+      const ordered = orderedPanes();
+      ordered.forEach(function (pane, idx) {
+        const hint = pane.querySelector('[data-chase-hint]');
+        if (!hint) return;
+        if (idx === 0) {
+          hint.hidden = true;
+          hint.textContent = '';
+          return;
+        }
+        const first = paneScore(ordered[0]);
+        const second = paneScore(pane);
+        const target = first.runs + 1;
+        let msg = 'Target: ' + target + ' (' + first.teamName + ' scored ' + first.runs + ').';
+        if (second.runs >= target) {
+          msg += ' ' + second.teamName + ' won by ' + (10 - second.wickets) + ' wickets.';
+        } else if (second.wickets >= 10) {
+          msg += ' ' + first.teamName + ' won by ' + (target - 1 - second.runs) + ' runs.';
+        } else {
+          msg += ' Needs ' + (target - second.runs) + ' more to win.';
+        }
+        hint.hidden = false;
+        hint.textContent = msg;
+      });
+
+      const suggest = form.querySelector('[data-result-suggest]');
+      const suggestText = form.querySelector('[data-result-suggest-text]');
+      if (!suggest || !suggestText || ordered.length < 2) return;
+      const first = paneScore(ordered[0]);
+      const second = paneScore(ordered[1]);
+      let winnerId = null;
+      let resultText = '';
+      if (second.runs >= first.runs + 1) {
+        winnerId = second.teamId;
+        resultText = second.teamName + ' won by ' + (10 - second.wickets) + ' wickets';
+      } else if (second.wickets >= 10 && second.runs < first.runs) {
+        winnerId = first.teamId;
+        resultText = first.teamName + ' won by ' + (first.runs - second.runs) + ' runs';
+      }
+      if (!winnerId) {
+        suggest.hidden = true;
+        return;
+      }
+      suggest.hidden = false;
+      suggest.dataset.winnerId = String(winnerId);
+      suggest.dataset.resultText = resultText;
+      suggestText.textContent = 'Suggested: ' + resultText + '.';
+    }
+
+    form.querySelectorAll('[data-innings-pane]').forEach(function (pane) {
+      pane.querySelectorAll(':scope > .row [data-field]').forEach(function (input) {
+        input.addEventListener('input', refreshSummary);
+      });
+    });
+
+    const applyBtn = form.querySelector('[data-result-suggest-apply]');
+    if (applyBtn) {
+      applyBtn.addEventListener('click', function () {
+        const suggest = form.querySelector('[data-result-suggest]');
+        if (!suggest || !suggest.dataset.winnerId) return;
+        form.querySelector('#winner').value = suggest.dataset.winnerId;
+        form.querySelector('#result_text').value = suggest.dataset.resultText || '';
+      });
+    }
+
+    refreshSummary();
 
     function playerSelect(teamId, placeholder) {
       const rows = rosters[String(teamId)] || [];

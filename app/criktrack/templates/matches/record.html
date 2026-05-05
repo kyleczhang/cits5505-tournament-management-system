@@ -91,6 +91,7 @@
                   <input type="number" step="0.1" class="form-control" data-field="overs" value="{{ ctx.innings.overs if ctx.innings else 0 }}" min="0">
                 </div>
               </div>
+              <div class="form-text mb-3" data-chase-hint hidden></div>
 
               <h3 class="h6 mb-2" style="font-family:var(--ctm-font-body); font-weight:700;">Batting ({{ ctx.team.name }})</h3>
               <div class="d-flex flex-column gap-2 mb-3" data-batting-list data-team-id="{{ ctx.team.id }}">
@@ -186,6 +187,10 @@
                 <label for="result_text" class="form-label">Result text</label>
                 <input type="text" id="result_text" name="result_text" class="form-control" value="{{ match.result_text or '' }}" placeholder="e.g. Crusaders won by 17 runs">
               </div>
+            </div>
+            <div class="d-flex align-items-center gap-2 mt-3" data-result-suggest hidden>
+              <span class="form-text m-0" data-result-suggest-text></span>
+              <button type="button" class="btn btn-ctm-ghost btn-sm" data-result-suggest-apply>Apply</button>
             </div>
           </div>
         </div>
