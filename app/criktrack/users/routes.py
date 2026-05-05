@@ -236,11 +236,9 @@ def _build_following():
 
     players = []
     if player_ids:
-        rows = Player.query.filter(Player.id.in_(player_ids), Player.team_id.is_not(None)).limit(6).all()
+        rows = Player.query.filter(Player.id.in_(player_ids)).limit(6).all()
         players = []
         for p in rows:
-            if p.team is None:
-                continue
             latest_entry = _latest_tournament_entry_per_team([p.team_id]).get(p.team_id)
             if latest_entry is None:
                 continue
