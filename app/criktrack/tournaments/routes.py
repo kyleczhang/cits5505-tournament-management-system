@@ -32,6 +32,19 @@ def _team_short_code(name: str, fallback: str = "TBD") -> str:
     return (cleaned[:3] or fallback)[:4]
 
 
+def _owned_tournament_or_403(tournament_id: int) -> Tournament:
+    tournament = db.session.get(Tournament, tournament_id) or abort(404)
+    if tournament.organiser_id != current_user.id:
+        abort(403)
+    return tournament
+
+
+def _sync_team_count(tournament: Tournament) -> None:
+    tournament.team_count = TournamentTeam.query.filter_by(
+        tournament_id=tournament.id
+    ).count()
+
+
 @bp.route("")
 def list_view():
     q = (request.args.get("q") or "").strip()
@@ -122,6 +135,7 @@ def create():
                     team_id=team.id,
                 )
             )
+        _sync_team_count(tournament)
 
         db.session.commit()
         flash("Tournament created. Add fixtures next.", "success")
@@ -164,18 +178,88 @@ def detail(tournament_id: int):
         .all()
     )
     standings = _ordered_teams(tournament)
+    registered_team_ids = {entry.team_id for entry in tournament.tournament_teams}
+    available_teams: list[Team] = []
+    is_organiser = (
+        current_user.is_authenticated and current_user.id == tournament.organiser_id
+    )
+    if is_organiser:
+        query = Team.query.filter_by(organiser_id=current_user.id).order_by(Team.name.asc())
+        if registered_team_ids:
+            query = query.filter(Team.id.notin_(registered_team_ids))
+        available_teams = query.all()
 
     return render_template(
         "tournaments/detail.html",
         tournament=tournament,
         teams=standings,
         matches=_match_payload(matches),
-        is_organiser=(
-            current_user.is_authenticated and current_user.id == tournament.organiser_id
-        ),
+        available_teams=available_teams,
+        is_organiser=is_organiser,
         is_following_tournament=is_following(FollowTarget.TOURNAMENT, tournament.id),
         followed_team_ids=followed_ids(FollowTarget.TEAM),
     )
+
+
+@bp.route("/<int:tournament_id>/teams/add", methods=["POST"])
+@login_required
+@require_role("organizer")
+def add_team(tournament_id: int):
+    tournament = _owned_tournament_or_403(tournament_id)
+    team_id = request.form.get("team_id", type=int)
+    if not team_id:
+        flash("Select a team to add.", "warning")
+        return redirect(url_for("tournaments.detail", tournament_id=tournament.id))
+
+    team = Team.query.filter_by(id=team_id, organiser_id=current_user.id).first()
+    if team is None:
+        flash("Selected team is not available.", "warning")
+        return redirect(url_for("tournaments.detail", tournament_id=tournament.id))
+
+    existing = TournamentTeam.query.filter_by(
+        tournament_id=tournament.id, team_id=team.id
+    ).first()
+    if existing is not None:
+        flash("That team is already part of this tournament.", "warning")
+        return redirect(url_for("tournaments.detail", tournament_id=tournament.id))
+
+    db.session.add(TournamentTeam(tournament_id=tournament.id, team_id=team.id))
+    db.session.flush()
+    _sync_team_count(tournament)
+    db.session.commit()
+    flash("Team added to tournament.", "success")
+    return redirect(url_for("tournaments.detail", tournament_id=tournament.id))
+
+
+@bp.route("/<int:tournament_id>/teams/<int:team_id>/remove", methods=["POST"])
+@login_required
+@require_role("organizer")
+def remove_team(tournament_id: int, team_id: int):
+    tournament = _owned_tournament_or_403(tournament_id)
+    entry = TournamentTeam.query.filter_by(
+        tournament_id=tournament.id, team_id=team_id
+    ).first() or abort(404)
+
+    has_fixtures = (
+        Match.query.filter(
+            Match.tournament_id == tournament.id,
+            (Match.team_a_id == team_id) | (Match.team_b_id == team_id),
+        ).first()
+        is not None
+    )
+    if has_fixtures:
+        flash(
+            "You cannot remove a team after fixtures have been scheduled for it.",
+            "warning",
+        )
+        return redirect(url_for("tournaments.detail", tournament_id=tournament.id))
+
+    db.session.delete(entry)
+    db.session.flush()
+    _sync_team_count(tournament)
+    db.session.commit()
+    flash("Team removed from tournament.", "success")
+    return redirect(url_for("tournaments.detail", tournament_id=tournament.id))
 
 
 @bp.route("/<slug>/share")
