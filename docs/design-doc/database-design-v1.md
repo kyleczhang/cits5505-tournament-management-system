@@ -1,6 +1,6 @@
 # Database Design — CRIKTRACK
 
-Companion to `README.md` and `plan-backend.md`. This document captures the schema and the backend services that read/write it.
+Companion to `README.md` and `plan-backend-v1.md`. This document captures the schema and the backend services that read/write it.
 
 - **Engine:** SQLite 3 via Flask-SQLAlchemy (`sqlite:///criktrack.sqlite3` in `app/instance/`).
 - **ORM:** SQLAlchemy 2.0.31 (declarative style, `db.Column` / `db.relationship`).
