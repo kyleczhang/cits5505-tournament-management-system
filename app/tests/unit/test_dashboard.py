@@ -76,7 +76,7 @@ def test_organizer_record_cta_points_to_record_route(client, app, make_user, log
 def test_organizer_fan_view_renders_user_dashboard(client, app, make_user, login):
     _seed(make_user)
     login("org@example.com")
-    body = client.get("/dashboard?as=fan").data.decode()
+    body = client.get("/dashboard?view=fan").data.decode()
     assert "Fan view" in body
     assert "Back to organiser workspace" in body
     assert "Live cricket around the world" in body

@@ -28,7 +28,7 @@ from .forms import ProfileEditForm
 @login_required
 def dashboard():
     is_organizer = current_user.role == Role.ORGANIZER
-    fan_view = request.args.get("as") == "fan"
+    fan_view = request.args.get("view") == "fan"
 
     if is_organizer and not fan_view:
         return _render_organizer_dashboard()
