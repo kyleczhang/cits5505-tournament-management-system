@@ -104,6 +104,12 @@
                 class="small link-primary d-block mt-1">Scorecard →</a>
               {% endif %}
               {% if is_organiser %}
+              {% if m.status.value == 'upcoming' %}
+              <form method="post" action="{{ url_for('matches.start', tournament_id=tournament.id, match_id=m.id) }}" class="mt-1">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-link link-primary small p-0 text-decoration-none">Start live scoring</button>
+              </form>
+              {% endif %}
               <a href="{{ url_for('matches.record', tournament_id=tournament.id, match_id=m.id) }}"
                 class="small link-primary d-block">Enter result</a>
               {% endif %}

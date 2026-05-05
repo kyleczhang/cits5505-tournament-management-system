@@ -80,3 +80,45 @@ def test_record_page_uses_roster_selectors(client, app, make_user, login):
     assert 'data-field="player_id"' in body
     assert "Select batter" in body
     assert "Select bowler" in body
+
+
+def test_organiser_can_start_upcoming_match(client, app, make_user, login):
+    tournament, team_a, team_b = _scaffold(make_user)
+    match = Match(
+        tournament_id=tournament.id,
+        team_a_id=team_a.id,
+        team_b_id=team_b.id,
+        status=MatchStatus.UPCOMING,
+    )
+    db.session.add(match)
+    db.session.commit()
+    login("org@example.com")
+
+    resp = client.post(
+        f"/tournaments/{tournament.id}/matches/{match.id}/start",
+        follow_redirects=False,
+    )
+
+    assert resp.status_code in (302, 303)
+    db.session.refresh(match)
+    db.session.refresh(tournament)
+    assert match.status == MatchStatus.LIVE
+    assert tournament.status == TournamentStatus.LIVE
+
+
+def test_other_organiser_cannot_start_foreign_match(client, app, make_user, login):
+    tournament, team_a, team_b = _scaffold(make_user)
+    make_user("other@example.com", role=Role.ORGANIZER, display_name="Other Org")
+    match = Match(
+        tournament_id=tournament.id,
+        team_a_id=team_a.id,
+        team_b_id=team_b.id,
+        status=MatchStatus.UPCOMING,
+    )
+    db.session.add(match)
+    db.session.commit()
+    login("other@example.com")
+
+    resp = client.post(f"/tournaments/{tournament.id}/matches/{match.id}/start")
+
+    assert resp.status_code == 403

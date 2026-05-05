@@ -10,7 +10,7 @@ from ..extensions import db
 from ..models import Match, MatchStatus, Player, Team, Tournament
 from . import bp
 from .forms import MatchCreateForm
-from .services import ValidationError, save_result, validate_payload
+from .services import ValidationError, save_result, start_match, validate_payload
 
 
 def _load(tournament_id: int, match_id: int) -> tuple[Tournament, Match]:
@@ -89,6 +89,27 @@ def create(tournament_id: int):
         return redirect(url_for("tournaments.detail", tournament_id=tournament.id))
 
     return render_template("matches/create.html", tournament=tournament, form=form)
+
+
+@bp.route("/tournaments/<int:tournament_id>/matches/<int:match_id>/start", methods=["POST"])
+@login_required
+@require_role("organizer")
+def start(tournament_id: int, match_id: int):
+    tournament, match = _load(tournament_id, match_id)
+    if tournament.organiser_id != current_user.id:
+        abort(403)
+
+    if match.status == MatchStatus.COMPLETED:
+        flash("Completed matches cannot be restarted.", "warning")
+        return redirect(
+            url_for("matches.scorecard", tournament_id=tournament.id, match_id=match.id)
+        )
+
+    start_match(match)
+    flash("Match is now live. You can start recording the scorecard.", "success")
+    return redirect(
+        url_for("matches.record", tournament_id=tournament.id, match_id=match.id)
+    )
 
 
 @bp.route(

@@ -113,7 +113,9 @@ def test_save_result_marks_match_completed_and_updates_standings(app):
     save_result(match, normalised)
 
     db.session.refresh(match)
+    db.session.refresh(tournament)
     assert match.status == MatchStatus.COMPLETED
+    assert tournament.status == TournamentStatus.COMPLETED
     assert match.winner_id == team_a.id
     assert match.result_text == "Aces won by 20 runs"
     assert len(match.innings) == 2
@@ -174,6 +176,30 @@ def test_save_result_replaces_previous_innings(app):
     db.session.refresh(match)
     assert len(match.innings) == 1
     assert match.winner_id == team_b.id
+
+
+def test_save_result_without_winner_keeps_tournament_live(app):
+    _, tournament, team_a, _, _, _, match = _scaffold(app)
+    normalised = validate_payload(
+        {
+            "innings": [
+                {
+                    "batting_team_id": team_a.id,
+                    "runs": 120,
+                    "wickets": 4,
+                    "overs": "14.0",
+                }
+            ],
+        },
+        match,
+    )
+
+    save_result(match, normalised)
+
+    db.session.refresh(match)
+    db.session.refresh(tournament)
+    assert match.status == MatchStatus.LIVE
+    assert tournament.status == TournamentStatus.LIVE
 
 
 def test_validate_rejects_player_from_wrong_team(app):

@@ -15,8 +15,9 @@ from ..models import (
     Match,
     MatchStatus,
     Player,
-    Team,
+    Tournament,
     TournamentTeam,
+    TournamentStatus,
     TossDecision,
 )
 
@@ -262,9 +263,44 @@ def save_result(match: Match, normalised: dict) -> Match:
                 )
             )
 
-    db.session.commit()
+    db.session.flush()
+    _refresh_tournament_status(match.tournament_id)
     _recompute_standings(match)
+    db.session.commit()
     return match
+
+
+def start_match(match: Match) -> Match:
+    """Mark an upcoming fixture as live and refresh the parent tournament status."""
+    if match.status == MatchStatus.UPCOMING:
+        match.status = MatchStatus.LIVE
+        _refresh_tournament_status(match.tournament_id)
+        db.session.commit()
+    return match
+
+
+def _refresh_tournament_status(tournament_id: int) -> None:
+    """Derive tournament status from its scheduled matches."""
+    tournament = db.session.get(Tournament, tournament_id)
+    if tournament is None:
+        return
+
+    statuses = [
+        status
+        for (status,) in db.session.query(Match.status)
+        .filter_by(tournament_id=tournament_id)
+        .all()
+    ]
+    if not statuses:
+        tournament.status = TournamentStatus.UPCOMING
+        return
+    if all(status == MatchStatus.COMPLETED for status in statuses):
+        tournament.status = TournamentStatus.COMPLETED
+        return
+    if any(status in (MatchStatus.LIVE, MatchStatus.COMPLETED) for status in statuses):
+        tournament.status = TournamentStatus.LIVE
+        return
+    tournament.status = TournamentStatus.UPCOMING
 
 
 def _recompute_standings(match: Match) -> None:
@@ -278,11 +314,15 @@ def _recompute_standings(match: Match) -> None:
     """
     tournament_id = match.tournament_id
     rows = TournamentTeam.query.filter_by(tournament_id=tournament_id).all()
-    team_by_id = {row.team_id: row for row in rows}
     # Zero out every team first so deletions/edits can't leave stale totals behind.
     for t in rows:
         t.played = t.won = t.lost = t.points = 0
         t.nrr = 0
+    db.session.flush()
+    db.session.expire_all()
+
+    rows = TournamentTeam.query.filter_by(tournament_id=tournament_id).all()
+    team_by_id = {row.team_id: row for row in rows}
 
     completed = (
         Match.query.options(joinedload(Match.innings))
@@ -321,5 +361,3 @@ def _recompute_standings(match: Match) -> None:
         rf_rate = (rf / of) if of else Decimal(0)
         ra_rate = (ra / oa) if oa else Decimal(0)
         t.nrr = round(float(rf_rate - ra_rate), 2)
-
-    db.session.commit()
