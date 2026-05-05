@@ -133,7 +133,6 @@ The Selenium suite spins up the Flask app on a random port in a background threa
 ```
 .
 ├── README.md
-├── CLAUDE.md                          # Guidance for Claude Code sessions
 ├── docs/design-doc/plan-backend-v1.md # Checkpoint 3 build plan
 ├── frontend-original/                 # Checkpoint 2 prototype (untouched)
 └── app/
