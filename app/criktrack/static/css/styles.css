@@ -411,6 +411,57 @@ textarea:focus-visible {
   border-radius: 2px;
 }
 
+/* ---------- LANDING PAGE ---------- */
+.ctm-hero .avatar-stack {
+  display: flex;
+}
+.ctm-hero .avatar-stack .avatar {
+  margin-right: -10px;
+}
+.ctm-hero .avatar-stack .avatar:last-child {
+  margin-right: 0;
+}
+.avatar-teal {
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+}
+.avatar-violet {
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+}
+.team-logo-blue {
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+}
+.ctm-hero .team-score {
+  font-family: var(--ctm-font-heading);
+}
+
+.section-lead {
+  max-width: 640px;
+}
+
+.feature-title {
+  font-family: var(--ctm-font-body);
+  font-weight: 700;
+}
+
+.section-dark {
+  background: #0f172a;
+  color: #fff;
+}
+.stat-number {
+  font-family: var(--ctm-font-heading);
+  font-size: 3rem;
+  line-height: 1;
+  color: var(--ctm-accent);
+}
+.section-dark .muted {
+  color: #94a3b8;
+}
+
+.ctm-cta-card {
+  padding: 3rem 2rem;
+  border-top: 4px solid var(--ctm-accent);
+}
+
 /* ---------- AUTH PAGES ---------- */
 .auth-wrapper {
   min-height: calc(100vh - 140px);
