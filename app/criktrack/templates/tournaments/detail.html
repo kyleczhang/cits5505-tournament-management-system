@@ -77,7 +77,7 @@
           <p class="small muted m-0">Reusable teams registered to this tournament.</p>
         </div>
         {% if is_organiser and available_teams %}
-          <form method="post" action="{{ url_for('tournaments.add_team', tournament_id=tournament.id) }}" class="d-flex flex-wrap gap-2">
+          <form method="post" action="{{ url_for('tournaments.add_team', tournament_id=tournament.id) }}" class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <select name="team_id" class="form-select form-select-sm" style="min-width:220px;">
               <option value="">Select a team…</option>
@@ -85,7 +85,7 @@
                 <option value="{{ team.id }}">{{ team.name }}</option>
               {% endfor %}
             </select>
-            <button type="submit" class="btn btn-ctm-primary btn-sm">Add team</button>
+            <button type="submit" class="btn btn-ctm-primary btn-sm text-nowrap">Add team</button>
           </form>
         {% endif %}
       </div>
