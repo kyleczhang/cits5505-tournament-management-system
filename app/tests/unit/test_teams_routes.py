@@ -6,6 +6,10 @@ from datetime import date
 
 from criktrack.extensions import db
 from criktrack.models import (
+    BattingEntry,
+    Innings,
+    Match,
+    MatchStatus,
     Player,
     PlayerRole,
     Role,
@@ -118,3 +122,69 @@ def test_other_organiser_cannot_delete_foreign_team(client, app, make_user, logi
     resp = client.post(f"/teams/{team.id}/delete")
 
     assert resp.status_code == 403
+
+
+def test_organiser_cannot_remove_player_with_scorecard_history(
+    client, app, make_user, login
+):
+    organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
+    team_a = Team(organiser_id=organiser.id, name="Alpha", short_code="ALP")
+    team_b = Team(organiser_id=organiser.id, name="Bravo", short_code="BRV")
+    tournament = Tournament(
+        name="Fixture Cup",
+        format=TournamentFormat.ROUND_ROBIN,
+        status=TournamentStatus.UPCOMING,
+        start_date=date(2026, 9, 1),
+        team_count=2,
+        organiser_id=organiser.id,
+    )
+    db.session.add_all([team_a, team_b, tournament])
+    db.session.flush()
+    db.session.add_all(
+        [
+            TournamentTeam(tournament_id=tournament.id, team_id=team_a.id),
+            TournamentTeam(tournament_id=tournament.id, team_id=team_b.id),
+        ]
+    )
+    player = Player(team_id=team_a.id, name="Aarav Sharma", role=PlayerRole.BATTER)
+    db.session.add(player)
+    db.session.flush()
+    match = Match(
+        tournament_id=tournament.id,
+        team_a_id=team_a.id,
+        team_b_id=team_b.id,
+        status=MatchStatus.COMPLETED,
+    )
+    db.session.add(match)
+    db.session.flush()
+    innings = Innings(
+        match_id=match.id,
+        inning_number=1,
+        batting_team_id=team_a.id,
+        bowling_team_id=team_b.id,
+        runs=120,
+        wickets=4,
+        overs=20,
+    )
+    db.session.add(innings)
+    db.session.flush()
+    db.session.add(
+        BattingEntry(
+            innings_id=innings.id,
+            player_id=player.id,
+            runs=42,
+            balls=30,
+            fours=4,
+            sixes=1,
+        )
+    )
+    db.session.commit()
+    login("org@example.com")
+
+    resp = client.post(
+        f"/teams/{team_a.id}/players/{player.id}/delete",
+        follow_redirects=False,
+    )
+
+    assert resp.status_code in (302, 303)
+    assert db.session.get(Player, player.id) is not None

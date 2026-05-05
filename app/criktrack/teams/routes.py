@@ -5,7 +5,7 @@ from flask_login import current_user, login_required
 
 from ..decorators import require_role
 from ..extensions import db
-from ..models import Player, PlayerRole, Team
+from ..models import BattingEntry, BowlingEntry, Player, PlayerRole, Team
 from . import bp
 from .forms import PlayerForm, TeamForm
 
@@ -22,6 +22,13 @@ def _player_for_team_or_404(team: Team, player_id: int) -> Player:
     if player.team_id != team.id:
         abort(404)
     return player
+
+
+def _player_has_scorecard_history(player_id: int) -> bool:
+    return (
+        BattingEntry.query.filter_by(player_id=player_id).first() is not None
+        or BowlingEntry.query.filter_by(player_id=player_id).first() is not None
+    )
 
 
 @bp.route("")
@@ -132,6 +139,12 @@ def edit_player(team_id: int, player_id: int):
 def delete_player(team_id: int, player_id: int):
     team = _owned_team_or_404(team_id)
     player = _player_for_team_or_404(team, player_id)
+    if _player_has_scorecard_history(player.id):
+        flash(
+            "This player already appears in recorded scorecards and cannot be removed.",
+            "warning",
+        )
+        return redirect(url_for("teams.detail", team_id=team.id))
     db.session.delete(player)
     db.session.commit()
     flash("Player removed from roster.", "success")
