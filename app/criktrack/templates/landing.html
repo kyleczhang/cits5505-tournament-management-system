@@ -11,17 +11,17 @@
             <span class="accent">from draw to trophy.</span>
           </h1>
           <p class="lead mb-4">
-            Create tournaments, enter scorecards, watch the points table update live, and share results with anyone — no spreadsheets required.
+            Create tournaments, enter scorecards, watch the points table update live, and share results with anyone, without juggling spreadsheets.
           </p>
           <div class="d-flex flex-wrap gap-3">
             <a href="{{ url_for('auth.register') }}" class="btn btn-ctm-accent btn-lg">Get started — it's free</a>
             <a href="{{ url_for('tournaments.list_view') }}" class="btn btn-ctm-outline btn-lg">Browse tournaments</a>
           </div>
           <div class="d-flex align-items-center gap-3 mt-4 muted">
-            <div class="d-flex">
-              <span class="avatar" style="margin-right: -10px">CZ</span>
-              <span class="avatar" style="margin-right: -10px; background: linear-gradient(135deg, #0f766e, #14b8a6);">LN</span>
-              <span class="avatar" style="background: linear-gradient(135deg, #7c3aed, #a78bfa);">HA</span>
+            <div class="avatar-stack">
+              <span class="avatar">CZ</span>
+              <span class="avatar avatar-teal">LN</span>
+              <span class="avatar avatar-violet">HA</span>
             </div>
             <span>Built by cricketers, for cricketers.</span>
           </div>
@@ -34,11 +34,11 @@
             </div>
             <div class="d-flex justify-content-between align-items-center mb-3">
               <div class="team-chip"><span class="team-logo">CRU</span> Crusaders</div>
-              <div class="team-score fs-3" style="font-family: var(--ctm-font-heading)">94/2</div>
+              <div class="team-score fs-3">94/2</div>
             </div>
             <div class="d-flex justify-content-between align-items-center mb-3 muted">
               <div class="team-chip">
-                <span class="team-logo" style="background: linear-gradient(135deg, #1e40af, #3b82f6);">NED</span>
+                <span class="team-logo team-logo-blue">NED</span>
                 Knights
               </div>
               <div>— yet to bat</div>
@@ -60,11 +60,12 @@
       <div class="text-center mb-5">
         <div class="divider-gold mx-auto mb-3"></div>
         <h2>Everything an organiser needs.</h2>
-        <p class="lead mx-auto" style="max-width: 640px">
+        <p class="lead mx-auto section-lead">
           From knockout draws to round-robin standings, CRIKTRACK handles the admin so you can focus on the cricket.
         </p>
       </div>
       <div class="row g-4">
+        {# feat = (SVG path, feature title, feature description) #}
         {% for feat in [
           ('M3 6h18M6 12h12M9 18h6', 'Auto-generated fixtures', 'Round-robin, knockout, or group stage — generate a complete draw in one click.'),
           ('M4 4h16v4H4zM4 12h10v4H4zM4 20h7', 'Ball-by-ball scorecards', 'Enter batting, bowling and individual performances — we build the scorecard for you.'),
@@ -80,7 +81,7 @@
                   <path d="{{ feat[0] }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </div>
-              <h3 class="h5 mb-2" style="font-family: var(--ctm-font-body); font-weight: 700">{{ feat[1] }}</h3>
+              <h3 class="h5 mb-2 feature-title">{{ feat[1] }}</h3>
               <p class="muted m-0">{{ feat[2] }}</p>
             </div>
           </div>
@@ -89,13 +90,13 @@
     </div>
   </section>
 
-  <section class="section" style="background: #0f172a; color: #fff">
+  <section class="section section-dark">
     <div class="container">
       <div class="row text-center g-4">
         {% for stat in [('120+', 'Matches recorded'), ('28', 'Active tournaments'), ('600+', 'Players tracked'), ('100%', 'Free for clubs')] %}
           <div class="col-6 col-md-3">
-            <div style="font-family: var(--ctm-font-heading); font-size: 3rem; line-height: 1; color: #f59e0b;">{{ stat[0] }}</div>
-            <div class="muted" style="color: #94a3b8">{{ stat[1] }}</div>
+            <div class="stat-number">{{ stat[0] }}</div>
+            <div class="muted">{{ stat[1] }}</div>
           </div>
         {% endfor %}
       </div>
@@ -104,7 +105,7 @@
 
   <section class="section">
     <div class="container">
-      <div class="ctm-card text-center" style="padding: 3rem 2rem; border-top: 4px solid var(--ctm-accent)">
+      <div class="ctm-card ctm-cta-card text-center">
         <h2 class="mb-3">Ready to run your next tournament?</h2>
         <p class="lead mb-4">Sign up in under a minute and create your first fixture list today.</p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
