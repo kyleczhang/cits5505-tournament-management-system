@@ -58,7 +58,12 @@ def create():
 def detail(team_id: int):
     team = _owned_team_or_404(team_id)
     player_form = PlayerForm()
-    return render_template("teams/detail.html", team=team, player_form=player_form)
+    return render_template(
+        "teams/detail.html",
+        team=team,
+        player_form=player_form,
+        registrations=len(team.tournament_entries),
+    )
 
 
 @bp.route("/<int:team_id>/edit", methods=["GET", "POST"])
@@ -131,3 +136,21 @@ def delete_player(team_id: int, player_id: int):
     db.session.commit()
     flash("Player removed from roster.", "success")
     return redirect(url_for("teams.detail", team_id=team.id))
+
+
+@bp.route("/<int:team_id>/delete", methods=["POST"])
+@login_required
+@require_role("organizer")
+def delete(team_id: int):
+    team = _owned_team_or_404(team_id)
+    if team.tournament_entries:
+        flash(
+            "Remove this team from its tournaments before deleting it.",
+            "warning",
+        )
+        return redirect(url_for("teams.detail", team_id=team.id))
+
+    db.session.delete(team)
+    db.session.commit()
+    flash("Team deleted.", "success")
+    return redirect(url_for("teams.list_view"))

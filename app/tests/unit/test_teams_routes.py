@@ -2,8 +2,19 @@
 
 from __future__ import annotations
 
+from datetime import date
+
 from criktrack.extensions import db
-from criktrack.models import Player, PlayerRole, Role, Team
+from criktrack.models import (
+    Player,
+    PlayerRole,
+    Role,
+    Team,
+    Tournament,
+    TournamentFormat,
+    TournamentStatus,
+    TournamentTeam,
+)
 
 
 def test_organiser_can_create_team(client, app, make_user, login):
@@ -56,3 +67,54 @@ def test_organiser_can_add_player_to_team_roster(client, app, make_user, login):
     player = Player.query.filter_by(team_id=team.id, name="Aarav Sharma").first()
     assert player is not None
     assert player.role == PlayerRole.BATTER
+
+
+def test_organiser_can_delete_unused_team(client, app, make_user, login):
+    organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
+    team = Team(organiser_id=organiser.id, name="Alpha", short_code="ALP")
+    db.session.add(team)
+    db.session.commit()
+    login("org@example.com")
+
+    resp = client.post(f"/teams/{team.id}/delete", follow_redirects=False)
+
+    assert resp.status_code in (302, 303)
+    assert db.session.get(Team, team.id) is None
+
+
+def test_organiser_cannot_delete_team_registered_in_tournament(
+    client, app, make_user, login
+):
+    organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
+    team = Team(organiser_id=organiser.id, name="Alpha", short_code="ALP")
+    tournament = Tournament(
+        name="Fixture Cup",
+        format=TournamentFormat.ROUND_ROBIN,
+        status=TournamentStatus.UPCOMING,
+        start_date=date(2026, 9, 1),
+        team_count=1,
+        organiser_id=organiser.id,
+    )
+    db.session.add_all([team, tournament])
+    db.session.flush()
+    db.session.add(TournamentTeam(tournament_id=tournament.id, team_id=team.id))
+    db.session.commit()
+    login("org@example.com")
+
+    resp = client.post(f"/teams/{team.id}/delete", follow_redirects=False)
+
+    assert resp.status_code in (302, 303)
+    assert db.session.get(Team, team.id) is not None
+
+
+def test_other_organiser_cannot_delete_foreign_team(client, app, make_user, login):
+    owner = make_user("owner@example.com", role=Role.ORGANIZER, display_name="Owner")
+    make_user("other@example.com", role=Role.ORGANIZER, display_name="Other")
+    team = Team(organiser_id=owner.id, name="Alpha", short_code="ALP")
+    db.session.add(team)
+    db.session.commit()
+    login("other@example.com")
+
+    resp = client.post(f"/teams/{team.id}/delete")
+
+    assert resp.status_code == 403

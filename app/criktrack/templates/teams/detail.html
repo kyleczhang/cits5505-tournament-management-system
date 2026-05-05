@@ -11,10 +11,17 @@
           <span class="badge-ctm badge-format mb-2">Reusable team</span>
           <h1 class="mb-1">{{ team.name }}</h1>
           <p class="muted m-0">{{ team.short_code }} • {{ team.players | length }} players in roster</p>
+          {% if registrations %}
+            <p class="small muted mt-2 mb-0">Registered in {{ registrations }} tournament{{ '' if registrations == 1 else 's' }}. Remove those registrations before deleting this team.</p>
+          {% endif %}
         </div>
         <div class="d-flex gap-2">
           <a href="{{ url_for('teams.edit', team_id=team.id) }}" class="btn btn-ctm-ghost">Edit team</a>
           <a href="{{ url_for('tournaments.create') }}" class="btn btn-ctm-primary">Use in tournament</a>
+          <form method="post" action="{{ url_for('teams.delete', team_id=team.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-ctm-ghost" {% if registrations %}disabled aria-disabled="true"{% endif %}>Delete team</button>
+          </form>
         </div>
       </div>
 
