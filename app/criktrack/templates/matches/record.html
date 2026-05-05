@@ -4,8 +4,27 @@
 
 {% set inn_by_team = {} %}
 {% for inn in match.innings %}{% if inn_by_team.update({inn.batting_team_id: inn}) %}{% endif %}{% endfor %}
-{% set inn_a = inn_by_team.get(match.team_a_id) %}
-{% set inn_b = inn_by_team.get(match.team_b_id) %}
+
+{# Resolve the display order of the two innings panes:
+   1. If innings have already been recorded, follow inning_number.
+   2. Else, derive from toss winner + decision.
+   3. Else, default to team_a batting first. #}
+{% set sorted_innings = match.innings | sort(attribute='inning_number') %}
+{% if sorted_innings %}
+  {% set first_team_id = sorted_innings[0].batting_team_id %}
+{% elif match.toss_winner_id and match.toss_decision %}
+  {% if match.toss_decision.value == 'bat' %}
+    {% set first_team_id = match.toss_winner_id %}
+  {% else %}
+    {% set first_team_id = match.team_b_id if match.toss_winner_id == match.team_a_id else match.team_a_id %}
+  {% endif %}
+{% else %}
+  {% set first_team_id = match.team_a_id %}
+{% endif %}
+{% set first_team = match.team_a if first_team_id == match.team_a_id else match.team_b %}
+{% set second_team = match.team_b if first_team_id == match.team_a_id else match.team_a %}
+{% set first_innings = inn_by_team.get(first_team.id) %}
+{% set second_innings = inn_by_team.get(second_team.id) %}
 
 {% block content %}
   <section class="section">
@@ -46,18 +65,18 @@
         </div>
 
         <ul class="nav nav-pills nav-pills-ctm gap-2 mb-3" role="tablist">
-          <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#inn1" type="button" role="tab">Innings 1 — {{ match.team_a.name }}</button></li>
-          <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#inn2" type="button" role="tab">Innings 2 — {{ match.team_b.name }}</button></li>
+          <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#inn1" type="button" role="tab" data-innings-tab="1">Innings 1 — {{ first_team.name }}</button></li>
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#inn2" type="button" role="tab" data-innings-tab="2">Innings 2 — {{ second_team.name }}</button></li>
           <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#result" type="button" role="tab">Result</button></li>
         </ul>
 
         <div class="tab-content">
           {% for ctx in [
-            {'pane':'inn1', 'team': match.team_a, 'opp': match.team_b, 'innings': inn_a},
-            {'pane':'inn2', 'team': match.team_b, 'opp': match.team_a, 'innings': inn_b},
+            {'pane':'inn1', 'team': first_team, 'opp': second_team, 'innings': first_innings},
+            {'pane':'inn2', 'team': second_team, 'opp': first_team, 'innings': second_innings},
           ] %}
             <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="{{ ctx.pane }}" role="tabpanel"
-                 data-innings-pane data-batting-team-id="{{ ctx.team.id }}">
+                 data-innings-pane data-batting-team-id="{{ ctx.team.id }}" data-team-name="{{ ctx.team.name }}">
               <div class="row g-3 mb-3">
                 <div class="col-md-3">
                   <label class="form-label">Total runs</label>

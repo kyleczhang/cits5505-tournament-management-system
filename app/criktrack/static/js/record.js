@@ -6,6 +6,42 @@
     const form = document.getElementById('record-form');
     if (!form) return;
     const rosters = JSON.parse(form.getAttribute('data-rosters') || '{}');
+    const teamAId = parseInt(form.getAttribute('data-team-a-id'), 10);
+    const teamBId = parseInt(form.getAttribute('data-team-b-id'), 10);
+
+    function firstBatTeamId() {
+      const winner = parseInt(form.querySelector('#toss_winner').value, 10);
+      const decision = form.querySelector('#toss_decision').value;
+      if (!winner || !decision) return null;
+      if (decision === 'bat') return winner;
+      return winner === teamAId ? teamBId : teamAId;
+    }
+
+    function orderedPanes() {
+      const panes = Array.from(form.querySelectorAll('[data-innings-pane]'));
+      const firstId = firstBatTeamId();
+      if (!firstId) return panes;
+      const first = panes.find(function (p) {
+        return parseInt(p.getAttribute('data-batting-team-id'), 10) === firstId;
+      });
+      if (!first) return panes;
+      return [first].concat(panes.filter(function (p) { return p !== first; }));
+    }
+
+    function refreshInningsLabels() {
+      const ordered = orderedPanes();
+      const tabs = form.querySelectorAll('[data-innings-tab]');
+      tabs.forEach(function (tab, idx) {
+        const pane = ordered[idx];
+        if (!pane) return;
+        tab.setAttribute('data-bs-target', '#' + pane.id);
+        tab.textContent =
+          'Innings ' + (idx + 1) + ' — ' + pane.getAttribute('data-team-name');
+      });
+    }
+
+    form.querySelector('#toss_winner').addEventListener('change', refreshInningsLabels);
+    form.querySelector('#toss_decision').addEventListener('change', refreshInningsLabels);
 
     function playerSelect(teamId, placeholder) {
       const rows = rosters[String(teamId)] || [];
@@ -81,7 +117,7 @@
       errBox.textContent = '';
 
       const innings = [];
-      form.querySelectorAll('[data-innings-pane]').forEach(function (pane) {
+      orderedPanes().forEach(function (pane) {
         const battingTeamId = parseInt(pane.getAttribute('data-batting-team-id'), 10);
         const meta = {};
         pane.querySelectorAll(':scope > .row [data-field]').forEach(function (f) {
