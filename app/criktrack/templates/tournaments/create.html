@@ -3,6 +3,11 @@
 
 {% block title %}Create Tournament — CRIKTRACK{% endblock %}
 
+{% block scripts %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='js/team-picker.js') }}" defer></script>
+{% endblock %}
+
 {% block content %}
   <section class="section">
     <div class="container" style="max-width:860px;">
@@ -54,13 +59,46 @@
 
         <h2 class="h5 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Teams</h2>
         <p class="small muted mb-3">Choose at least two existing teams. Create more teams from the team management area if needed.</p>
-        <div class="mb-3">
-          <label for="{{ form.team_ids.id }}" class="form-label">Participating teams</label>
-          {{ form.team_ids(class="form-select" + (" is-invalid" if form.team_ids.errors else ""), size=8, multiple=true) }}
+        <div class="mb-3" data-team-picker>
+          <label for="team-picker-search" class="form-label">Participating teams</label>
+
+          {# Hidden source-of-truth select; submitted with the form. #}
+          <div class="visually-hidden" aria-hidden="true">
+            {{ form.team_ids(id=form.team_ids.id, multiple=true) }}
+          </div>
+
+          <div class="ctm-team-picker {% if form.team_ids.errors %}is-invalid{% endif %}">
+            <div class="ctm-team-picker__search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+              <input type="search" id="team-picker-search" class="form-control" placeholder="Search teams by name…" autocomplete="off" data-team-picker-search>
+            </div>
+
+            <div class="ctm-team-picker__meta">
+              <span data-team-picker-count>0 selected</span>
+              <button type="button" class="btn btn-link btn-sm p-0" data-team-picker-clear>Clear all</button>
+            </div>
+
+            <ul class="ctm-team-picker__list" role="listbox" aria-multiselectable="true" data-team-picker-list>
+              {% for choice in form.team_ids.iter_choices() %}
+                {% set value = choice[0] %}{% set label = choice[1] %}{% set selected = choice[2] %}
+                <li class="ctm-team-picker__item" data-team-name="{{ label|lower }}">
+                  <label>
+                    <input type="checkbox" value="{{ value }}" {% if selected %}checked{% endif %} data-team-picker-option>
+                    <span>{{ label }}</span>
+                  </label>
+                </li>
+              {% else %}
+                <li class="ctm-team-picker__empty muted small">No teams yet — create some from the dashboard first.</li>
+              {% endfor %}
+            </ul>
+            <div class="ctm-team-picker__no-results muted small" data-team-picker-no-results hidden>No teams match your search.</div>
+
+            <div class="ctm-team-picker__selected" data-team-picker-chips aria-live="polite"></div>
+          </div>
+
           {% for err in form.team_ids.errors %}
             <div class="form-hint-error" role="alert">{{ err }}</div>
           {% endfor %}
-          <div class="small muted mt-2">Hold Cmd/Ctrl to select multiple teams.</div>
         </div>
 
         <div class="d-flex gap-2 justify-content-end mt-4">
