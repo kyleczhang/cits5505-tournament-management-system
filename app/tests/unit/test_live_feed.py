@@ -10,6 +10,7 @@ from criktrack.integrations import cricketdata
 
 
 def _fake_response(payload):
+    """Build a minimal `requests.Response`-like mock returning `payload` from .json()."""
     resp = Mock(status_code=200)
     resp.json.return_value = payload
     resp.raise_for_status = lambda: None
@@ -38,6 +39,8 @@ def test_live_then_cache_hit(client, app):
 
 
 def test_stale_fallback_on_upstream_failure(client, app):
+    """After a successful fetch, if the next upstream call fails we serve the
+    last known payload with `X-CTM-Stale: 1` instead of erroring out."""
     app.config["CRICKETDATA_API_KEY"] = "fake-key"
     app.config["LIVE_FEED_CACHE_SECONDS"] = 30
     fake = _fake_response({"status": "success", "data": [{"id": "1"}]})

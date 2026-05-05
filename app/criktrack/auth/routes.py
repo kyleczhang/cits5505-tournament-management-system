@@ -1,3 +1,5 @@
+"""Auth routes: register, login, logout. Hosts the open-redirect guard."""
+
 from __future__ import annotations
 
 from urllib.parse import urlparse
@@ -25,6 +27,7 @@ def _safe_next(target: str | None) -> str | None:
 
 @bp.route("/register", methods=["GET", "POST"])
 def register():
+    """Create a user account; promote to ORGANIZER if invite code matches config."""
     if current_user.is_authenticated:
         return redirect(url_for("users.dashboard"))
 
@@ -58,6 +61,7 @@ def register():
 
 @bp.route("/login", methods=["GET", "POST"])
 def login():
+    """Authenticate; honour ?next= only when `_safe_next()` clears it."""
     if current_user.is_authenticated:
         return redirect(url_for("users.dashboard"))
 

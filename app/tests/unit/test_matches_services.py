@@ -22,6 +22,7 @@ from criktrack.models import (
 
 
 def _scaffold(app):
+    """Seed an organiser, a 2-team tournament, and a single scheduled match."""
     organiser = User(email="o@example.com", display_name="Org", role=Role.ORGANIZER)
     organiser.set_password("secret123")
     db.session.add(organiser)

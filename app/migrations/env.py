@@ -1,3 +1,9 @@
+"""Alembic migration environment for Flask-Migrate.
+
+Wires the Flask app's SQLAlchemy engine and metadata into Alembic so
+``flask db migrate``/``upgrade`` can run online or offline migrations.
+"""
+
 import logging
 from logging.config import fileConfig
 
@@ -16,6 +22,7 @@ logger = logging.getLogger('alembic.env')
 
 
 def get_engine():
+    """Return the SQLAlchemy engine, handling both pre/post Flask-SQLAlchemy 3."""
     try:
         # this works with Flask-SQLAlchemy<3 and Alchemical
         return current_app.extensions['migrate'].db.get_engine()

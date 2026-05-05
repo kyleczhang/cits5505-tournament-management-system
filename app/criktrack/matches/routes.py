@@ -1,3 +1,5 @@
+"""Match routes: public scorecard view and organiser-only result recording endpoint."""
+
 from __future__ import annotations
 
 from flask import abort, jsonify, render_template, request, url_for
@@ -11,9 +13,11 @@ from .services import ValidationError, save_result, validate_payload
 
 
 def _load(tournament_id: int, match_id: int) -> tuple[Tournament, Match]:
+    """Fetch tournament+match, 404ing if either is missing or the match is foreign."""
     tournament = db.session.get(Tournament, tournament_id) or abort(404)
     match = db.session.get(Match, match_id) or abort(404)
     if match.tournament_id != tournament.id:
+        # Guard against URL tampering: a match must belong to the tournament in the URL.
         abort(404)
     return tournament, match
 
@@ -40,6 +44,8 @@ def scorecard(tournament_id: int, match_id: int):
 @require_role("organizer")
 def record(tournament_id: int, match_id: int):
     tournament, match = _load(tournament_id, match_id)
+    # Ownership check: the organizer role alone isn't enough — only the tournament's
+    # own organiser may record results for its matches.
     if tournament.organiser_id != current_user.id:
         abort(403)
 
@@ -50,6 +56,8 @@ def record(tournament_id: int, match_id: int):
             normalised = validate_payload(request.get_json(silent=True) or {}, match)
         except ValidationError as exc:
             return jsonify({"errors": exc.errors}), 400
+        # Always go through save_result — it owns the wipe-and-rebuild + standings
+        # recompute. Mutating match.status/winner_id directly would drift standings.
         save_result(match, normalised)
         return jsonify(
             {

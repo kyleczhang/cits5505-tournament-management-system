@@ -1,3 +1,5 @@
+"""Comment model — user-authored discussion attached to either a match or a tournament."""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
@@ -6,6 +8,8 @@ from ..extensions import db
 
 
 class Comment(db.Model):
+    """A comment on exactly one of (match, tournament); enforced by XOR check constraint."""
+
     __tablename__ = "comments"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -31,8 +35,10 @@ class Comment(db.Model):
     )
 
     def to_dict(self) -> dict:
+        """Serialise for the JSON comments API; ensures createdAt is UTC-aware ISO 8601."""
         created = self.created_at
         if created.tzinfo is None:
+            # Legacy rows stored naive UTC via datetime.utcnow; tag them so the JS client parses correctly.
             created = created.replace(tzinfo=UTC)
         author = self.user
         return {

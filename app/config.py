@@ -1,3 +1,9 @@
+"""Application configuration classes selected by the ``FLASK_ENV`` env var.
+
+Defines per-environment settings (development, testing, production) and reads
+secrets and integration keys from the local ``.env`` file at import time.
+"""
+
 import os
 from pathlib import Path
 
@@ -63,6 +69,7 @@ class ProdConfig(BaseConfig):
 
 
 def get_config() -> type[BaseConfig]:
+    """Pick a config class based on ``FLASK_ENV`` (defaults to development)."""
     env = os.environ.get("FLASK_ENV", "development").lower()
     if env == "production":
         return ProdConfig

@@ -14,12 +14,14 @@ from criktrack.extensions import db as _db
 
 
 def _free_port() -> int:
+    """Bind to port 0 to let the OS pick an unused TCP port, then return it."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(("127.0.0.1", 0))
         return s.getsockname()[1]
 
 
 def _wait_for(host: str, port: int, timeout: float = 5.0) -> None:
+    """Poll until `host:port` accepts a TCP connection or `timeout` elapses."""
     deadline = time.time() + timeout
     while time.time() < deadline:
         try:
@@ -38,6 +40,12 @@ class _FileTestConfig(TestConfig):
 
 @pytest.fixture(scope="session")
 def live_server(tmp_path_factory):
+    """Start the Flask app in a daemon thread against a file-backed SQLite DB.
+
+    File-backed (not in-memory) because the Werkzeug request thread and the
+    test thread are different threads and SQLite's in-memory DB can't be
+    shared across them.
+    """
     db_path = tmp_path_factory.mktemp("db") / "selenium.sqlite3"
 
     class _Cfg(TestConfig):
@@ -66,6 +74,7 @@ def live_server(tmp_path_factory):
 
 @pytest.fixture(scope="session")
 def browser():
+    """Headless Chrome webdriver. Skips the test if Chrome/chromedriver is missing."""
     selenium = pytest.importorskip("selenium")
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options

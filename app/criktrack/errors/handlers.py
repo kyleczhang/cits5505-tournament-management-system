@@ -1,3 +1,5 @@
+"""HTTP error handlers — content-negotiate between rendered templates and JSON."""
+
 from flask import jsonify, render_template
 
 from ..decorators import wants_json
@@ -5,6 +7,7 @@ from . import bp
 
 
 def _respond(code: int, key: str, template: str):
+    """Return JSON for API clients (per `wants_json()`), otherwise the HTML error page."""
     if wants_json():
         return jsonify({"error": key}), code
     return render_template(template), code

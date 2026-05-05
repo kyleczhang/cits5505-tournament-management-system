@@ -1,3 +1,5 @@
+"""WTForms definitions for authentication (register, login, logout)."""
+
 from __future__ import annotations
 
 import re
@@ -22,6 +24,7 @@ _PW_RULE = re.compile(r"^(?=.*[A-Za-z])(?=.*\d).{8,}$")
 
 
 def _strong_password(_form, field):
+    """WTForms validator: require >= 8 chars containing both letters and digits."""
     if not _PW_RULE.match(field.data or ""):
         raise ValidationError("Password must be ≥ 8 chars with letters and digits.")
 

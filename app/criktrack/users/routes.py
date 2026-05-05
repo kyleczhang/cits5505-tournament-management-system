@@ -1,3 +1,5 @@
+"""User-facing routes: role-aware dashboard, public profile, profile edit."""
+
 from __future__ import annotations
 
 from datetime import date
@@ -27,6 +29,11 @@ from .forms import ProfileEditForm
 @bp.route("/dashboard")
 @login_required
 def dashboard():
+    """Render the role-appropriate dashboard.
+
+    Organizers see their tournaments; passing ?as=fan lets them preview the
+    fan dashboard without changing role.
+    """
     is_organizer = current_user.role == Role.ORGANIZER
     fan_view = request.args.get("as") == "fan"
 
@@ -82,6 +89,7 @@ def _render_organizer_dashboard():
 
 
 def _build_needs_attention(organised, organised_ids):
+    """Surface up to 6 organizer action items: live matches, empty rosters, missing fixtures."""
     items: list[dict] = []
 
     live_matches = (
@@ -350,6 +358,7 @@ def _build_conversations():
 
 
 def _profile_completion(user: User) -> dict:
+    """Return progress-bar data based on which optional profile fields are filled."""
     fields = [
         ("Display name", bool(user.display_name)),
         ("Avatar", bool(user.avatar_url)),
@@ -395,6 +404,7 @@ def profile(user_id: int):
 @bp.route("/profile/edit", methods=["GET", "POST"])
 @login_required
 def profile_edit():
+    """Edit the current user's profile; rejects email changes that collide with another account."""
     form = ProfileEditForm(obj=current_user)
     if form.validate_on_submit():
         new_email = form.email.data.lower().strip()

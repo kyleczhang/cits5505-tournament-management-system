@@ -1,3 +1,5 @@
+"""WTForms definitions for tournament creation."""
+
 from __future__ import annotations
 
 from flask_wtf import FlaskForm

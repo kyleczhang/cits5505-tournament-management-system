@@ -1,3 +1,6 @@
+"""Player stats view: aggregates batting and bowling entries for a player
+within a single tournament and renders the player_stats template."""
+
 from __future__ import annotations
 
 from decimal import Decimal
@@ -23,6 +26,8 @@ from . import bp
 def stats(tournament_id: int, player_id: int):
     tournament = db.session.get(Tournament, tournament_id) or abort(404)
     player = db.session.get(Player, player_id) or abort(404)
+    # Guard against cross-tournament URL tampering: a player must belong to
+    # a team registered in the tournament being viewed.
     if player.team is None or player.team.tournament_id != tournament.id:
         abort(404)
 
@@ -58,6 +63,7 @@ def stats(tournament_id: int, player_id: int):
     total_overs = sum((Decimal(b.overs) for b in bowl_entries), Decimal(0))
     total_conceded = sum(b.runs for b in bowl_entries)
 
+    # Distinct matches the player batted OR bowled in (union of match ids).
     summary = {
         "matches": len(
             {b.innings.match_id for b in bat_entries}

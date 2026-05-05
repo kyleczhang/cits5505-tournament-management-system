@@ -25,6 +25,7 @@ from criktrack.models import Role, User  # noqa: E402
 
 @pytest.fixture
 def app():
+    """Fresh in-memory SQLite Flask app per test; live-feed cache reset for isolation."""
     app = create_app(TestConfig)
     with app.app_context():
         _db.create_all()
@@ -36,11 +37,13 @@ def app():
 
 @pytest.fixture
 def client(app):
+    """Flask test client bound to the per-test `app` fixture."""
     return app.test_client()
 
 
 @pytest.fixture
 def make_user(app):
+    """Factory fixture: persist a `User` with the given email/password/role."""
     def _make(
         email: str,
         password: str = "secret123",
@@ -58,6 +61,7 @@ def make_user(app):
 
 @pytest.fixture
 def login(client):
+    """Helper that POSTs to /login and asserts the session cookie was set."""
     def _login(email: str, password: str = "secret123") -> None:
         resp = client.post(
             "/login",

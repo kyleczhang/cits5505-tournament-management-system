@@ -1,3 +1,5 @@
+"""Match, Innings, and per-player batting/bowling entries — the scorecard schema."""
+
 from __future__ import annotations
 
 import enum
@@ -13,11 +15,15 @@ class MatchStatus(str, enum.Enum):
 
 
 class TossDecision(str, enum.Enum):
+    """Choice the toss winner makes: bat first or bowl first."""
+
     BAT = "bat"
     BOWL = "bowl"
 
 
 class Match(db.Model):
+    """A scheduled fixture between two teams; result/innings populated when played."""
+
     __tablename__ = "matches"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -64,6 +70,8 @@ class Match(db.Model):
 
 
 class Innings(db.Model):
+    """One side's batting innings within a match (typically inning_number 1 or 2)."""
+
     __tablename__ = "innings"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -89,6 +97,8 @@ class Innings(db.Model):
 
 
 class BattingEntry(db.Model):
+    """One batter's line in an innings scorecard."""
+
     __tablename__ = "batting_entries"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -108,10 +118,13 @@ class BattingEntry(db.Model):
 
     @property
     def strike_rate(self) -> float:
+        """Runs per 100 balls faced; 0.0 when no balls faced (avoids div-by-zero)."""
         return round((self.runs / self.balls) * 100, 1) if self.balls else 0.0
 
 
 class BowlingEntry(db.Model):
+    """One bowler's line in an innings scorecard."""
+
     __tablename__ = "bowling_entries"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -129,5 +142,6 @@ class BowlingEntry(db.Model):
 
     @property
     def economy(self) -> float:
+        """Runs conceded per over; 0.0 when no overs bowled."""
         overs = float(self.overs or 0)
         return round(self.runs / overs, 2) if overs else 0.0

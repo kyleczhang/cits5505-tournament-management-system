@@ -1,3 +1,5 @@
+"""Follow model — polymorphic many-to-many between users and tournaments/teams/players."""
+
 from __future__ import annotations
 
 import enum
@@ -13,6 +15,8 @@ class FollowTarget(str, enum.Enum):
 
 
 class Follow(db.Model):
+    """A user's follow of a single target; (target_type, target_id) is a soft polymorphic FK."""
+
     __tablename__ = "follows"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -29,8 +33,10 @@ class Follow(db.Model):
     user = db.relationship("User", back_populates="follows")
 
     __table_args__ = (
+        # Prevent duplicate follows of the same target by one user.
         db.UniqueConstraint(
             "user_id", "target_type", "target_id", name="uq_follow_user_target"
         ),
+        # Speeds up "who follows X?" lookups used by notification fan-out.
         db.Index("ix_follows_target", "target_type", "target_id"),
     )

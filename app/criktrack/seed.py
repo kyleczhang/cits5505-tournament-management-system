@@ -22,9 +22,11 @@ from .models import (
 from .seed_data import SEED_COMMENTS, SEED_TOURNAMENTS, SEED_USERS, SEED_VENUES
 
 _DEFAULT_ORGANISER_KEY = "cheng"
+# All seeded tournaments are owned by this organiser to keep the demo simple.
 
 
 def _team_short_code(name: str) -> str:
+    """Derive a 3-4 letter uppercase code from a team name (fallback ``TBD``)."""
     cleaned = "".join(c for c in name.upper() if c.isalpha())
     return (cleaned[:3] or "TBD")[:4]
 
@@ -83,6 +85,11 @@ def _ensure_player(
     team: Team,
     player_name: str,
 ) -> Player:
+    """Return a cached Player for ``team`` + ``player_name``, creating one if absent.
+
+    Used so batting/bowling rows can reference players that weren't pre-declared
+    in a roster — keeps the seed data forgiving without producing duplicates.
+    """
     team_players = players_by_team.setdefault(team.name, {})
     existing = team_players.get(player_name)
     if existing is not None:
@@ -260,6 +267,7 @@ def seed_cli(reset: bool):
     """Load demo fixtures into the database."""
     if reset:
         click.echo("Resetting tables...")
+        # Delete in reverse dependency order so FKs don't block child rows.
         for table in reversed(db.metadata.sorted_tables):
             db.session.execute(table.delete())
         db.session.commit()

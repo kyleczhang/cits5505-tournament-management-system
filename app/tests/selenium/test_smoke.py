@@ -27,6 +27,8 @@ def _unique_email() -> str:
 
 
 def _submit_form(browser, button_name: str = "submit") -> None:
+    # JS click instead of native click — sticky headers can intercept clicks
+    # on off-screen submit buttons in headless Chrome.
     btn = browser.find_element(By.NAME, button_name)
     browser.execute_script("arguments[0].scrollIntoView({block:'center'});", btn)
     browser.execute_script("arguments[0].click();", btn)

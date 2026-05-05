@@ -1,3 +1,9 @@
+"""JSON REST routes for match and tournament comments.
+
+POST handlers expect a JSON body and the ``X-CSRFToken`` header
+(emitted by ``base.html`` and read by ``static/js/comments.js``).
+"""
+
 from __future__ import annotations
 
 from flask import abort, jsonify, request
@@ -7,6 +13,7 @@ from ..extensions import db
 from ..models import Comment, Match, Tournament
 from . import bp
 
+# Hard cap on comment length; mirrored by the front-end textarea maxlength.
 _MAX_LEN = 500
 
 
@@ -15,6 +22,10 @@ def _serialize(rows):
 
 
 def _ensure_body() -> str:
+    """Validate the JSON payload and return the trimmed comment body.
+
+    Aborts 401 if anonymous, 400 if missing/empty or over ``_MAX_LEN``.
+    """
     if not current_user.is_authenticated:
         abort(401)
     payload = request.get_json(silent=True) or {}

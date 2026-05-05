@@ -16,6 +16,7 @@ _cache: dict[str, Any] = {"payload": None, "fetched_at": 0.0}
 
 
 def _ttl() -> int:
+    """Cache lifetime in seconds, read from app config (default 30)."""
     return int(current_app.config.get("LIVE_FEED_CACHE_SECONDS", 30))
 
 

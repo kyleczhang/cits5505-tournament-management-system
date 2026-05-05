@@ -1,3 +1,5 @@
+"""Live blueprint: thin proxy over the cricketdata.org live-matches feed."""
+
 from flask import Blueprint
 
 bp = Blueprint("live", __name__)

@@ -1,3 +1,5 @@
+"""Helpers for querying the current user's follows from templates/views."""
+
 from __future__ import annotations
 
 from flask_login import current_user
@@ -18,6 +20,7 @@ def followed_ids(target_type: FollowTarget) -> set[int]:
 
 
 def is_following(target_type: FollowTarget, target_id: int) -> bool:
+    """Return True if the current user follows the given target row."""
     if not current_user.is_authenticated:
         return False
     return (

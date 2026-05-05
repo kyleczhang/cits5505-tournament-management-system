@@ -1,3 +1,8 @@
+"""JSON endpoints for follow/unfollow and follow status.
+
+POST/DELETE handlers require the ``X-CSRFToken`` header from the front-end.
+"""
+
 from __future__ import annotations
 
 from flask import abort, jsonify, request
@@ -7,6 +12,8 @@ from ..extensions import db
 from ..models import Follow, FollowTarget, Player, Team, Tournament
 from . import bp
 
+# Maps the FollowTarget enum to its concrete model so we can validate that
+# the referenced row actually exists before persisting a Follow.
 _TARGET_MODELS = {
     FollowTarget.TOURNAMENT: Tournament,
     FollowTarget.TEAM: Team,
@@ -20,6 +27,10 @@ def _require_auth() -> None:
 
 
 def _parse_target() -> tuple[FollowTarget, int]:
+    """Extract and validate ``targetType``/``targetId`` from the JSON body.
+
+    Aborts 400 on bad input and 404 if the referenced row does not exist.
+    """
     payload = request.get_json(silent=True) or {}
     raw_type = (payload.get("targetType") or "").strip().lower()
     raw_id = payload.get("targetId")
@@ -40,6 +51,8 @@ def _parse_target() -> tuple[FollowTarget, int]:
 def create():
     _require_auth()
     target_type, target_id = _parse_target()
+    # Idempotent: a duplicate POST is a no-op rather than a 409 so the UI
+    # can safely retry on flaky networks.
     existing = Follow.query.filter_by(
         user_id=current_user.id, target_type=target_type, target_id=target_id
     ).first()

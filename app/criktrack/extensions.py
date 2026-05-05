@@ -1,3 +1,9 @@
+"""Shared Flask extension singletons.
+
+Created once here and bound to the app inside :func:`criktrack.create_app`
+so the project can use the app-factory pattern without circular imports.
+"""
+
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy

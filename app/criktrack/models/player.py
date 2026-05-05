@@ -1,3 +1,5 @@
+"""Player model — squad members belonging (optionally) to a team."""
+
 from __future__ import annotations
 
 import enum
@@ -13,6 +15,8 @@ class PlayerRole(str, enum.Enum):
 
 
 class Player(db.Model):
+    """A cricketer; team_id is nullable to allow free-agent players."""
+
     __tablename__ = "players"
 
     id = db.Column(db.Integer, primary_key=True)

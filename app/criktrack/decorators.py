@@ -1,3 +1,5 @@
+"""View decorators and request helpers shared across blueprints."""
+
 from __future__ import annotations
 
 from functools import wraps

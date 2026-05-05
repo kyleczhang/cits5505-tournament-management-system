@@ -1,3 +1,5 @@
+"""Development entry point — instantiates the Flask app via the factory."""
+
 from criktrack import create_app
 
 app = create_app()

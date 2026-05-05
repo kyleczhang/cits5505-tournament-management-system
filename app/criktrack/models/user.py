@@ -1,3 +1,5 @@
+"""User and Role models — authentication identity and authorisation tier."""
+
 from __future__ import annotations
 
 import enum
@@ -10,6 +12,8 @@ from ..extensions import db
 
 
 class Role(str, enum.Enum):
+    """Authorisation role; ORGANIZER can create/edit tournaments and matches."""
+
     ORGANIZER = "organizer"
     USER = "user"
 
@@ -18,6 +22,8 @@ class Role(str, enum.Enum):
 
 
 class User(db.Model, UserMixin):
+    """Application user; integrates with Flask-Login via UserMixin."""
+
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -44,16 +50,19 @@ class User(db.Model, UserMixin):
 
     # ---- password helpers -------------------------------------------------
     def set_password(self, password: str) -> None:
+        """Hash and store the password using PBKDF2-SHA256 (600k iterations)."""
         self.password_hash = generate_password_hash(
             password, method="pbkdf2:sha256:600000", salt_length=16
         )
 
     def check_password(self, password: str) -> bool:
+        """Return True if the plaintext password matches the stored hash."""
         return check_password_hash(self.password_hash, password)
 
     # ---- presentation helpers --------------------------------------------
     @property
     def initials(self) -> str:
+        """Two-letter initials derived from display_name for avatar fallbacks."""
         parts = [p for p in (self.display_name or "").strip().split() if p]
         if not parts:
             return "??"
@@ -62,6 +71,7 @@ class User(db.Model, UserMixin):
         return (parts[0][0] + parts[-1][0]).upper()
 
     def to_dict(self) -> dict:
+        """Serialise the user for JSON responses (camelCase keys for the JS client)."""
         return {
             "id": self.id,
             "displayName": self.display_name,

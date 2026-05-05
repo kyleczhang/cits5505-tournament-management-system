@@ -21,6 +21,12 @@ from ..models import (
 
 
 class ValidationError(Exception):
+    """Raised by ``validate_payload`` carrying a {field_path: message} mapping.
+
+    Field paths use dotted notation (e.g. ``innings.0.batting.2.runs``) so the
+    frontend can attach error messages to the relevant input.
+    """
+
     def __init__(self, errors: dict[str, str]):
         super().__init__("Validation failed")
         self.errors = errors
@@ -67,7 +73,13 @@ def _player_for(name: str, team_id: int) -> Player:
 
 
 def validate_payload(payload: dict, match: Match) -> dict:
-    """Return a normalised payload or raise ValidationError."""
+    """Return a normalised payload or raise ValidationError.
+
+    Validates that toss winner / match winner / batting team are one of the two
+    teams that actually played this match, coerces numeric fields, and skips
+    blank batting/bowling rows so the form can ship with empty placeholders.
+    The returned dict is the contract consumed by ``save_result``.
+    """
     errors: dict[str, str] = {}
     if not isinstance(payload, dict):
         raise ValidationError({"_": "Invalid payload."})
@@ -180,11 +192,24 @@ def validate_payload(payload: dict, match: Match) -> dict:
 
 
 def save_result(match: Match, normalised: dict) -> Match:
-    """Replace the match's innings/entries with the validated payload."""
+    """Replace the match's innings/entries with the validated payload.
+
+    This is the ONLY supported way to persist a match result. It:
+
+    1. Updates toss/winner/result-text fields on the match.
+    2. Wipes existing innings (cascade clears batting/bowling entries) and
+       re-inserts fresh rows from the payload.
+    3. Calls ``_recompute_standings`` to rebuild every team's
+       played/won/lost/points/nrr from scratch.
+
+    Routes must NEVER mutate ``Match.status`` or ``Match.winner_id`` directly:
+    bypassing this function will leave tournament standings drifting out of sync.
+    """
     match.toss_winner_id = normalised["toss_winner_id"]
     match.toss_decision = normalised["toss_decision"]
     match.winner_id = normalised["winner_id"]
     match.result_text = normalised["result_text"]
+    # No winner yet => match is still in progress; once a winner is set it's complete.
     match.status = MatchStatus.COMPLETED if match.winner_id else MatchStatus.LIVE
 
     # Wipe existing innings (cascade clears batting/bowling entries).
@@ -239,10 +264,18 @@ def save_result(match: Match, normalised: dict) -> Match:
 
 
 def _recompute_standings(match: Match) -> None:
-    """Recalculate played/won/lost/points/nrr for both teams in this match's tournament."""
+    """Recalculate played/won/lost/points/nrr for every team in the tournament.
+
+    Rebuilds standings from scratch by iterating all completed matches rather
+    than incrementally adjusting — this is the safe default when results can be
+    edited or re-recorded, since it avoids accumulated drift from re-saves.
+    Points scheme: 2 per win, 0 per loss. NRR = (runs_for/overs_for) -
+    (runs_against/overs_against), rounded to two decimals.
+    """
     tournament_id = match.tournament_id
     teams = Team.query.filter_by(tournament_id=tournament_id).all()
     team_by_id = {t.id: t for t in teams}
+    # Zero out every team first so deletions/edits can't leave stale totals behind.
     for t in teams:
         t.played = t.won = t.lost = t.points = 0
         t.nrr = 0

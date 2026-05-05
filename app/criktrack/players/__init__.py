@@ -1,3 +1,5 @@
+"""Players blueprint: per-tournament player stats pages."""
+
 from flask import Blueprint
 
 bp = Blueprint("players", __name__)

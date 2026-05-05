@@ -1,3 +1,5 @@
+"""Tournament and Team models — the top-level competition entity and its participants."""
+
 from __future__ import annotations
 
 import enum
@@ -20,10 +22,13 @@ class TournamentStatus(str, enum.Enum):
 
 
 def _generate_share_slug() -> str:
+    """Random URL-safe slug for the public anonymous share view."""
     return secrets.token_urlsafe(9)  # ~12 chars, URL-safe
 
 
 class Tournament(db.Model):
+    """A cricket tournament organised by one user, containing teams and matches."""
+
     __tablename__ = "tournaments"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -46,6 +51,7 @@ class Tournament(db.Model):
         db.Integer, db.ForeignKey("users.id"), nullable=False, index=True
     )
     venue_id = db.Column(db.Integer, db.ForeignKey("venues.id"), nullable=True)
+    # Used by the public /tournaments/p/<slug> view; unguessable so it acts as a capability token.
     share_slug = db.Column(
         db.String(32),
         unique=True,
@@ -68,6 +74,7 @@ class Tournament(db.Model):
     )
 
     def to_summary_dict(self) -> dict:
+        """Compact JSON view used in tournament listings and the share page."""
         return {
             "id": self.id,
             "name": self.name,
@@ -81,6 +88,8 @@ class Tournament(db.Model):
 
 
 class Team(db.Model):
+    """A team competing in a single tournament; standings columns are derived state."""
+
     __tablename__ = "teams"
 
     id = db.Column(db.Integer, primary_key=True)

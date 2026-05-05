@@ -1,3 +1,5 @@
+"""Comments blueprint: JSON REST endpoints for match and tournament comments."""
+
 from flask import Blueprint
 
 bp = Blueprint("comments", __name__)

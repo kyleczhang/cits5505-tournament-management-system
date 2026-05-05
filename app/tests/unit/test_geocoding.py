@@ -10,6 +10,7 @@ from criktrack.integrations import geocoding
 
 
 def _fake(payload):
+    """Build a minimal `requests.Response`-like mock returning `payload` from .json()."""
     resp = Mock(status_code=200)
     resp.json.return_value = payload
     resp.raise_for_status = lambda: None

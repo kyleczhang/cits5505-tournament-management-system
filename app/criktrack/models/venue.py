@@ -1,9 +1,13 @@
+"""Venue model — physical match locations with optional geocoded coordinates."""
+
 from __future__ import annotations
 
 from ..extensions import db
 
 
 class Venue(db.Model):
+    """A ground or stadium; lat/lng are populated by integrations.geocoding when available."""
+
     __tablename__ = "venues"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -17,6 +21,7 @@ class Venue(db.Model):
         return self.lat is not None and self.lng is not None
 
     def to_dict(self) -> dict:
+        """Serialise for client-side map rendering (see static/js/maps.js)."""
         return {
             "id": self.id,
             "name": self.name,

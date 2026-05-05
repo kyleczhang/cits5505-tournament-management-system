@@ -21,6 +21,7 @@ from criktrack.models import (
 
 
 def _seed(make_user):
+    """Seed an organiser, a live tournament, two teams, two players (one teamless), and a live match."""
     organiser = make_user(
         "org@example.com", role=Role.ORGANIZER, display_name="Org User"
     )
