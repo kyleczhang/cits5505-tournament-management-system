@@ -82,11 +82,30 @@ def validate_payload(payload: dict, match: Match) -> dict:
     toss = payload.get("toss") or {}
     toss_winner = toss.get("winner_team_id")
     toss_decision = toss.get("decision")
+    expected_first_bat: int | None = None
     if toss_winner not in (None, ""):
-        if int(toss_winner) not in team_ids:
+        try:
+            toss_winner_int = int(toss_winner)
+        except (TypeError, ValueError):
             errors["toss.winner_team_id"] = "Toss winner must be one of the two teams."
+            toss_winner_int = None
+        else:
+            if toss_winner_int not in team_ids:
+                errors["toss.winner_team_id"] = (
+                    "Toss winner must be one of the two teams."
+                )
+                toss_winner_int = None
         if toss_decision not in ("bat", "bowl"):
             errors["toss.decision"] = "Decision must be 'bat' or 'bowl'."
+        elif toss_winner_int is not None:
+            other_team = (
+                match.team_b_id
+                if toss_winner_int == match.team_a_id
+                else match.team_a_id
+            )
+            expected_first_bat = (
+                toss_winner_int if toss_decision == "bat" else other_team
+            )
 
     result = payload.get("result") or {}
     winner_id = result.get("winner_team_id")
@@ -114,6 +133,15 @@ def validate_payload(payload: dict, match: Match) -> dict:
         if bat_team_id not in team_ids:
             errors[f"{prefix}.batting_team_id"] = (
                 "Batting team must be one of the two teams."
+            )
+            continue
+        if (
+            idx == 0
+            and expected_first_bat is not None
+            and bat_team_id != expected_first_bat
+        ):
+            errors[f"{prefix}.batting_team_id"] = (
+                "First innings batting team must match the toss outcome."
             )
             continue
         bowl_team_id = (

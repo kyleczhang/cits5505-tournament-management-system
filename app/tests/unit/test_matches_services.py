@@ -202,6 +202,35 @@ def test_save_result_without_winner_keeps_tournament_live(app):
     assert tournament.status == TournamentStatus.LIVE
 
 
+def test_validate_rejects_innings_inconsistent_with_toss(app):
+    _, _, team_a, team_b, _, _, match = _scaffold(app)
+    # Toss winner = A, decision = bowl, so B should bat first. Sending A first
+    # should be rejected.
+    payload = {
+        "toss": {"winner_team_id": team_a.id, "decision": "bowl"},
+        "innings": [
+            {"batting_team_id": team_a.id, "runs": 100, "wickets": 5, "overs": "20.0"},
+            {"batting_team_id": team_b.id, "runs": 90, "wickets": 8, "overs": "20.0"},
+        ],
+    }
+    with pytest.raises(ValidationError) as exc:
+        validate_payload(payload, match)
+    assert "innings.0.batting_team_id" in exc.value.errors
+
+
+def test_validate_accepts_innings_consistent_with_toss(app):
+    _, _, team_a, team_b, _, _, match = _scaffold(app)
+    payload = {
+        "toss": {"winner_team_id": team_a.id, "decision": "bowl"},
+        "innings": [
+            {"batting_team_id": team_b.id, "runs": 90, "wickets": 8, "overs": "20.0"},
+            {"batting_team_id": team_a.id, "runs": 100, "wickets": 5, "overs": "20.0"},
+        ],
+    }
+    normalised = validate_payload(payload, match)
+    assert normalised["innings"][0]["batting_team_id"] == team_b.id
+
+
 def test_validate_rejects_player_from_wrong_team(app):
     _, _, team_a, team_b, _, bowler, match = _scaffold(app)
     payload = {
