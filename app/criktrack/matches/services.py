@@ -15,7 +15,9 @@ from ..models import (
     Match,
     MatchStatus,
     Player,
-    Team,
+    Tournament,
+    TournamentTeam,
+    TournamentStatus,
     TossDecision,
 )
 
@@ -58,20 +60,6 @@ def _to_decimal(value: Any, key: str, errors: dict[str, str]) -> Decimal | None:
     return val
 
 
-def _player_for(name: str, team_id: int) -> Player:
-    """Return the existing player by (name, team) or create one."""
-    cleaned = (name or "").strip()
-    if not cleaned:
-        raise ValueError("Player name required.")
-    existing = Player.query.filter_by(team_id=team_id, name=cleaned).first()
-    if existing:
-        return existing
-    player = Player(team_id=team_id, name=cleaned)
-    db.session.add(player)
-    db.session.flush()
-    return player
-
-
 def validate_payload(payload: dict, match: Match) -> dict:
     """Return a normalised payload or raise ValidationError.
 
@@ -85,6 +73,11 @@ def validate_payload(payload: dict, match: Match) -> dict:
         raise ValidationError({"_": "Invalid payload."})
 
     team_ids = {match.team_a_id, match.team_b_id}
+    roster_rows = Player.query.filter(Player.team_id.in_(team_ids)).all()
+    roster_ids = {
+        team_id: {player.id for player in roster_rows if player.team_id == team_id}
+        for team_id in team_ids
+    }
 
     toss = payload.get("toss") or {}
     toss_winner = toss.get("winner_team_id")
@@ -136,11 +129,17 @@ def validate_payload(payload: dict, match: Match) -> dict:
         cleaned_batting = []
         for bidx, b in enumerate(inn.get("batting", []) or []):
             bp = f"{prefix}.batting.{bidx}"
-            name = (b.get("player_name") or "").strip()
-            if not name:
+            player_id = b.get("player_id")
+            if player_id in (None, ""):
+                continue
+            player_id = _to_int(player_id, f"{bp}.player_id", errors, min_value=1)
+            if player_id is None:
+                continue
+            if player_id not in roster_ids.get(bat_team_id, set()):
+                errors[f"{bp}.player_id"] = "Player must belong to the batting team."
                 continue
             entry = {
-                "player_name": name,
+                "player_id": player_id,
                 "runs": _to_int(b.get("runs", 0), f"{bp}.runs", errors),
                 "balls": _to_int(b.get("balls", 0), f"{bp}.balls", errors),
                 "fours": _to_int(b.get("fours", 0), f"{bp}.fours", errors) or 0,
@@ -153,11 +152,17 @@ def validate_payload(payload: dict, match: Match) -> dict:
         cleaned_bowling = []
         for bidx, b in enumerate(inn.get("bowling", []) or []):
             bp = f"{prefix}.bowling.{bidx}"
-            name = (b.get("player_name") or "").strip()
-            if not name:
+            player_id = b.get("player_id")
+            if player_id in (None, ""):
+                continue
+            player_id = _to_int(player_id, f"{bp}.player_id", errors, min_value=1)
+            if player_id is None:
+                continue
+            if player_id not in roster_ids.get(bowl_team_id, set()):
+                errors[f"{bp}.player_id"] = "Player must belong to the bowling team."
                 continue
             entry = {
-                "player_name": name,
+                "player_id": player_id,
                 "overs": _to_decimal(b.get("overs", 0), f"{bp}.overs", errors),
                 "maidens": _to_int(b.get("maidens", 0), f"{bp}.maidens", errors) or 0,
                 "runs": _to_int(b.get("runs", 0), f"{bp}.runs", errors),
@@ -231,7 +236,7 @@ def save_result(match: Match, normalised: dict) -> Match:
         db.session.flush()
 
         for b in payload["batting"]:
-            player = _player_for(b["player_name"], payload["batting_team_id"])
+            player = db.session.get(Player, b["player_id"])
             db.session.add(
                 BattingEntry(
                     innings_id=inn.id,
@@ -246,7 +251,7 @@ def save_result(match: Match, normalised: dict) -> Match:
             )
 
         for b in payload["bowling"]:
-            player = _player_for(b["player_name"], payload["bowling_team_id"])
+            player = db.session.get(Player, b["player_id"])
             db.session.add(
                 BowlingEntry(
                     innings_id=inn.id,
@@ -258,9 +263,44 @@ def save_result(match: Match, normalised: dict) -> Match:
                 )
             )
 
-    db.session.commit()
+    db.session.flush()
+    _refresh_tournament_status(match.tournament_id)
     _recompute_standings(match)
+    db.session.commit()
     return match
+
+
+def start_match(match: Match) -> Match:
+    """Mark an upcoming fixture as live and refresh the parent tournament status."""
+    if match.status == MatchStatus.UPCOMING:
+        match.status = MatchStatus.LIVE
+        _refresh_tournament_status(match.tournament_id)
+        db.session.commit()
+    return match
+
+
+def _refresh_tournament_status(tournament_id: int) -> None:
+    """Derive tournament status from its scheduled matches."""
+    tournament = db.session.get(Tournament, tournament_id)
+    if tournament is None:
+        return
+
+    statuses = [
+        status
+        for (status,) in db.session.query(Match.status)
+        .filter_by(tournament_id=tournament_id)
+        .all()
+    ]
+    if not statuses:
+        tournament.status = TournamentStatus.UPCOMING
+        return
+    if all(status == MatchStatus.COMPLETED for status in statuses):
+        tournament.status = TournamentStatus.COMPLETED
+        return
+    if any(status in (MatchStatus.LIVE, MatchStatus.COMPLETED) for status in statuses):
+        tournament.status = TournamentStatus.LIVE
+        return
+    tournament.status = TournamentStatus.UPCOMING
 
 
 def _recompute_standings(match: Match) -> None:
@@ -273,12 +313,16 @@ def _recompute_standings(match: Match) -> None:
     (runs_against/overs_against), rounded to two decimals.
     """
     tournament_id = match.tournament_id
-    teams = Team.query.filter_by(tournament_id=tournament_id).all()
-    team_by_id = {t.id: t for t in teams}
+    rows = TournamentTeam.query.filter_by(tournament_id=tournament_id).all()
     # Zero out every team first so deletions/edits can't leave stale totals behind.
-    for t in teams:
+    for t in rows:
         t.played = t.won = t.lost = t.points = 0
         t.nrr = 0
+    db.session.flush()
+    db.session.expire_all()
+
+    rows = TournamentTeam.query.filter_by(tournament_id=tournament_id).all()
+    team_by_id = {row.team_id: row for row in rows}
 
     completed = (
         Match.query.options(joinedload(Match.innings))
@@ -286,10 +330,10 @@ def _recompute_standings(match: Match) -> None:
         .all()
     )
 
-    runs_for: dict[int, Decimal] = {t.id: Decimal(0) for t in teams}
-    runs_against: dict[int, Decimal] = {t.id: Decimal(0) for t in teams}
-    overs_for: dict[int, Decimal] = {t.id: Decimal(0) for t in teams}
-    overs_against: dict[int, Decimal] = {t.id: Decimal(0) for t in teams}
+    runs_for: dict[int, Decimal] = {t.team_id: Decimal(0) for t in rows}
+    runs_against: dict[int, Decimal] = {t.team_id: Decimal(0) for t in rows}
+    overs_for: dict[int, Decimal] = {t.team_id: Decimal(0) for t in rows}
+    overs_against: dict[int, Decimal] = {t.team_id: Decimal(0) for t in rows}
 
     for m in completed:
         if m.team_a_id not in team_by_id or m.team_b_id not in team_by_id:
@@ -311,11 +355,9 @@ def _recompute_standings(match: Match) -> None:
                 runs_against[inn.bowling_team_id] += Decimal(inn.runs)
                 overs_against[inn.bowling_team_id] += Decimal(inn.overs)
 
-    for t in teams:
-        rf, of = runs_for[t.id], overs_for[t.id]
-        ra, oa = runs_against[t.id], overs_against[t.id]
+    for t in rows:
+        rf, of = runs_for[t.team_id], overs_for[t.team_id]
+        ra, oa = runs_against[t.team_id], overs_against[t.team_id]
         rf_rate = (rf / of) if of else Decimal(0)
         ra_rate = (ra / oa) if oa else Decimal(0)
         t.nrr = round(float(rf_rate - ra_rate), 2)
-
-    db.session.commit()

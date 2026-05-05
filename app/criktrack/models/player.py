@@ -1,4 +1,4 @@
-"""Player model — squad members belonging (optionally) to a team."""
+"""Player model — squad members belonging to a reusable team."""
 
 from __future__ import annotations
 
@@ -15,12 +15,12 @@ class PlayerRole(str, enum.Enum):
 
 
 class Player(db.Model):
-    """A cricketer; team_id is nullable to allow free-agent players."""
+    """A cricketer attached to exactly one team roster."""
 
     __tablename__ = "players"
 
     id = db.Column(db.Integer, primary_key=True)
-    team_id = db.Column(db.Integer, db.ForeignKey("teams.id"), nullable=True)
+    team_id = db.Column(db.Integer, db.ForeignKey("teams.id"), nullable=False)
     name = db.Column(db.String(80), nullable=False)
     role = db.Column(
         db.Enum(PlayerRole, values_callable=lambda x: [m.value for m in x]),

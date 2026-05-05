@@ -14,6 +14,7 @@ from criktrack.models import (
     PlayerRole,
     Role,
     Team,
+    TournamentTeam,
     Tournament,
     TournamentFormat,
     TournamentStatus,
@@ -21,7 +22,7 @@ from criktrack.models import (
 
 
 def _seed(make_user):
-    """Seed an organiser, a live tournament, two teams, two players (one teamless), and a live match."""
+    """Seed an organiser, a live tournament, two teams, rostered players, and a live match."""
     organiser = make_user(
         "org@example.com", role=Role.ORGANIZER, display_name="Org User"
     )
@@ -35,12 +36,18 @@ def _seed(make_user):
     )
     db.session.add(tournament)
     db.session.flush()
-    team_a = Team(tournament_id=tournament.id, name="Alpha", short_code="ALP")
-    team_b = Team(tournament_id=tournament.id, name="Bravo", short_code="BRV")
+    team_a = Team(organiser_id=organiser.id, name="Alpha", short_code="ALP")
+    team_b = Team(organiser_id=organiser.id, name="Bravo", short_code="BRV")
     db.session.add_all([team_a, team_b])
     db.session.flush()
+    db.session.add_all(
+        [
+            TournamentTeam(tournament_id=tournament.id, team_id=team_a.id),
+            TournamentTeam(tournament_id=tournament.id, team_id=team_b.id),
+        ]
+    )
     player = Player(team_id=team_a.id, name="Aarav", role=PlayerRole.BATTER)
-    teamless = Player(team_id=None, name="Free Agent", role=PlayerRole.BATTER)
+    second_player = Player(team_id=team_b.id, name="Ben", role=PlayerRole.BOWLER)
     match = Match(
         tournament_id=tournament.id,
         team_a_id=team_a.id,
@@ -48,9 +55,9 @@ def _seed(make_user):
         scheduled_at=datetime(2026, 5, 2, 14, 0),
         status=MatchStatus.LIVE,
     )
-    db.session.add_all([player, teamless, match])
+    db.session.add_all([player, second_player, match])
     db.session.commit()
-    return organiser, tournament, team_a, player, teamless, match
+    return organiser, tournament, team_a, player, second_player, match
 
 
 def test_organizer_dashboard_renders_workspace(client, app, make_user, login):
@@ -124,15 +131,30 @@ def test_following_widgets_render_when_user_follows_targets(
     assert player.name in body
 
 
-def test_dashboard_skips_teamless_followed_player(client, app, make_user, login):
-    """Player with NULL team_id must not crash the followed-players widget."""
-    _, _, _, _, teamless, _ = _seed(make_user)
+def test_dashboard_skips_followed_player_without_tournament_entry(
+    client, app, make_user, login
+):
+    """A followed player whose team is not registered anywhere should be ignored."""
+    _seed(make_user)
     fan = make_user("fan@example.com")
+    owner = make_user(
+        "other-org@example.com", role=Role.ORGANIZER, display_name="Other Org"
+    )
+    detached_team = Team(organiser_id=owner.id, name="Detached", short_code="DET")
+    db.session.add(detached_team)
+    db.session.flush()
+    detached_player = Player(
+        team_id=detached_team.id,
+        name="Detached Player",
+        role=PlayerRole.BATTER,
+    )
+    db.session.add(detached_player)
+    db.session.flush()
     db.session.add(
         Follow(
             user_id=fan.id,
             target_type=FollowTarget.PLAYER,
-            target_id=teamless.id,
+            target_id=detached_player.id,
         )
     )
     db.session.commit()
@@ -141,5 +163,6 @@ def test_dashboard_skips_teamless_followed_player(client, app, make_user, login)
     resp = client.get("/dashboard")
     assert resp.status_code == 200
     # Widget header only renders when at least one followable row survives;
-    # the teamless player is filtered out, so the section should not appear.
+    # the detached player's team has no tournament registration, so the section
+    # should not appear.
     assert "Players you follow" not in resp.data.decode()

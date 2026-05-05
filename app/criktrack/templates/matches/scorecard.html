@@ -33,7 +33,14 @@
             {% endif %}
           </div>
           {% if is_organiser %}
-            <a class="btn btn-ctm-accent" href="{{ url_for('matches.record', tournament_id=tournament.id, match_id=match.id) }}">Edit result</a>
+            {% if match.status.value == 'upcoming' %}
+              <form method="post" action="{{ url_for('matches.start', tournament_id=tournament.id, match_id=match.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-ctm-accent">Start live scoring</button>
+              </form>
+            {% else %}
+              <a class="btn btn-ctm-accent" href="{{ url_for('matches.record', tournament_id=tournament.id, match_id=match.id) }}">Edit result</a>
+            {% endif %}
           {% endif %}
         </div>
         <div class="row align-items-center g-3">

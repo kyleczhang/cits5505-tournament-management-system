@@ -421,12 +421,6 @@ textarea:focus-visible {
 .ctm-hero .avatar-stack .avatar:last-child {
   margin-right: 0;
 }
-.avatar-teal {
-  background: linear-gradient(135deg, #0f766e, #14b8a6);
-}
-.avatar-violet {
-  background: linear-gradient(135deg, #7c3aed, #a78bfa);
-}
 .team-logo-blue {
   background: linear-gradient(135deg, #1e40af, #3b82f6);
 }
@@ -610,6 +604,12 @@ textarea:focus-visible {
   height: 96px;
   font-size: 2rem;
 }
+.avatar.avatar-teal {
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+}
+.avatar.avatar-violet {
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+}
 .avatar.xl {
   width: 128px;
   height: 128px;
@@ -658,6 +658,20 @@ textarea:focus-visible {
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(8px) saturate(1.1);
+  -webkit-backdrop-filter: blur(8px) saturate(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+}
+.tournament-card .card-cover .status-pill.badge-upcoming {
+  color: #1d4ed8;
+}
+.tournament-card .card-cover .status-pill.badge-live {
+  color: #b91c1c;
+}
+.tournament-card .card-cover .status-pill.badge-completed {
+  color: #334155;
 }
 .tournament-card .card-cover h3 {
   color: #fff;
@@ -1218,4 +1232,116 @@ body[data-ctm-role='user'] [data-role-gate='organizer'] {
     bottom: 8px;
     font-size: 0.8rem;
   }
+}
+
+/* Team picker (tournament create) */
+.ctm-team-picker {
+  border: 1px solid var(--ctm-border);
+  border-radius: var(--ctm-radius);
+  background: var(--ctm-card);
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.ctm-team-picker.is-invalid {
+  border-color: var(--ctm-danger);
+}
+.ctm-team-picker__search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.ctm-team-picker__search svg {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--ctm-subtle);
+  pointer-events: none;
+}
+.ctm-team-picker__search .form-control {
+  padding-left: 2.25rem;
+}
+.ctm-team-picker__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--ctm-muted);
+}
+.ctm-team-picker__list {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid var(--ctm-border);
+  border-radius: var(--ctm-radius-sm);
+  background: var(--ctm-bg);
+}
+.ctm-team-picker__item {
+  border-radius: var(--ctm-radius-sm);
+}
+.ctm-team-picker__item:hover {
+  background: var(--ctm-bg-alt);
+}
+.ctm-team-picker__item label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.6rem;
+  margin: 0;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: var(--ctm-text);
+  width: 100%;
+}
+.ctm-team-picker__item input[type="checkbox"] {
+  accent-color: var(--ctm-primary);
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+.ctm-team-picker__empty,
+.ctm-team-picker__no-results {
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+}
+.ctm-team-picker__selected {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  min-height: 0;
+}
+.ctm-team-picker__selected:empty::before {
+  content: "No teams selected yet.";
+  color: var(--ctm-subtle);
+  font-size: 0.85rem;
+}
+.ctm-team-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.35rem 0.25rem 0.65rem;
+  background: rgba(15, 118, 110, 0.1);
+  color: var(--ctm-primary-dark);
+  border: 1px solid rgba(15, 118, 110, 0.25);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.ctm-team-chip button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 0;
+  background: transparent;
+  color: var(--ctm-primary-dark);
+  cursor: pointer;
+  padding: 0;
+}
+.ctm-team-chip button:hover {
+  background: rgba(15, 118, 110, 0.2);
 }

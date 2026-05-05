@@ -12,6 +12,7 @@ from criktrack.models import (
     PlayerRole,
     Role,
     Team,
+    TournamentTeam,
     Tournament,
     TournamentFormat,
     TournamentStatus,
@@ -37,9 +38,10 @@ def _scaffold():
     db.session.add(tournament)
     db.session.flush()
 
-    team = Team(tournament_id=tournament.id, name="A", short_code="AAA")
+    team = Team(organiser_id=organiser.id, name="A", short_code="AAA")
     db.session.add(team)
     db.session.flush()
+    db.session.add(TournamentTeam(tournament_id=tournament.id, team_id=team.id))
 
     player = Player(team_id=team.id, name="Aarav", role=PlayerRole.BATTER)
     db.session.add(player)

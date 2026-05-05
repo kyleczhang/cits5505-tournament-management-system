@@ -70,6 +70,55 @@
 
 <section class="section">
   <div class="container">
+    <div class="ctm-card mb-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+        <div>
+          <h2 class="h5 mb-1" style="font-family:var(--ctm-font-body); font-weight:700;">Participating teams</h2>
+          <p class="small muted m-0">Reusable teams registered to this tournament.</p>
+        </div>
+        {% if is_organiser and available_teams %}
+          <form method="post" action="{{ url_for('tournaments.add_team', tournament_id=tournament.id) }}" class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <select name="team_id" class="form-select form-select-sm" style="min-width:220px;">
+              <option value="">Select a team…</option>
+              {% for team in available_teams %}
+                <option value="{{ team.id }}">{{ team.name }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-ctm-primary btn-sm text-nowrap">Add team</button>
+          </form>
+        {% endif %}
+      </div>
+      <div class="row g-2">
+        {% for entry in teams %}
+          <div class="col-md-6 col-lg-4">
+            <div class="d-flex justify-content-between align-items-center border rounded-3 px-3 py-2 h-100">
+              <div class="d-flex align-items-center gap-2">
+                <span class="team-logo">{{ entry.team.short_code }}</span>
+                <div>
+                  <strong style="color:var(--ctm-text);">{{ entry.team.name }}</strong>
+                  <div class="small muted">{{ entry.team.players | length }} players in roster</div>
+                </div>
+              </div>
+              {% if is_organiser %}
+                <form method="post" action="{{ url_for('tournaments.remove_team', tournament_id=tournament.id, team_id=entry.team.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-ctm-ghost btn-sm">Remove</button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        {% else %}
+          <div class="col-12">
+            <div class="text-center muted small py-3">No participating teams yet.</div>
+          </div>
+        {% endfor %}
+      </div>
+      {% if is_organiser and not available_teams %}
+        <div class="small muted mt-3">All of your saved teams are already registered to this tournament.</div>
+      {% endif %}
+    </div>
+
     <ul class="nav nav-pills nav-pills-ctm gap-2 mb-4" role="tablist">
       <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#fixtures"
           type="button" role="tab">Fixtures</button></li>
@@ -79,6 +128,11 @@
 
     <div class="tab-content">
       <div class="tab-pane fade show active" id="fixtures" role="tabpanel">
+        {% if is_organiser %}
+          <div class="d-flex justify-content-end mb-3">
+            <a href="{{ url_for('matches.create', tournament_id=tournament.id) }}" class="btn btn-ctm-primary btn-sm">Schedule match</a>
+          </div>
+        {% endif %}
         <div class="d-flex flex-column gap-3">
           {% for row in matches %}
           {% set m = row.match %}
@@ -99,6 +153,12 @@
                 class="small link-primary d-block mt-1">Scorecard →</a>
               {% endif %}
               {% if is_organiser %}
+              {% if m.status.value == 'upcoming' %}
+              <form method="post" action="{{ url_for('matches.start', tournament_id=tournament.id, match_id=m.id) }}" class="mt-1">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-link link-primary small p-0 text-decoration-none">Start live scoring</button>
+              </form>
+              {% endif %}
               <a href="{{ url_for('matches.record', tournament_id=tournament.id, match_id=m.id) }}"
                 class="small link-primary d-block">Enter result</a>
               {% endif %}
@@ -113,7 +173,14 @@
             </div>
           </article>
           {% else %}
-          <div class="ctm-card text-center muted">No fixtures recorded yet.</div>
+          <div class="ctm-card text-center muted">
+            No fixtures recorded yet.
+            {% if is_organiser %}
+              <div class="mt-3">
+                <a href="{{ url_for('matches.create', tournament_id=tournament.id) }}" class="btn btn-ctm-primary btn-sm">Create the first match</a>
+              </div>
+            {% endif %}
+          </div>
           {% endfor %}
         </div>
       </div>
@@ -136,7 +203,7 @@
               {% for team in teams %}
               <tr>
                 <td class="rank{% if loop.index == 1 %} rank-1{% endif %}">{{ loop.index }}</td>
-                <td class="team-chip"><span class="team-logo">{{ team.short_code }}</span>{{ team.name }}</td>
+                <td class="team-chip"><span class="team-logo">{{ team.team.short_code }}</span>{{ team.team.name }}</td>
                 <td>{{ team.played }}</td>
                 <td>{{ team.won }}</td>
                 <td>{{ team.lost }}</td>
@@ -144,7 +211,7 @@
                 <td>{{ '%+.2f' | format(team.nrr | float) }}</td>
                 {% if current_user.is_authenticated %}
                 <td>
-                  {% with target_type='team', target_id=team.id, following=(team.id in followed_team_ids), compact=True,
+                  {% with target_type='team', target_id=team.team.id, following=(team.team.id in followed_team_ids), compact=True,
                   size='sm' %}
                   {% include "partials/follow_button.html" %}
                   {% endwith %}

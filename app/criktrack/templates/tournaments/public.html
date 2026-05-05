@@ -34,7 +34,7 @@
                 {% for team in teams %}
                   <tr>
                     <td class="rank{% if loop.index == 1 %} rank-1{% endif %}">{{ loop.index }}</td>
-                    <td class="team-chip"><span class="team-logo">{{ team.short_code }}</span>{{ team.name }}</td>
+                    <td class="team-chip"><span class="team-logo">{{ team.team.short_code }}</span>{{ team.team.name }}</td>
                     <td>{{ team.played }}</td>
                     <td>{{ team.won }}</td>
                     <td><strong>{{ team.points }}</strong></td>

@@ -1,4 +1,4 @@
-"""Tournament and Team models — the top-level competition entity and its participants."""
+"""Tournament model — the top-level competition entity."""
 
 from __future__ import annotations
 
@@ -63,8 +63,10 @@ class Tournament(db.Model):
 
     organiser = db.relationship("User", back_populates="organised_tournaments")
     venue = db.relationship("Venue", lazy="joined")
-    teams = db.relationship(
-        "Team", back_populates="tournament", cascade="all, delete-orphan"
+    tournament_teams = db.relationship(
+        "TournamentTeam",
+        back_populates="tournament",
+        cascade="all, delete-orphan",
     )
     matches = db.relationship(
         "Match", back_populates="tournament", cascade="all, delete-orphan"
@@ -86,27 +88,7 @@ class Tournament(db.Model):
             "shareSlug": self.share_slug,
         }
 
-
-class Team(db.Model):
-    """A team competing in a single tournament; standings columns are derived state."""
-
-    __tablename__ = "teams"
-
-    id = db.Column(db.Integer, primary_key=True)
-    tournament_id = db.Column(
-        db.Integer, db.ForeignKey("tournaments.id"), nullable=False, index=True
-    )
-    name = db.Column(db.String(80), nullable=False)
-    short_code = db.Column(db.String(4), nullable=False, default="???")
-
-    # Denormalised standings columns; recomputed by services.
-    played = db.Column(db.Integer, nullable=False, default=0)
-    won = db.Column(db.Integer, nullable=False, default=0)
-    lost = db.Column(db.Integer, nullable=False, default=0)
-    points = db.Column(db.Integer, nullable=False, default=0)
-    nrr = db.Column(db.Numeric(5, 2), nullable=False, default=0)
-
-    tournament = db.relationship("Tournament", back_populates="teams")
-    players = db.relationship(
-        "Player", back_populates="team", cascade="all, delete-orphan"
-    )
+    @property
+    def teams(self) -> list:
+        """Convenience view of participating teams for templates and summaries."""
+        return [entry.team for entry in self.tournament_teams]

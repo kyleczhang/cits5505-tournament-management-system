@@ -5,12 +5,23 @@
   document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('record-form');
     if (!form) return;
+    const rosters = JSON.parse(form.getAttribute('data-rosters') || '{}');
 
-    function templateRow(kind) {
+    function playerSelect(teamId, placeholder) {
+      const rows = rosters[String(teamId)] || [];
+      const options = ['<option value="">' + placeholder + '</option>']
+        .concat(rows.map(function (player) {
+          return '<option value="' + player.id + '">' + player.name + '</option>';
+        }))
+        .join('');
+      return '<select class="form-select" data-field="player_id">' + options + '</select>';
+    }
+
+    function templateRow(kind, teamId) {
       if (kind === 'batter') {
         return (
           '<div class="row g-2 align-items-center" data-row>' +
-          '  <div class="col-md-4"><input type="text" class="form-control" data-field="player_name" placeholder="Batter name"></div>' +
+          '  <div class="col-md-4">' + playerSelect(teamId, 'Select batter') + '</div>' +
           '  <div class="col-md-3"><input type="text" class="form-control" data-field="dismissal" placeholder="Dismissal"></div>' +
           '  <div class="col-md-2"><input type="number" class="form-control" data-field="runs" placeholder="Runs"></div>' +
           '  <div class="col-md-2"><input type="number" class="form-control" data-field="balls" placeholder="Balls"></div>' +
@@ -20,7 +31,7 @@
       }
       return (
         '<div class="row g-2 align-items-center" data-row>' +
-        '  <div class="col-md-4"><input type="text" class="form-control" data-field="player_name" placeholder="Bowler"></div>' +
+        '  <div class="col-md-4">' + playerSelect(teamId, 'Select bowler') + '</div>' +
         '  <div class="col-md-2"><input type="number" step="0.1" class="form-control" data-field="overs" placeholder="Overs"></div>' +
         '  <div class="col-md-2"><input type="number" class="form-control" data-field="runs" placeholder="Runs"></div>' +
         '  <div class="col-md-2"><input type="number" class="form-control" data-field="wickets" placeholder="Wkts"></div>' +
@@ -39,13 +50,13 @@
       const addBatter = e.target.closest('[data-add-batter]');
       if (addBatter) {
         const list = addBatter.previousElementSibling;
-        list.insertAdjacentHTML('beforeend', templateRow('batter'));
+        list.insertAdjacentHTML('beforeend', templateRow('batter', list.getAttribute('data-team-id')));
         return;
       }
       const addBowler = e.target.closest('[data-add-bowler]');
       if (addBowler) {
         const list = addBowler.previousElementSibling;
-        list.insertAdjacentHTML('beforeend', templateRow('bowler'));
+        list.insertAdjacentHTML('beforeend', templateRow('bowler', list.getAttribute('data-team-id')));
       }
     });
 
@@ -58,7 +69,7 @@
           const key = f.getAttribute('data-field');
           obj[key] = f.value;
         });
-        if ((obj.player_name || '').trim()) out.push(obj);
+        if ((obj.player_id || '').trim()) out.push(obj);
       });
       return out;
     }

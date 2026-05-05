@@ -28,7 +28,9 @@ def stats(tournament_id: int, player_id: int):
     player = db.session.get(Player, player_id) or abort(404)
     # Guard against cross-tournament URL tampering: a player must belong to
     # a team registered in the tournament being viewed.
-    if player.team is None or player.team.tournament_id != tournament.id:
+    if player.team is None or not any(
+        entry.tournament_id == tournament.id for entry in player.team.tournament_entries
+    ):
         abort(404)
 
     bat_entries = (
