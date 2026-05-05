@@ -15,6 +15,7 @@
       <ul class="navbar-nav d-flex flex-md-row gap-md-1 align-items-md-center">
         {% if current_user.is_authenticated %}
           <li class="nav-item"><a class="nav-link {% if active_endpoint == 'users.dashboard' %}active{% endif %}" href="{{ url_for('users.dashboard') }}">Dashboard</a></li>
+          <li class="nav-item" data-role-gate="organizer"><a class="nav-link {% if active_endpoint and active_endpoint.startswith('teams.') %}active{% endif %}" href="{{ url_for('teams.list_view') }}">Teams</a></li>
           <li class="nav-item"><a class="nav-link {% if active_endpoint == 'tournaments.list_view' %}active{% endif %}" href="{{ url_for('tournaments.list_view') }}">Tournaments</a></li>
           <li class="nav-item" data-role-gate="organizer"><a class="nav-link {% if active_endpoint == 'tournaments.create' %}active{% endif %}" href="{{ url_for('tournaments.create') }}">Create</a></li>
           <li class="nav-item"><a class="nav-link {% if active_endpoint == 'users.profile' %}active{% endif %}" href="{{ url_for('users.profile', user_id=current_user.id) }}">Profile</a></li>

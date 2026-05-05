@@ -86,11 +86,13 @@ def _register_blueprints(app: Flask) -> None:
     from .live import bp as live_bp
     from .matches import bp as matches_bp
     from .players import bp as players_bp
+    from .teams import bp as teams_bp
     from .tournaments import bp as tournaments_bp
     from .users import bp as users_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)
+    app.register_blueprint(teams_bp, url_prefix="/teams")
     app.register_blueprint(tournaments_bp, url_prefix="/tournaments")
     app.register_blueprint(matches_bp)
     app.register_blueprint(players_bp)

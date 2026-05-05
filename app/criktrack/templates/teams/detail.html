@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% from "auth/_helpers.html" import field %}
+
+{% block title %}{{ team.name }} — Team — CRIKTRACK{% endblock %}
+
+{% block content %}
+  <section class="section">
+    <div class="container">
+      <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+        <div>
+          <span class="badge-ctm badge-format mb-2">Reusable team</span>
+          <h1 class="mb-1">{{ team.name }}</h1>
+          <p class="muted m-0">{{ team.short_code }} • {{ team.players | length }} players in roster</p>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="{{ url_for('teams.edit', team_id=team.id) }}" class="btn btn-ctm-ghost">Edit team</a>
+          <a href="{{ url_for('tournaments.create') }}" class="btn btn-ctm-primary">Use in tournament</a>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-lg-7">
+          <div class="ctm-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2 class="h5 m-0" style="font-family:var(--ctm-font-body); font-weight:700;">Roster</h2>
+              <span class="small muted">{{ team.players | length }} player{{ '' if team.players | length == 1 else 's' }}</span>
+            </div>
+            <ul class="list-unstyled d-flex flex-column gap-2 m-0">
+              {% for player in team.players | sort(attribute='name') %}
+                <li class="d-flex justify-content-between align-items-center gap-3 p-2 rounded" style="background:var(--ctm-bg-subtle, #F8FAFC);">
+                  <div>
+                    <strong class="d-block">{{ player.name }}</strong>
+                    <span class="small muted">{{ player.role.value | replace('_', ' ') | title }}</span>
+                  </div>
+                  <div class="d-flex gap-2">
+                    <a href="{{ url_for('teams.edit_player', team_id=team.id, player_id=player.id) }}" class="btn btn-ctm-ghost btn-sm">Edit</a>
+                    <form method="post" action="{{ url_for('teams.delete_player', team_id=team.id, player_id=player.id) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" class="btn btn-ctm-ghost btn-sm">Remove</button>
+                    </form>
+                  </div>
+                </li>
+              {% else %}
+                <li class="muted small">No players added yet.</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-lg-5">
+          <div class="ctm-card">
+            <h2 class="h5 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Add player</h2>
+            <form method="post" action="{{ url_for('teams.add_player', team_id=team.id) }}" novalidate>
+              {{ player_form.hidden_tag() }}
+              <div class="row g-3">
+                <div class="col-12">
+                  {{ field(player_form.name, "Player name", placeholder="e.g. Aarav Sharma") }}
+                </div>
+                <div class="col-12">
+                  <label for="{{ player_form.role.id }}" class="form-label">Role</label>
+                  {{ player_form.role(class="form-select" + (" is-invalid" if player_form.role.errors else "")) }}
+                  {% for err in player_form.role.errors %}
+                    <div class="form-hint-error" role="alert">{{ err }}</div>
+                  {% endfor %}
+                </div>
+              </div>
+              <div class="d-flex justify-content-end mt-4">
+                {{ player_form.submit(class="btn btn-ctm-primary", value="Add player") }}
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
