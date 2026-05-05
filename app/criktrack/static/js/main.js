@@ -53,6 +53,16 @@
     });
   });
 
+  // Smooth-scroll the footer "Back to top" link; href="#top" remains the no-JS fallback.
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-back-to-top]').forEach(function (link) {
+      link.addEventListener('click', function (event) {
+        event.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+  });
+
   // Share button (public tournament link).
   document.addEventListener('DOMContentLoaded', function () {
     const shareBtns = document.querySelectorAll('[data-share]');
