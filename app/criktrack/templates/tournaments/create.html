@@ -47,11 +47,16 @@
               <div class="form-hint-error" role="alert">{{ err }}</div>
             {% endfor %}
           </div>
-          <div class="col-md-6">
-            {{ field(form.venue_name, "Venue name (optional)", placeholder="e.g. UWA Sports Park") }}
+          <div class="col-12">
+            <div class="small muted">
+              Set an optional default venue for this tournament. You can keep it for new matches or override it per fixture later.
+            </div>
           </div>
           <div class="col-md-6">
-            {{ field(form.venue_address, "Venue address (optional)", placeholder="Hackett Dr, Crawley WA 6009") }}
+            {{ field(form.venue_name, "Default venue name (optional)", placeholder="e.g. UWA Sports Park") }}
+          </div>
+          <div class="col-md-6">
+            {{ field(form.venue_address, "Default venue address (optional)", placeholder="Hackett Dr, Crawley WA 6009") }}
           </div>
         </div>
 

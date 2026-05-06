@@ -41,8 +41,10 @@ class TournamentCreateForm(FlaskForm):
     team_ids = SelectMultipleField(
         "Participating teams", coerce=int, validators=[DataRequired()]
     )
-    venue_name = StringField("Venue name", validators=[Optional(), Length(max=160)])
+    venue_name = StringField(
+        "Default venue name", validators=[Optional(), Length(max=160)]
+    )
     venue_address = StringField(
-        "Venue address", validators=[Optional(), Length(max=255)]
+        "Default venue address", validators=[Optional(), Length(max=255)]
     )
     submit = SubmitField("Create & continue")
