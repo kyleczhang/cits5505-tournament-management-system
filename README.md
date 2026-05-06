@@ -133,8 +133,12 @@ The Selenium suite spins up the Flask app on a random port in a background threa
 ```
 .
 ├── README.md
-├── docs/design-doc/plan-backend-v1.md # Checkpoint 3 build plan
-├── frontend-original/                 # Checkpoint 2 prototype (untouched)
+├── Makefile
+├── pyproject.toml
+├── docs/
+│   ├── checkpoint-2/                 # Checkpoint 2 static prototype (historical reference)
+│   ├── design-doc/                   # Backend / frontend planning and DB notes
+│   └── *.md                          # Product, implementation, and setup docs
 └── app/
     ├── run.py                         # Flask entrypoint
     ├── config.py                      # Dev / Test / Prod configs
@@ -143,23 +147,24 @@ The Selenium suite spins up the Flask app on a random port in a background threa
     ├── pytest.ini
     ├── .env.example                   # Copy to .env
     ├── migrations/                    # Alembic
+    ├── instance/                      # Local instance data (e.g. SQLite DB)
     ├── criktrack/
     │   ├── __init__.py                # App factory
     │   ├── extensions.py              # db, migrate, login_manager, csrf
     │   ├── decorators.py              # @require_role
     │   ├── filters.py                 # pretty_date, etc.
-    │   ├── seed.py                    # `flask seed` CLI
+    │   ├── seed.py / seed_data.py     # `flask seed` CLI + demo fixtures
     │   ├── models/                    # User, Tournament, Team, Match, …
-    │   ├── auth/ users/ tournaments/  # Feature blueprints
-    │   ├── matches/ players/ comments/
-    │   ├── live/                      # /api/live/matches proxy
+    │   ├── auth/ users/ tournaments/  # Page blueprints
+    │   ├── matches/ teams/ players/   # Match recording + team/player views
+    │   ├── comments/ follows/ live/   # JSON APIs + live-feed proxy
     │   ├── integrations/              # cricketdata + geocoding clients
     │   ├── templates/                 # Server-rendered Jinja
     │   └── static/                    # CSS + JS (record, comments, maps, livefeed)
     └── tests/
-        ├── conftest.py
-        ├── unit/                      # 20 pytest tests
-        └── selenium/                  # 6 end-to-end tests
+        ├── conftest.py                # App / client / auth fixtures
+        ├── unit/                      # Unit and route tests
+        └── selenium/                  # Browser smoke tests
 ```
 
 ## Team organisation
