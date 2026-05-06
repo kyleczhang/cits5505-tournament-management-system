@@ -4,12 +4,35 @@ from __future__ import annotations
 
 from datetime import date
 
+import criktrack.matches.routes as match_routes
 from criktrack.extensions import db
-from criktrack.models import Match, MatchStatus, Player, PlayerRole, Role, Team, Tournament, TournamentFormat, TournamentStatus, TournamentTeam
+from criktrack.models import (
+    Match,
+    MatchStatus,
+    Player,
+    PlayerRole,
+    Role,
+    Team,
+    Tournament,
+    TournamentFormat,
+    TournamentStatus,
+    TournamentTeam,
+    Venue,
+)
 
 
-def _scaffold(make_user):
+def _scaffold(make_user, with_default_venue: bool = False):
     organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
+    venue = None
+    if with_default_venue:
+        venue = Venue(
+            name="UWA Sports Park",
+            address="Hackett Dr, Crawley WA 6009",
+            lat=-31.95,
+            lng=115.86,
+        )
+        db.session.add(venue)
+        db.session.flush()
     tournament = Tournament(
         name="Fixture Cup",
         format=TournamentFormat.ROUND_ROBIN,
@@ -17,6 +40,7 @@ def _scaffold(make_user):
         start_date=date(2026, 7, 1),
         team_count=2,
         organiser_id=organiser.id,
+        venue_id=venue.id if venue else None,
     )
     db.session.add(tournament)
     db.session.flush()
@@ -61,6 +85,77 @@ def test_organiser_can_create_match(client, app, make_user, login):
     assert match.team_a_id == team_a.id
     assert match.team_b_id == team_b.id
     assert match.status == MatchStatus.UPCOMING
+
+
+def test_match_create_inherits_tournament_default_venue(client, app, make_user, login):
+    tournament, team_a, team_b = _scaffold(make_user, with_default_venue=True)
+    login("org@example.com")
+
+    resp = client.post(
+        f"/tournaments/{tournament.id}/matches/create",
+        data={
+            "team_a_id": team_a.id,
+            "team_b_id": team_b.id,
+            "scheduled_at": "2026-07-02T14:00",
+        },
+        follow_redirects=False,
+    )
+
+    assert resp.status_code in (302, 303)
+    match = Match.query.filter_by(tournament_id=tournament.id).first()
+    assert match is not None
+    assert match.venue_id == tournament.venue_id
+
+
+def test_match_create_can_override_tournament_default_venue(
+    client, app, make_user, login, monkeypatch
+):
+    tournament, team_a, team_b = _scaffold(make_user, with_default_venue=True)
+    monkeypatch.setattr(match_routes, "geocode_address", lambda _: (-32.05, 115.75))
+    login("org@example.com")
+
+    resp = client.post(
+        f"/tournaments/{tournament.id}/matches/create",
+        data={
+            "team_a_id": team_a.id,
+            "team_b_id": team_b.id,
+            "scheduled_at": "2026-07-02T14:00",
+            "venue_name": "Fremantle Oval",
+            "venue_address": "Fremantle WA 6160",
+        },
+        follow_redirects=False,
+    )
+
+    assert resp.status_code in (302, 303)
+    match = Match.query.filter_by(tournament_id=tournament.id).first()
+    assert match is not None
+    assert match.venue_id != tournament.venue_id
+    assert match.venue is not None
+    assert match.venue.name == "Fremantle Oval"
+    assert match.venue.address == "Fremantle WA 6160"
+    assert match.venue.lat == -32.05
+    assert match.venue.lng == 115.75
+
+
+def test_match_create_rejects_partial_venue_override(client, app, make_user, login):
+    tournament, team_a, team_b = _scaffold(make_user, with_default_venue=True)
+    login("org@example.com")
+
+    resp = client.post(
+        f"/tournaments/{tournament.id}/matches/create",
+        data={
+            "team_a_id": team_a.id,
+            "team_b_id": team_b.id,
+            "scheduled_at": "2026-07-02T14:00",
+            "venue_name": "Fremantle Oval",
+            "venue_address": "",
+        },
+        follow_redirects=False,
+    )
+
+    assert resp.status_code == 200
+    assert Match.query.filter_by(tournament_id=tournament.id).count() == 0
+    assert b"Enter a venue address or leave both venue fields blank." in resp.data
 
 
 def test_record_page_uses_roster_selectors(client, app, make_user, login):

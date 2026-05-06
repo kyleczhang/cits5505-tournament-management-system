@@ -7,7 +7,8 @@ from flask_login import current_user, login_required
 
 from ..decorators import require_role
 from ..extensions import db
-from ..models import Match, MatchStatus, Player, Team, Tournament
+from ..integrations.geocoding import geocode_address
+from ..models import Match, MatchStatus, Player, Team, Tournament, Venue
 from . import bp
 from .forms import MatchCreateForm
 from .services import ValidationError, save_result, start_match, validate_payload
@@ -75,13 +76,39 @@ def create(tournament_id: int):
             form.team_b_id.errors.append("Team B must be different from Team A.")
             return render_template("matches/create.html", tournament=tournament, form=form)
 
+        venue_name = (form.venue_name.data or "").strip()
+        venue_address = (form.venue_address.data or "").strip()
+        if bool(venue_name) != bool(venue_address):
+            if not venue_name:
+                form.venue_name.errors.append(
+                    "Enter a venue name or leave both venue fields blank."
+                )
+            if not venue_address:
+                form.venue_address.errors.append(
+                    "Enter a venue address or leave both venue fields blank."
+                )
+            return render_template("matches/create.html", tournament=tournament, form=form)
+
+        venue = tournament.venue
+        if venue_name and venue_address:
+            # Geocoding is best-effort: a failed lookup still preserves the typed venue.
+            coords = geocode_address(venue_address)
+            venue = Venue(
+                name=venue_name,
+                address=venue_address,
+                lat=coords[0] if coords else None,
+                lng=coords[1] if coords else None,
+            )
+            db.session.add(venue)
+            db.session.flush()
+
         match = Match(
             tournament_id=tournament.id,
             team_a_id=form.team_a_id.data,
             team_b_id=form.team_b_id.data,
             scheduled_at=form.scheduled_at.data,
             status=MatchStatus.UPCOMING,
-            venue_id=tournament.venue_id,
+            venue_id=venue.id if venue else None,
         )
         db.session.add(match)
         db.session.commit()

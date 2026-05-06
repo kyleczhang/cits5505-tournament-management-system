@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 
+import criktrack.tournaments.routes as tournament_routes
 from criktrack.extensions import db
 from criktrack.models import (
     Match,
@@ -86,6 +87,41 @@ def test_organiser_can_create_tournament_from_existing_teams(
     entries = TournamentTeam.query.filter_by(tournament_id=tournament.id).all()
     assert {entry.team_id for entry in entries} == {team_a.id, team_b.id}
     assert tournament.team_count == 2
+
+
+def test_organiser_can_create_tournament_with_default_venue(
+    client, app, make_user, login, monkeypatch
+):
+    organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
+    team_a = Team(organiser_id=organiser.id, name="Alpha", short_code="ALP")
+    team_b = Team(organiser_id=organiser.id, name="Bravo", short_code="BRV")
+    db.session.add_all([team_a, team_b])
+    db.session.commit()
+    monkeypatch.setattr(tournament_routes, "geocode_address", lambda _: (-31.95, 115.86))
+
+    login("org@example.com")
+    resp = client.post(
+        "/tournaments/create",
+        data={
+            "name": "Fixture Cup",
+            "start_date": "2026-08-01",
+            "format": "round_robin",
+            "overs": "20",
+            "team_ids": [str(team_a.id), str(team_b.id)],
+            "venue_name": "UWA Sports Park",
+            "venue_address": "Hackett Dr, Crawley WA 6009",
+        },
+        follow_redirects=False,
+    )
+
+    assert resp.status_code in (302, 303)
+    tournament = Tournament.query.filter_by(name="Fixture Cup").first()
+    assert tournament is not None
+    assert tournament.venue is not None
+    assert tournament.venue.name == "UWA Sports Park"
+    assert tournament.venue.address == "Hackett Dr, Crawley WA 6009"
+    assert tournament.venue.lat == -31.95
+    assert tournament.venue.lng == 115.86
 
 
 def test_organiser_can_add_existing_team_to_tournament(client, app, make_user, login):
