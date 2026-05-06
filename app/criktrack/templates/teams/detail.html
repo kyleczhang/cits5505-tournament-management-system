@@ -17,7 +17,6 @@
         </div>
         <div class="d-flex gap-2">
           <a href="{{ url_for('teams.edit', team_id=team.id) }}" class="btn btn-ctm-ghost">Edit team</a>
-          <a href="{{ url_for('tournaments.create') }}" class="btn btn-ctm-primary">Use in tournament</a>
           <form method="post" action="{{ url_for('teams.delete', team_id=team.id) }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn btn-ctm-ghost" {% if registrations %}disabled aria-disabled="true"{% endif %}>Delete team</button>
