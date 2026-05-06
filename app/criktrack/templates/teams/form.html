@@ -26,7 +26,7 @@
           </div>
         </div>
         <div class="d-flex gap-2 justify-content-end mt-4">
-          <a href="{{ url_for('teams.list_view') }}" class="btn btn-ctm-ghost">Cancel</a>
+          <a href="{{ url_for('teams.detail', team_id=team.id) if team is defined else url_for('teams.list_view') }}" class="btn btn-ctm-ghost">Cancel</a>
           {{ form.submit(class="btn btn-ctm-primary") }}
         </div>
       </form>

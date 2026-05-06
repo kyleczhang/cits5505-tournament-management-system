@@ -36,6 +36,22 @@
           <div class="col-md-6">
             {{ field(form.scheduled_at, "Scheduled at", type="datetime-local") }}
           </div>
+          <div class="col-12">
+            <div class="small muted">
+              Leave the venue blank to use the tournament default.
+              {% if tournament.venue %}
+                Current default: {{ tournament.venue.name }} — {{ tournament.venue.address }}.
+              {% else %}
+                This tournament does not have a default venue yet.
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-md-6">
+            {{ field(form.venue_name, "Match venue name (optional)", placeholder="e.g. UWA Sports Park") }}
+          </div>
+          <div class="col-md-6">
+            {{ field(form.venue_address, "Match venue address (optional)", placeholder="Hackett Dr, Crawley WA 6009") }}
+          </div>
         </div>
 
         <div class="d-flex gap-2 justify-content-end mt-4">

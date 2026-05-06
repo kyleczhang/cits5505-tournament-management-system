@@ -274,6 +274,74 @@ textarea:focus-visible {
   border-top: 4px solid var(--ctm-accent);
 }
 
+.ctm-inline-tooltip {
+  position: relative;
+  display: inline-flex;
+  outline: none;
+}
+
+.ctm-inline-tooltip > .btn[disabled] {
+  pointer-events: none;
+}
+
+.ctm-tooltip-bubble {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: max-content;
+  max-width: min(20rem, 80vw);
+  padding: 0.625rem 0.85rem;
+  border-radius: var(--ctm-radius-sm);
+  background: var(--ctm-card);
+  border: 1px solid var(--ctm-border);
+  color: var(--ctm-text);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  box-shadow: var(--ctm-shadow);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-0.25rem);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease,
+    visibility 160ms ease;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.ctm-tooltip-bubble::before,
+.ctm-tooltip-bubble::after {
+  content: "";
+  position: absolute;
+  right: 0.9rem;
+  width: 0.6rem;
+  height: 0.6rem;
+  background: var(--ctm-card);
+  transform: rotate(45deg);
+}
+
+.ctm-tooltip-bubble::before {
+  top: -0.35rem;
+  border-top: 1px solid var(--ctm-border);
+  border-left: 1px solid var(--ctm-border);
+}
+
+.ctm-tooltip-bubble::after {
+  display: none;
+}
+
+.ctm-inline-tooltip:hover .ctm-tooltip-bubble,
+.ctm-inline-tooltip:focus-visible .ctm-tooltip-bubble {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.ctm-inline-tooltip:focus-visible {
+  border-radius: var(--ctm-radius-sm);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.18);
+}
+
 .stat-card {
   background: var(--ctm-card);
   border: 1px solid var(--ctm-border);

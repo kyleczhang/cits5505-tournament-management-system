@@ -23,6 +23,7 @@
       <form method="post" class="ctm-card" novalidate>
         {{ form.hidden_tag() }}
 
+        <h2 class="h5 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Tournament details</h2>
         <div class="row g-3">
           <div class="col-12">
             {{ field(form.name, "Tournament name", placeholder="e.g. UWA Social League 2026") }}
@@ -47,11 +48,18 @@
               <div class="form-hint-error" role="alert">{{ err }}</div>
             {% endfor %}
           </div>
+        </div>
+
+        <hr class="my-4">
+
+        <h2 class="h5 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Default venue</h2>
+        <p class="small muted mb-3">Set an optional default venue for this tournament. You can keep it for new matches or override it per fixture later.</p>
+        <div class="row g-3">
           <div class="col-md-6">
-            {{ field(form.venue_name, "Venue name (optional)", placeholder="e.g. UWA Sports Park") }}
+            {{ field(form.venue_name, "Default venue name (optional)", placeholder="e.g. UWA Sports Park") }}
           </div>
           <div class="col-md-6">
-            {{ field(form.venue_address, "Venue address (optional)", placeholder="Hackett Dr, Crawley WA 6009") }}
+            {{ field(form.venue_address, "Default venue address (optional)", placeholder="Hackett Dr, Crawley WA 6009") }}
           </div>
         </div>
 
