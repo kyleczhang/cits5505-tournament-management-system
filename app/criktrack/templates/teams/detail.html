@@ -20,9 +20,23 @@
           <form method="post" action="{{ url_for('teams.delete', team_id=team.id) }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             {% if registrations %}
-              <span class="d-inline-block" tabindex="0" title="This team is registered in one or more tournaments. Remove those registrations before deleting it.">
+              <div class="ctm-inline-tooltip">
                 <button type="submit" class="btn btn-ctm-ghost" disabled aria-disabled="true">Delete team</button>
-              </span>
+                <button
+                  type="button"
+                  class="ctm-tooltip-trigger"
+                  aria-label="Why can't I delete this team?"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" />
+                    <path d="M12 10v5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <circle cx="12" cy="7" r="1" fill="currentColor" />
+                  </svg>
+                </button>
+                <span class="ctm-tooltip-bubble" role="tooltip">
+                  This team is registered in one or more tournaments. Remove those registrations before deleting it.
+                </span>
+              </div>
             {% else %}
               <button type="submit" class="btn btn-ctm-ghost">Delete team</button>
             {% endif %}
