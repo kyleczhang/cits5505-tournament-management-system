@@ -124,6 +124,34 @@ def test_organiser_cannot_delete_team_registered_in_tournament(
     assert db.session.get(Team, team.id) is not None
 
 
+def test_team_detail_shows_delete_tooltip_for_registered_team(
+    client, app, make_user, login
+):
+    organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
+    team = Team(organiser_id=organiser.id, name="Alpha", short_code="ALP")
+    tournament = Tournament(
+        name="Fixture Cup",
+        format=TournamentFormat.ROUND_ROBIN,
+        status=TournamentStatus.UPCOMING,
+        start_date=date(2026, 9, 1),
+        team_count=1,
+        organiser_id=organiser.id,
+    )
+    db.session.add_all([team, tournament])
+    db.session.flush()
+    db.session.add(TournamentTeam(tournament_id=tournament.id, team_id=team.id))
+    db.session.commit()
+    login("org@example.com")
+
+    resp = client.get(f"/teams/{team.id}")
+
+    assert resp.status_code == 200
+    assert (
+        b"This team is registered in one or more tournaments. Remove those "
+        b"registrations before deleting it."
+    ) in resp.data
+
+
 def test_other_organiser_cannot_delete_foreign_team(client, app, make_user, login):
     owner = make_user("owner@example.com", role=Role.ORGANIZER, display_name="Owner")
     make_user("other@example.com", role=Role.ORGANIZER, display_name="Other")
