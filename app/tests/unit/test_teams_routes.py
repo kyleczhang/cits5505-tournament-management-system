@@ -54,6 +54,19 @@ def test_team_list_only_shows_current_organisers_teams(client, app, make_user, l
     assert "Bravo" not in body
 
 
+def test_edit_team_cancel_links_back_to_team_detail(client, app, make_user, login):
+    organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
+    team = Team(organiser_id=organiser.id, name="Alpha", short_code="ALP")
+    db.session.add(team)
+    db.session.commit()
+    login("org@example.com")
+
+    resp = client.get(f"/teams/{team.id}/edit")
+
+    assert resp.status_code == 200
+    assert f'/teams/{team.id}"'.encode() in resp.data
+
+
 def test_organiser_can_add_player_to_team_roster(client, app, make_user, login):
     organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
     team = Team(organiser_id=organiser.id, name="Alpha", short_code="ALP")

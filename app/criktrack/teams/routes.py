@@ -85,7 +85,7 @@ def edit(team_id: int):
         db.session.commit()
         flash("Team updated.", "success")
         return redirect(url_for("teams.detail", team_id=team.id))
-    return render_template("teams/form.html", form=form, page_title="Edit team")
+    return render_template("teams/form.html", form=form, page_title="Edit team", team=team)
 
 
 @bp.route("/<int:team_id>/players/add", methods=["POST"])
