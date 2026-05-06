@@ -277,72 +277,69 @@ textarea:focus-visible {
 .ctm-inline-tooltip {
   position: relative;
   display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+  outline: none;
 }
 
-.ctm-tooltip-trigger {
-  width: 1.75rem;
-  height: 1.75rem;
-  padding: 0;
-  border: 1px solid var(--ctm-border);
-  border-radius: 999px;
-  background: var(--ctm-card);
-  color: var(--ctm-muted);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    color 160ms ease,
-    border-color 160ms ease,
-    background 160ms ease;
-}
-
-.ctm-tooltip-trigger:hover,
-.ctm-tooltip-trigger:focus-visible {
-  color: var(--ctm-primary);
-  border-color: var(--ctm-primary);
-  background: rgba(15, 118, 110, 0.08);
+.ctm-inline-tooltip > .btn[disabled] {
+  pointer-events: none;
 }
 
 .ctm-tooltip-bubble {
   position: absolute;
-  top: calc(100% + 0.6rem);
+  top: calc(100% + 0.5rem);
   right: 0;
-  width: min(18rem, 80vw);
-  padding: 0.75rem 0.9rem;
+  width: max-content;
+  max-width: min(20rem, 80vw);
+  padding: 0.625rem 0.85rem;
   border-radius: var(--ctm-radius-sm);
-  background: var(--ctm-text);
-  color: #fff;
-  font-size: 0.875rem;
-  line-height: 1.4;
+  background: var(--ctm-card);
+  border: 1px solid var(--ctm-border);
+  color: var(--ctm-text);
+  font-size: 0.8125rem;
+  line-height: 1.45;
   box-shadow: var(--ctm-shadow);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-0.2rem);
+  transform: translateY(-0.25rem);
   transition:
     opacity 160ms ease,
     transform 160ms ease,
     visibility 160ms ease;
   z-index: 20;
+  pointer-events: none;
 }
 
-.ctm-tooltip-bubble::before {
+.ctm-tooltip-bubble::before,
+.ctm-tooltip-bubble::after {
   content: "";
   position: absolute;
-  top: -0.35rem;
   right: 0.9rem;
-  width: 0.7rem;
-  height: 0.7rem;
-  background: var(--ctm-text);
+  width: 0.6rem;
+  height: 0.6rem;
+  background: var(--ctm-card);
   transform: rotate(45deg);
 }
 
+.ctm-tooltip-bubble::before {
+  top: -0.35rem;
+  border-top: 1px solid var(--ctm-border);
+  border-left: 1px solid var(--ctm-border);
+}
+
+.ctm-tooltip-bubble::after {
+  display: none;
+}
+
 .ctm-inline-tooltip:hover .ctm-tooltip-bubble,
-.ctm-inline-tooltip:focus-within .ctm-tooltip-bubble {
+.ctm-inline-tooltip:focus-visible .ctm-tooltip-bubble {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
+}
+
+.ctm-inline-tooltip:focus-visible {
+  border-radius: var(--ctm-radius-sm);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.18);
 }
 
 .stat-card {
