@@ -39,11 +39,12 @@
     li.className = 'ctm-comment-card' + (c.role === 'organizer' ? ' is-organizer' : '');
     li.setAttribute('aria-label', 'Comment by ' + c.authorName);
     const initials = c.initials || (c.authorName || '').split(' ').map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
+    const avatarClass = c.avatarColorClass ? ' ' + String(c.avatarColorClass) : '';
     const badge = c.role === 'organizer'
       ? '<span class="ctm-badge-organizer" aria-label="Organizer role">Organizer</span>'
       : '';
     li.innerHTML =
-      '<span class="avatar" aria-hidden="true">' + escapeHtml(initials) + '</span>' +
+      '<span class="avatar' + escapeHtml(avatarClass) + '" aria-hidden="true">' + escapeHtml(initials) + '</span>' +
       '<div class="ctm-comment-body">' +
         '<div class="ctm-comment-head">' +
           '<span class="ctm-comment-author">' + escapeHtml(c.authorName) + '</span>' +

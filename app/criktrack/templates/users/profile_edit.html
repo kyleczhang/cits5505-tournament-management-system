@@ -18,10 +18,31 @@
       <form method="post" class="ctm-card" novalidate>
         {{ form.hidden_tag() }}
 
-        <div class="d-flex align-items-center gap-3 mb-4">
-          <span class="avatar xl">{{ current_user.initials }}</span>
+        <div class="d-flex flex-column flex-md-row align-items-start gap-3 mb-4">
+          <span class="avatar xl {{ current_user.avatar_class if not form.avatar_color.data else 'avatar-' ~ form.avatar_color.data }}">{{ current_user.initials }}</span>
           <div class="flex-grow-1">
-            {{ field(form.avatar_url, "Avatar URL (optional)", placeholder="https://…", hint="Paste an image URL. PNG or JPG, square images look best.") }}
+            <fieldset class="mb-0">
+              <legend class="form-label mb-2">Avatar color</legend>
+              <p class="form-text mb-3">Choose a preset gradient for your initials badge.</p>
+              <div class="avatar-choice-grid" role="radiogroup" aria-label="Avatar color choices">
+                {% for value, label in form.avatar_color.choices %}
+                  <label class="avatar-choice{% if form.avatar_color.data == value %} is-selected{% endif %}">
+                    <input
+                      type="radio"
+                      name="{{ form.avatar_color.name }}"
+                      id="{{ form.avatar_color.id }}-{{ value }}"
+                      value="{{ value }}"
+                      {% if form.avatar_color.data == value %}checked{% endif %}
+                    >
+                    <span class="avatar avatar-choice-preview avatar-{{ value }}" aria-hidden="true">{{ current_user.initials }}</span>
+                    <span class="avatar-choice-label">{{ label }}</span>
+                  </label>
+                {% endfor %}
+              </div>
+              {% for err in form.avatar_color.errors %}
+                <div class="form-hint-error" role="alert">{{ err }}</div>
+              {% endfor %}
+            </fieldset>
           </div>
         </div>
 
