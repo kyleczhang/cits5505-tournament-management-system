@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, TextAreaField
-from wtforms.validators import URL, DataRequired, Email, Length, Optional
+from wtforms import SelectField, StringField, SubmitField, TextAreaField
+from wtforms.validators import DataRequired, Email, Length, Optional
+
+from ..models import AVATAR_COLOR_CHOICES, DEFAULT_AVATAR_COLOR
 
 
 class ProfileEditForm(FlaskForm):
@@ -16,7 +18,10 @@ class ProfileEditForm(FlaskForm):
     )
     location = StringField("Location", validators=[Optional(), Length(max=120)])
     bio = TextAreaField("Bio", validators=[Optional(), Length(max=240)])
-    avatar_url = StringField(
-        "Avatar URL", validators=[Optional(), URL(), Length(max=255)]
+    avatar_color = SelectField(
+        "Avatar color",
+        choices=AVATAR_COLOR_CHOICES,
+        default=DEFAULT_AVATAR_COLOR,
+        validators=[DataRequired()],
     )
     submit = SubmitField("Save changes")

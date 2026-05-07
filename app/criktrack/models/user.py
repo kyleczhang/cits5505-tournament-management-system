@@ -10,6 +10,17 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from ..extensions import db
 
+AVATAR_COLOR_CHOICES = [
+    ("amber", "Championship Gold"),
+    ("teal", "Pitch Teal"),
+    ("violet", "Stadium Violet"),
+    ("blue", "Royal Blue"),
+    ("crimson", "Boundary Red"),
+    ("slate", "Night Slate"),
+]
+_AVATAR_COLOR_VALUES = {value for value, _ in AVATAR_COLOR_CHOICES}
+DEFAULT_AVATAR_COLOR = "amber"
+
 
 class Role(str, enum.Enum):
     """Authorisation role; ORGANIZER can create/edit tournaments and matches."""
@@ -37,6 +48,9 @@ class User(db.Model, UserMixin):
     )
     bio = db.Column(db.Text, nullable=True)
     avatar_url = db.Column(db.String(255), nullable=True)
+    avatar_color = db.Column(
+        db.String(24), nullable=False, default=DEFAULT_AVATAR_COLOR
+    )
     location = db.Column(db.String(120), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
@@ -71,6 +85,18 @@ class User(db.Model, UserMixin):
             return parts[0][:2].upper()
         return (parts[0][0] + parts[-1][0]).upper()
 
+    @property
+    def avatar_color_token(self) -> str:
+        """Validated avatar theme token with a safe default for legacy rows."""
+        if self.avatar_color in _AVATAR_COLOR_VALUES:
+            return self.avatar_color
+        return DEFAULT_AVATAR_COLOR
+
+    @property
+    def avatar_class(self) -> str:
+        """CSS class applied to initials-based avatar badges."""
+        return f"avatar-{self.avatar_color_token}"
+
     def to_dict(self) -> dict:
         """Serialise the user for JSON responses (camelCase keys for the JS client)."""
         return {
@@ -81,5 +107,7 @@ class User(db.Model, UserMixin):
             "role": self.role.value,
             "bio": self.bio,
             "avatarUrl": self.avatar_url,
+            "avatarColor": self.avatar_color_token,
+            "avatarColorClass": self.avatar_class,
             "location": self.location,
         }

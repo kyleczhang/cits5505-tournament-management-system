@@ -48,6 +48,7 @@ class Comment(db.Model):
             "authorId": author.id if author else None,
             "authorName": author.display_name if author else "Unknown",
             "initials": author.initials if author else "??",
+            "avatarColorClass": author.avatar_class if author else "avatar-amber",
             "role": author.role.value if author else "user",
             "body": self.body,
             "createdAt": created.isoformat(),

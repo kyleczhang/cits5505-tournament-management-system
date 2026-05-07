@@ -76,7 +76,9 @@ def test_post_comment_requires_authentication(client, app):
 
 def test_authenticated_user_can_post_and_fetch_comment(client, app, make_user, login):
     tournament, match = _scaffold()
-    make_user("fan@example.com", password="secret123")
+    user = make_user("fan@example.com", password="secret123")
+    user.avatar_color = "violet"
+    db.session.commit()
     login("fan@example.com", "secret123")
 
     post = client.post(
@@ -90,6 +92,7 @@ def test_authenticated_user_can_post_and_fetch_comment(client, app, make_user, l
     body = get.get_json()
     assert len(body) == 1
     assert body[0]["body"] == "Thrilling finish!"
+    assert body[0]["avatarColorClass"] == "avatar-violet"
 
 
 def test_comment_length_limit_enforced(client, app, make_user, login):

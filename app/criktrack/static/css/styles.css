@@ -672,16 +672,74 @@ textarea:focus-visible {
   height: 96px;
   font-size: 2rem;
 }
+.avatar.avatar-amber {
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+}
 .avatar.avatar-teal {
   background: linear-gradient(135deg, #0f766e, #14b8a6);
 }
 .avatar.avatar-violet {
   background: linear-gradient(135deg, #7c3aed, #a78bfa);
 }
+.avatar.avatar-blue {
+  background: linear-gradient(135deg, #1d4ed8, #60a5fa);
+}
+.avatar.avatar-crimson {
+  background: linear-gradient(135deg, #b91c1c, #ef4444);
+}
+.avatar.avatar-slate {
+  background: linear-gradient(135deg, #334155, #64748b);
+}
 .avatar.xl {
   width: 128px;
   height: 128px;
   font-size: 2.5rem;
+}
+.avatar-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+.avatar-choice {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--ctm-border);
+  border-radius: 16px;
+  background: #fff;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+.avatar-choice:hover {
+  border-color: rgba(15, 118, 110, 0.25);
+  box-shadow: var(--ctm-shadow-sm);
+  transform: translateY(-1px);
+}
+.avatar-choice input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.avatar-choice.is-selected {
+  border-color: var(--ctm-primary);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+.avatar-choice:has(input:checked) {
+  border-color: var(--ctm-primary);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+.avatar-choice-preview {
+  width: 48px;
+  height: 48px;
+  font-size: 1rem;
+}
+.avatar-choice-label {
+  font-weight: 600;
+  color: var(--ctm-text);
 }
 
 /* ---------- TOURNAMENT CARD ---------- */

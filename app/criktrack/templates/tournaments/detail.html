@@ -237,7 +237,7 @@
       {% if current_user.is_authenticated %}
       <form class="ctm-comment-form" data-ctm-comment-form aria-label="Post a comment">
         <div class="d-flex align-items-center gap-2 small muted">
-          <span class="avatar" data-ctm-current-avatar aria-hidden="true">{{ current_user.initials }}</span>
+          <span class="avatar {{ current_user.avatar_class }}" data-ctm-current-avatar aria-hidden="true">{{ current_user.initials }}</span>
           <span>Commenting as <strong data-ctm-current-name>{{ current_user.display_name }}</strong></span>
           {% if current_user.role.value == 'organizer' %}
           <span class="ctm-badge-organizer" data-ctm-current-badge>Organizer</span>

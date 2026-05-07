@@ -11,6 +11,7 @@ from sqlalchemy import func
 from ..extensions import db
 from ..follows.services import followed_ids
 from ..models import (
+    DEFAULT_AVATAR_COLOR,
     Comment,
     FollowTarget,
     Match,
@@ -384,7 +385,7 @@ def _profile_completion(user: User) -> dict:
     """Return progress-bar data based on which optional profile fields are filled."""
     fields = [
         ("Display name", bool(user.display_name)),
-        ("Avatar", bool(user.avatar_url)),
+        ("Avatar", bool(user.avatar_color_token)),
         ("Location", bool(user.location)),
         ("Bio", bool(user.bio)),
     ]
@@ -429,6 +430,8 @@ def profile(user_id: int):
 def profile_edit():
     """Edit the current user's profile; rejects email changes that collide with another account."""
     form = ProfileEditForm(obj=current_user)
+    if request.method == "GET" and not form.avatar_color.data:
+        form.avatar_color.data = current_user.avatar_color_token or DEFAULT_AVATAR_COLOR
     if form.validate_on_submit():
         new_email = form.email.data.lower().strip()
         if new_email != current_user.email:
@@ -442,7 +445,7 @@ def profile_edit():
         current_user.email = new_email
         current_user.location = (form.location.data or "").strip() or None
         current_user.bio = (form.bio.data or "").strip() or None
-        current_user.avatar_url = (form.avatar_url.data or "").strip() or None
+        current_user.avatar_color = form.avatar_color.data or DEFAULT_AVATAR_COLOR
         db.session.commit()
         flash("Profile updated.", "success")
         return redirect(url_for("users.profile", user_id=current_user.id))
