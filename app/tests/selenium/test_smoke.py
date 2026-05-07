@@ -93,6 +93,42 @@ def test_tournaments_list_page_loads(browser, live_server):
     assert "tournament" in body
 
 
+def test_tournaments_list_ui_filters_and_search(browser, live_server):
+    """Basic E2E assertions for the list UI: search submits, status links set params.
+
+    This test intentionally verifies the frontend wiring (form action, status
+    buttons and query params) rather than relying on seeded data which may
+    differ in CI environments.
+    """
+    base = live_server["url"]
+    browser.get(base + "/tournaments")
+    _wait(browser).until(EC.presence_of_element_located((By.TAG_NAME, "main")))
+
+    # Submit a search that will likely match nothing and assert the empty state.
+    search = browser.find_element(By.ID, "tournament-search")
+    search.clear()
+    search.send_keys("no-such-tournament-xyz")
+    # Click the visible Search button
+    browser.find_element(By.CSS_SELECTOR, "form button[type=submit]").click()
+    _wait(browser).until(EC.url_contains("q=no-such-tournament-xyz"))
+    # Expect the template to show the empty-state message when no results
+    body = browser.find_element(By.TAG_NAME, "body").text
+    assert "No tournaments match your filters." in body
+
+    # Click the 'Live' status filter (find by link href) and ensure the status param is present
+    status_links = browser.find_elements(By.CSS_SELECTOR, 'div[role="group"] a')
+    live_link = None
+    for a in status_links:
+        href = a.get_attribute("href") or ""
+        if "status=live" in href:
+            live_link = a
+            break
+    assert live_link is not None, "expected a status=live filter link"
+    browser.execute_script("arguments[0].click();", live_link)
+    _wait(browser).until(EC.url_contains("status=live"))
+    assert "status=live" in browser.current_url
+
+
 def test_register_form_rejects_weak_password(browser, live_server):
     browser.get(live_server["url"] + "/register")
     browser.find_element(By.NAME, "display_name").send_keys("Weak Pw")
