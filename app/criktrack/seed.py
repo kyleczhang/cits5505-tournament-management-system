@@ -6,6 +6,7 @@ import click
 from flask.cli import with_appcontext
 
 from .extensions import db
+from .matches.services import _recompute_standings
 from .models import (
     BattingEntry,
     BowlingEntry,
@@ -13,23 +14,22 @@ from .models import (
     Innings,
     Match,
     Player,
-    PlayerRole,
     Team,
-    TournamentTeam,
     Tournament,
+    TournamentTeam,
     User,
     Venue,
 )
-from .seed_data import SEED_COMMENTS, SEED_TOURNAMENTS, SEED_USERS, SEED_VENUES
+from .seed_data import (
+    SEED_COMMENTS,
+    SEED_ROSTERS,
+    SEED_TEAMS,
+    SEED_TOURNAMENTS,
+    SEED_USERS,
+    SEED_VENUES,
+)
 
 _DEFAULT_ORGANISER_KEY = "cheng"
-# All seeded tournaments are owned by this organiser to keep the demo simple.
-
-
-def _team_short_code(name: str) -> str:
-    """Derive a 3-4 letter uppercase code from a team name (fallback ``TBD``)."""
-    cleaned = "".join(c for c in name.upper() if c.isalpha())
-    return (cleaned[:3] or "TBD")[:4]
 
 
 def _seed_users() -> dict[str, User]:
@@ -41,6 +41,7 @@ def _seed_users() -> dict[str, User]:
             role=payload["role"],
             bio=payload.get("bio"),
             location=payload.get("location"),
+            avatar_color=payload.get("avatar_color"),
         )
         user.set_password(payload["password"])
         db.session.add(user)
@@ -59,63 +60,26 @@ def _seed_venues() -> dict[str, Venue]:
     return venues_by_key
 
 
-def _seed_teams(tournament: Tournament, team_rows: list[dict]) -> dict[str, Team]:
+def _seed_team_pool(users_by_key: dict[str, User]) -> dict[str, Team]:
     teams_by_name: dict[str, Team] = {}
-    organiser_id = tournament.organiser_id
-    for row in team_rows:
-        team = Team.query.filter_by(organiser_id=organiser_id, name=row["name"]).first()
-        if team is None:
-            team = Team(
-                organiser_id=organiser_id,
-                name=row["name"],
-                short_code=row.get("short_code") or _team_short_code(row["name"]),
-            )
-            db.session.add(team)
-            db.session.flush()
-        db.session.add(
-            TournamentTeam(
-                tournament_id=tournament.id,
-                team_id=team.id,
-                played=row.get("played", 0),
-                won=row.get("won", 0),
-                lost=row.get("lost", 0),
-                points=row.get("points", 0),
-                nrr=row.get("nrr", 0),
-            )
+    organiser_id = users_by_key[_DEFAULT_ORGANISER_KEY].id
+    for payload in SEED_TEAMS:
+        team = Team(
+            organiser_id=organiser_id,
+            name=payload["name"],
+            short_code=payload["short_code"],
         )
-        teams_by_name[row["name"]] = team
+        db.session.add(team)
+        teams_by_name[payload["name"]] = team
     db.session.flush()
     return teams_by_name
 
 
-def _ensure_player(
-    players_by_team: dict[str, dict[str, Player]],
-    team: Team,
-    player_name: str,
-) -> Player:
-    """Return a cached Player for ``team`` + ``player_name``, creating one if absent.
-
-    Used so batting/bowling rows can reference players that weren't pre-declared
-    in a roster — keeps the seed data forgiving without producing duplicates.
-    """
-    team_players = players_by_team.setdefault(team.name, {})
-    existing = team_players.get(player_name)
-    if existing is not None:
-        return existing
-
-    player = Player(team_id=team.id, name=player_name, role=PlayerRole.ALL_ROUNDER)
-    db.session.add(player)
-    db.session.flush()
-    team_players[player_name] = player
-    return player
-
-
 def _seed_rosters(
-    roster_data: dict[str, list[dict]],
     teams_by_name: dict[str, Team],
 ) -> dict[str, dict[str, Player]]:
     players_by_team: dict[str, dict[str, Player]] = {}
-    for team_name, players in roster_data.items():
+    for team_name, players in SEED_ROSTERS.items():
         team = teams_by_name[team_name]
         players_by_name: dict[str, Player] = {}
         for payload in players:
@@ -129,6 +93,21 @@ def _seed_rosters(
         players_by_team[team_name] = players_by_name
     db.session.flush()
     return players_by_team
+
+
+def _roster_player(
+    players_by_team: dict[str, dict[str, Player]],
+    team: Team,
+    player_name: str,
+) -> Player:
+    """Return a seeded roster player or fail fast if the scorecard is inconsistent."""
+    player = players_by_team.get(team.name, {}).get(player_name)
+    if player is None:
+        raise ValueError(
+            f"Seed scorecard references unknown roster player {player_name!r} "
+            f"for team {team.name!r}."
+        )
+    return player
 
 
 def _seed_match(
@@ -181,9 +160,7 @@ def _seed_match(
         db.session.flush()
 
         for batting in innings_data.get("batting", []):
-            player = _ensure_player(
-                players_by_team, batting_team, batting["player_name"]
-            )
+            player = _roster_player(players_by_team, batting_team, batting["player_name"])
             db.session.add(
                 BattingEntry(
                     innings_id=innings.id,
@@ -198,9 +175,7 @@ def _seed_match(
             )
 
         for bowling in innings_data.get("bowling", []):
-            player = _ensure_player(
-                players_by_team, bowling_team, bowling["player_name"]
-            )
+            player = _roster_player(players_by_team, bowling_team, bowling["player_name"])
             db.session.add(
                 BowlingEntry(
                     innings_id=innings.id,
@@ -218,8 +193,11 @@ def _seed_match(
 
 def _seed_tournaments(
     users_by_key: dict[str, User],
+    teams_by_name: dict[str, Team],
+    players_by_team: dict[str, dict[str, Player]],
     venues_by_key: dict[str, Venue],
-) -> dict[str, Match]:
+) -> tuple[dict[str, Tournament], dict[str, Match]]:
+    tournaments_by_key: dict[str, Tournament] = {}
     matches_by_key: dict[str, Match] = {}
 
     for payload in SEED_TOURNAMENTS:
@@ -229,15 +207,22 @@ def _seed_tournaments(
             format=payload["format"],
             status=payload["status"],
             start_date=payload["start_date"],
-            team_count=payload["team_count"],
+            team_count=len(payload["team_names"]),
             organiser_id=users_by_key[_DEFAULT_ORGANISER_KEY].id,
             venue_id=venues_by_key[payload["venue_key"]].id,
         )
         db.session.add(tournament)
         db.session.flush()
+        tournaments_by_key[payload["key"]] = tournament
 
-        teams_by_name = _seed_teams(tournament, payload["teams"])
-        players_by_team = _seed_rosters(payload.get("rosters", {}), teams_by_name)
+        for team_name in payload["team_names"]:
+            db.session.add(
+                TournamentTeam(
+                    tournament_id=tournament.id,
+                    team_id=teams_by_name[team_name].id,
+                )
+            )
+        db.session.flush()
 
         for match_payload in payload.get("matches", []):
             match = _seed_match(
@@ -250,22 +235,33 @@ def _seed_tournaments(
             if match_payload.get("key"):
                 matches_by_key[match_payload["key"]] = match
 
-    return matches_by_key
+        if tournament.matches:
+            _recompute_standings(tournament.matches[0])
+            db.session.flush()
+
+    return tournaments_by_key, matches_by_key
 
 
 def _seed_comments(
     users_by_key: dict[str, User],
+    tournaments_by_key: dict[str, Tournament],
     matches_by_key: dict[str, Match],
 ) -> None:
     for payload in SEED_COMMENTS:
-        db.session.add(
-            Comment(
-                match_id=matches_by_key[payload["match_key"]].id,
-                user_id=users_by_key[payload["user_key"]].id,
-                body=payload["body"],
-                created_at=payload["created_at"],
-            )
+        comment = Comment(
+            user_id=users_by_key[payload["user_key"]].id,
+            body=payload["body"],
+            created_at=payload["created_at"],
         )
+        if payload.get("match_key"):
+            comment.match_id = matches_by_key[payload["match_key"]].id
+        elif payload.get("tournament_key"):
+            comment.tournament_id = tournaments_by_key[payload["tournament_key"]].id
+        else:
+            raise ValueError(
+                "Seed comment must reference either match_key or tournament_key."
+            )
+        db.session.add(comment)
 
 
 @click.command("seed")
@@ -275,7 +271,6 @@ def seed_cli(reset: bool):
     """Load demo fixtures into the database."""
     if reset:
         click.echo("Resetting tables...")
-        # Delete in reverse dependency order so FKs don't block child rows.
         for table in reversed(db.metadata.sorted_tables):
             db.session.execute(table.delete())
         db.session.commit()
@@ -286,11 +281,19 @@ def seed_cli(reset: bool):
 
     users_by_key = _seed_users()
     venues_by_key = _seed_venues()
-    matches_by_key = _seed_tournaments(users_by_key, venues_by_key)
-    _seed_comments(users_by_key, matches_by_key)
+    teams_by_name = _seed_team_pool(users_by_key)
+    players_by_team = _seed_rosters(teams_by_name)
+    tournaments_by_key, matches_by_key = _seed_tournaments(
+        users_by_key,
+        teams_by_name,
+        players_by_team,
+        venues_by_key,
+    )
+    _seed_comments(users_by_key, tournaments_by_key, matches_by_key)
 
     db.session.commit()
     click.echo(
-        f"Seeded {User.query.count()} users, {Tournament.query.count()} tournaments, "
+        f"Seeded {User.query.count()} users, {Team.query.count()} teams, "
+        f"{Player.query.count()} players, {Tournament.query.count()} tournaments, "
         f"{Match.query.count()} matches, {Comment.query.count()} comments."
     )
