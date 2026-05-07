@@ -38,8 +38,7 @@
         <div class="col-md-6">
           <label class="form-label d-block">Status</label>
           <div class="d-flex flex-wrap gap-2" role="group" aria-label="Status filter">
-            {% for key, label in [('all','All'),('upcoming','Upcoming'),('live','In
-            progress'),('completed','Completed')] %}
+            {% for key, label in [('all','All'),('upcoming','Upcoming'),('live','In progress'),('completed','Completed')] %}
             <a class="btn btn-ctm-ghost btn-sm{% if status == key %} active{% endif %}"
               href="{{ url_for('tournaments.list_view', q=q or None, status=(None if key=='all' else key)) }}">{{ label
               }}</a>
