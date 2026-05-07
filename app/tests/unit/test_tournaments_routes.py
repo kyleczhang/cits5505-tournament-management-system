@@ -227,3 +227,99 @@ def test_organiser_cannot_remove_team_with_existing_fixture(client, app, make_us
         tournament_id=tournament.id, team_id=team_b.id
     ).first()
     assert entry is not None
+
+
+def test_tournament_list_search_filters_by_name(client, app, make_user):
+    organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
+    db.session.add_all(
+        [
+            Tournament(
+                name="Summer Smash League",
+                format=TournamentFormat.ROUND_ROBIN,
+                status=TournamentStatus.UPCOMING,
+                start_date=date(2026, 6, 1),
+                team_count=6,
+                organiser_id=organiser.id,
+            ),
+            Tournament(
+                name="Winter Shield",
+                format=TournamentFormat.KNOCKOUT,
+                status=TournamentStatus.UPCOMING,
+                start_date=date(2026, 7, 1),
+                team_count=8,
+                organiser_id=organiser.id,
+            ),
+        ]
+    )
+    db.session.commit()
+
+    body = client.get("/tournaments?q=SMASH").data.decode()
+
+    assert "Summer Smash League" in body
+    assert "Winter Shield" not in body
+
+
+def test_tournament_list_status_filter_shows_only_selected_status(client, app, make_user):
+    organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
+    db.session.add_all(
+        [
+            Tournament(
+                name="Live Cup",
+                format=TournamentFormat.ROUND_ROBIN,
+                status=TournamentStatus.LIVE,
+                start_date=date(2026, 5, 2),
+                team_count=6,
+                organiser_id=organiser.id,
+            ),
+            Tournament(
+                name="Upcoming Cup",
+                format=TournamentFormat.ROUND_ROBIN,
+                status=TournamentStatus.UPCOMING,
+                start_date=date(2026, 6, 2),
+                team_count=6,
+                organiser_id=organiser.id,
+            ),
+            Tournament(
+                name="Completed Cup",
+                format=TournamentFormat.ROUND_ROBIN,
+                status=TournamentStatus.COMPLETED,
+                start_date=date(2026, 4, 2),
+                team_count=6,
+                organiser_id=organiser.id,
+            ),
+        ]
+    )
+    db.session.commit()
+
+    body = client.get("/tournaments?status=live").data.decode()
+
+    assert "Live Cup" in body
+    assert "Upcoming Cup" not in body
+    assert "Completed Cup" not in body
+
+
+def test_tournament_list_pagination_splits_results_across_pages(client, app, make_user):
+    organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
+    tournaments = []
+    for idx in range(1, 12):
+        tournaments.append(
+            Tournament(
+                name=f"Paged Tournament {idx}",
+                format=TournamentFormat.ROUND_ROBIN,
+                status=TournamentStatus.UPCOMING,
+                start_date=date(2026, 1, idx),
+                team_count=4,
+                organiser_id=organiser.id,
+            )
+        )
+    db.session.add_all(tournaments)
+    db.session.commit()
+
+    first_page = client.get("/tournaments?page=1").data.decode()
+    second_page = client.get("/tournaments?page=2").data.decode()
+
+    assert "Paged Tournament 11" in first_page
+    assert "Paged Tournament 2" not in first_page
+    assert "Paged Tournament 1" in second_page
+    assert "Paged Tournament 2" in second_page
+    assert "Paged Tournament 11" not in second_page
