@@ -58,4 +58,5 @@ instance/
 *.sqlite3-journal
 *.db
 
-a.*
+# Ignore todo list for this PR
+todo-issue-57.md
