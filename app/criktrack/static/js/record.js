@@ -157,14 +157,27 @@
       return '<select class="form-select" data-field="player_id">' + options + '</select>';
     }
 
+    var dismissalOptions =
+      '<option value="Bowled">Bowled</option>' +
+      '<option value="Caught">Caught</option>' +
+      '<option value="LBW">LBW</option>' +
+      '<option value="Run Out">Run Out</option>' +
+      '<option value="Stumped">Stumped</option>' +
+      '<option value="Hit Wicket">Hit Wicket</option>' +
+      '<option value="Retired Out">Retired Out</option>' +
+      '<option value="Not Out">Not Out</option>' +
+      '<option value="Did Not Bat">Did Not Bat</option>';
+
     function templateRow(kind, teamId) {
       if (kind === 'batter') {
         return (
           '<div class="row g-2 align-items-center" data-row>' +
-          '  <div class="col-md-4">' + playerSelect(teamId, 'Select batter') + '</div>' +
-          '  <div class="col-md-3"><input type="text" class="form-control" data-field="dismissal" placeholder="Dismissal"></div>' +
-          '  <div class="col-md-2"><input type="number" class="form-control" data-field="runs" placeholder="Runs"></div>' +
-          '  <div class="col-md-2"><input type="number" class="form-control" data-field="balls" placeholder="Balls"></div>' +
+          '  <div class="col-md-3">' + playerSelect(teamId, 'Select batter') + '</div>' +
+          '  <div class="col-md-2"><select class="form-select" data-field="dismissal">' + dismissalOptions + '</select></div>' +
+          '  <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="runs" placeholder="Runs" min="0"></div>' +
+          '  <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="balls" placeholder="Balls" min="0"></div>' +
+          '  <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="fours" placeholder="4s" min="0"></div>' +
+          '  <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="sixes" placeholder="6s" min="0"></div>' +
           '  <div class="col-md-1"><button type="button" class="btn btn-ctm-ghost w-100" data-remove-row aria-label="Remove">×</button></div>' +
           '</div>'
         );
@@ -172,19 +185,174 @@
       return (
         '<div class="row g-2 align-items-center" data-row>' +
         '  <div class="col-md-4">' + playerSelect(teamId, 'Select bowler') + '</div>' +
-        '  <div class="col-md-2"><input type="number" step="0.1" class="form-control" data-field="overs" placeholder="Overs"></div>' +
-        '  <div class="col-md-2"><input type="number" class="form-control" data-field="runs" placeholder="Runs"></div>' +
-        '  <div class="col-md-2"><input type="number" class="form-control" data-field="wickets" placeholder="Wkts"></div>' +
+        '  <div class="col-md-2"><input type="text" inputmode="decimal" class="form-control" data-field="overs" placeholder="Overs"></div>' +
+        '  <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="maidens" placeholder="Maidens" min="0"></div>' +
+        '  <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="runs" placeholder="Runs" min="0"></div>' +
+        '  <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="wickets" placeholder="Wickets" min="0" max="10"></div>' +
         '  <div class="col-md-2"><button type="button" class="btn btn-ctm-ghost w-100" data-remove-row aria-label="Remove">Remove</button></div>' +
         '</div>'
       );
     }
 
+    // Cricket overs arithmetic: balls go 0–5 only, then roll into next over.
+    // Normalise comma decimal separator (some Windows locales display "4,5").
+    function parseCricketOvers(val) {
+      const normalised = String(val).replace(',', '.');
+      const num = Math.max(0, parseFloat(normalised) || 0);
+      // Work in integer tenths to avoid floating-point drift (e.g. 4.2+0.1).
+      const tenths = Math.round(num * 10);
+      const ov = Math.floor(tenths / 10);
+      const balls = Math.min(5, tenths % 10);
+      return { ov: ov, balls: balls };
+    }
+    function fmtOvers(ov, balls) {
+      return ov + '.' + balls;
+    }
+    function incrementOvers(val) {
+      var p = parseCricketOvers(val);
+      p.balls += 1;
+      if (p.balls > 5) { p.balls = 0; p.ov += 1; }
+      return fmtOvers(p.ov, p.balls);
+    }
+    function decrementOvers(val) {
+      var p = parseCricketOvers(val);
+      p.balls -= 1;
+      if (p.balls < 0) {
+        if (p.ov > 0) { p.ov -= 1; p.balls = 5; }
+        else { p.balls = 0; }
+      }
+      return fmtOvers(p.ov, p.balls);
+    }
+
+    // Overs fields are type="text" so the browser never applies locale formatting.
+    // Only digits, one period, and navigation keys are allowed.
+    // Arrow up/down use cricket arithmetic (balls 0–5, then roll to next over).
+    form.addEventListener('keydown', function (e) {
+      const el = e.target;
+      const isOvers = el.getAttribute('data-field') === 'overs';
+
+      if (isOvers) {
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          el.value = e.key === 'ArrowUp' ? incrementOvers(el.value) : decrementOvers(el.value);
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          return;
+        }
+        // Allow: digits, single period, navigation, backspace/delete
+        const nav = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'];
+        if (nav.includes(e.key)) return;
+        if (e.key === '.' && !el.value.includes('.')) return;
+        if (!/^\d$/.test(e.key)) e.preventDefault();
+        return;
+      }
+
+      if (el.type !== 'number') return;
+      if (e.key === '-' && el.min !== '' && parseFloat(el.min) >= 0) {
+        e.preventDefault();
+        return;
+      }
+      if (e.key === '.' || e.key === 'e' || e.key === 'E') {
+        e.preventDefault();
+      }
+    });
+
+    // Prevent the same player appearing twice in the same batting or bowling list.
+    form.addEventListener('change', function (e) {
+      const el = e.target;
+      if (el.getAttribute('data-field') !== 'player_id' || !el.value) return;
+      const list = el.closest('[data-batting-list], [data-bowling-list]');
+      if (!list) return;
+      const already = Array.from(list.querySelectorAll('[data-field="player_id"]'))
+        .some(function (s) { return s !== el && s.value === el.value; });
+      if (!already) return;
+      el.value = '';
+      var msg = document.createElement('div');
+      msg.className = 'text-danger small mt-1';
+      msg.textContent = 'This player is already in the list.';
+      el.parentElement.appendChild(msg);
+      setTimeout(function () { msg.remove(); }, 2500);
+    });
+
+    // Normalise on blur — catches paste, autofill, and typed values.
+    // Overs (type=text): clamp balls to 0–5, always format as X.Y with period.
+    // Integer fields: strip leading zeros, enforce min/max.
+    form.addEventListener('change', function (e) {
+      const el = e.target;
+      const isOvers = el.getAttribute('data-field') === 'overs';
+      if (isOvers) {
+        var p = parseCricketOvers(el.value);
+        el.value = fmtOvers(p.ov, p.balls);
+        return;
+      }
+      if (el.type !== 'number') return;
+      const val = el.valueAsNumber;
+      if (isNaN(val) || el.value === '') { el.value = el.min !== '' ? el.min : 0; return; }
+      const min = el.min !== '' ? parseInt(el.min, 10) : -Infinity;
+      const max = el.max !== '' ? parseInt(el.max, 10) : Infinity;
+      el.value = String(Math.min(max, Math.max(min, Math.floor(val))));
+    });
+
+    // Dismissal values that do NOT count as a wicket.
+    var notOutDismissals = new Set(['', 'Not Out', 'Did Not Bat']);
+
+    function recalcInningsSummary(pane) {
+      var battingList = pane.querySelector('[data-batting-list]');
+      if (!battingList) return;
+      var totalRuns = 0, totalBalls = 0, wickets = 0, hasEntry = false;
+      battingList.querySelectorAll('[data-row]').forEach(function (row) {
+        // Clear any previous boundary error on this row.
+        var prev = row.querySelector('.boundary-error');
+        if (prev) prev.remove();
+
+        var pid = row.querySelector('[data-field="player_id"]');
+        if (!pid || !pid.value) return;
+        hasEntry = true;
+
+        var runs  = parseInt(row.querySelector('[data-field="runs"]').value,  10) || 0;
+        var balls = parseInt(row.querySelector('[data-field="balls"]').value, 10) || 0;
+        var fours = parseInt(row.querySelector('[data-field="fours"]').value, 10) || 0;
+        var sixes = parseInt(row.querySelector('[data-field="sixes"]').value, 10) || 0;
+        var d = row.querySelector('[data-field="dismissal"]').value;
+
+        // Per-batter validation: boundary runs cannot exceed the batter's total runs.
+        var boundaryRuns = (4 * fours) + (6 * sixes);
+        if (boundaryRuns > runs) {
+          var msg = document.createElement('div');
+          msg.className = 'text-danger small mt-1 boundary-error';
+          msg.textContent = 'Boundary runs (' + boundaryRuns + ') exceed this batter\'s runs (' + runs + ').';
+          row.appendChild(msg);
+        }
+
+        totalRuns  += runs;
+        totalBalls += balls;
+        if (!notOutDismissals.has(d)) wickets++;
+      });
+      if (!hasEntry) return;
+      var runsEl    = pane.querySelector(':scope > .row [data-field="runs"]');
+      var wicketsEl = pane.querySelector(':scope > .row [data-field="wickets"]');
+      var oversEl   = pane.querySelector(':scope > .row [data-field="overs"]');
+      if (runsEl)    runsEl.value    = totalRuns;
+      if (wicketsEl) wicketsEl.value = Math.min(10, wickets);
+      if (oversEl)   oversEl.value   = fmtOvers(Math.floor(totalBalls / 6), totalBalls % 6);
+      refreshSummary();
+    }
+
+    // Recalculate summary whenever a batting row field changes.
+    form.addEventListener('input', function (e) {
+      var battingList = e.target.closest('[data-batting-list]');
+      if (!battingList) return;
+      var pane = battingList.closest('[data-innings-pane]');
+      if (pane) recalcInningsSummary(pane);
+    });
+
     form.addEventListener('click', function (e) {
       const target = e.target.closest('[data-remove-row]');
       if (target) {
         const row = target.closest('[data-row]');
+        const pane = row && row.closest('[data-innings-pane]');
+        const inBatting = row && row.closest('[data-batting-list]');
         if (row) row.remove();
+        if (pane && inBatting) recalcInningsSummary(pane);
         return;
       }
       const addBatter = e.target.closest('[data-add-batter]');
@@ -197,6 +365,17 @@
       if (addBowler) {
         const list = addBowler.previousElementSibling;
         list.insertAdjacentHTML('beforeend', templateRow('bowler', list.getAttribute('data-team-id')));
+      }
+    });
+
+    // Dismissal changes fire 'change', not 'input' — handle separately.
+    form.addEventListener('change', function (e) {
+      if (e.target.getAttribute('data-field') === 'dismissal') {
+        var battingList = e.target.closest('[data-batting-list]');
+        if (battingList) {
+          var pane = battingList.closest('[data-innings-pane]');
+          if (pane) recalcInningsSummary(pane);
+        }
       }
     });
 

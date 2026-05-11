@@ -173,8 +173,14 @@ def validate_payload(payload: dict, match: Match) -> dict:
                 "fours": _to_int(b.get("fours", 0), f"{bp}.fours", errors) or 0,
                 "sixes": _to_int(b.get("sixes", 0), f"{bp}.sixes", errors) or 0,
                 "dismissal": (b.get("dismissal") or "").strip() or None,
-                "is_not_out": bool(b.get("is_not_out")),
+                "is_not_out": (b.get("dismissal") or "").strip() in ("Not Out", "Did Not Bat", ""),
             }
+            if entry["runs"] is not None and entry["fours"] is not None and entry["sixes"] is not None:
+                boundary_runs = 4 * entry["fours"] + 6 * entry["sixes"]
+                if boundary_runs > entry["runs"]:
+                    errors[f"{bp}.fours"] = (
+                        f"Boundary runs ({boundary_runs}) exceed this batter's runs ({entry['runs']})."
+                    )
             cleaned_batting.append(entry)
 
         cleaned_bowling = []
@@ -196,6 +202,8 @@ def validate_payload(payload: dict, match: Match) -> dict:
                 "runs": _to_int(b.get("runs", 0), f"{bp}.runs", errors),
                 "wickets": _to_int(b.get("wickets", 0), f"{bp}.wickets", errors),
             }
+            if entry["wickets"] is not None and entry["wickets"] > 10:
+                errors[f"{bp}.wickets"] = "Wickets cannot exceed 10."
             cleaned_bowling.append(entry)
 
         cleaned_innings.append(
