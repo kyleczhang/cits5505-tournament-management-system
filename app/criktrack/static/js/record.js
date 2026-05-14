@@ -175,22 +175,22 @@
           '<div class="row g-2 align-items-center" data-row>' +
           '  <div class="col-md-3">' + playerSelect(teamId, 'Select batter') + '</div>' +
           '  <div class="col-md-2"><select class="form-select" data-field="dismissal">' + dismissalOptions + '</select></div>' +
-          '  <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="runs" placeholder="Runs" min="0"></div>' +
-          '  <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="balls" placeholder="Balls" min="0"></div>' +
+          '  <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="runs" placeholder="Runs" min="0"></div>' +
+          '  <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="balls" placeholder="Balls" min="0"></div>' +
           '  <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="fours" placeholder="4s" min="0"></div>' +
           '  <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="sixes" placeholder="6s" min="0"></div>' +
-          '  <div class="col-md-1"><button type="button" class="btn btn-ctm-ghost w-100" data-remove-row aria-label="Remove">×</button></div>' +
+          '  <div class="col-md-1 d-flex justify-content-center"><button type="button" class="btn btn-link text-decoration-none" data-remove-row aria-label="Remove" style="padding:0; font-size:1.25rem;">×</button></div>' +
           '</div>'
         );
       }
       return (
         '<div class="row g-2 align-items-center" data-row>' +
-        '  <div class="col-md-4">' + playerSelect(teamId, 'Select bowler') + '</div>' +
+        '  <div class="col-md-3">' + playerSelect(teamId, 'Select bowler') + '</div>' +
         '  <div class="col-md-2"><input type="text" inputmode="decimal" class="form-control" data-field="overs" placeholder="Overs"></div>' +
-        '  <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="maidens" placeholder="Maidens" min="0"></div>' +
+        '  <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="maidens" placeholder="Maidens" min="0"></div>' +
         '  <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="runs" placeholder="Runs" min="0"></div>' +
-        '  <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="wickets" placeholder="Wickets" min="0" max="10"></div>' +
-        '  <div class="col-md-2"><button type="button" class="btn btn-ctm-ghost w-100" data-remove-row aria-label="Remove">Remove</button></div>' +
+        '  <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="wickets" placeholder="Wickets" min="0" max="10"></div>' +
+        '  <div class="col-md-1 d-flex justify-content-center"><button type="button" class="btn btn-link text-decoration-none" data-remove-row aria-label="Remove" style="padding:0; font-size:1.25rem;">×</button></div>' +
         '</div>'
       );
     }
