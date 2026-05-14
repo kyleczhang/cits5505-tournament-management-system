@@ -294,7 +294,7 @@
     });
 
     // Dismissal values that do NOT count as a wicket.
-    var notOutDismissals = new Set(['', 'Not Out', 'Did Not Bat']);
+    var notOutDismissals = new Set(['Not Out', 'Did Not Bat']);
 
     function recalcInningsSummary(pane) {
       var battingList = pane.querySelector('[data-batting-list]');
