@@ -390,3 +390,99 @@ def test_save_result_preserves_legacy_dismissal_on_edit(app):
     db.session.refresh(match)
     assert match.innings[0].batting_entries[0].dismissal == "Caught behind"
     assert match.innings[0].batting_entries[0].runs == 60  # runs were updated
+
+
+def test_validate_rejects_negative_runs_in_batting(app):
+    """Reject negative runs in batting entries."""
+    _, _, team_a, _, batter, _, match = _scaffold(app)
+    payload = {
+        "innings": [
+            {
+                "batting_team_id": team_a.id,
+                "runs": 100,
+                "wickets": 5,
+                "overs": "20.0",
+                "batting": [{"player_id": batter.id, "runs": -5, "balls": 10}],
+            }
+        ]
+    }
+    with pytest.raises(ValidationError) as exc:
+        validate_payload(payload, match)
+    assert "innings.0.batting.0.runs" in exc.value.errors
+
+
+def test_validate_rejects_boundary_runs_exceeding_total(app):
+    """Reject when 4s and 6s total more than batter's runs."""
+    _, _, team_a, _, batter, _, match = _scaffold(app)
+    payload = {
+        "innings": [
+            {
+                "batting_team_id": team_a.id,
+                "runs": 100,
+                "wickets": 5,
+                "overs": "20.0",
+                "batting": [
+                    {
+                        "player_id": batter.id,
+                        "runs": 20,
+                        "balls": 15,
+                        "fours": 8,
+                        "sixes": 0,
+                    }
+                ],
+            }
+        ]
+    }
+    with pytest.raises(ValidationError) as exc:
+        validate_payload(payload, match)
+    assert "innings.0.batting.0.fours" in exc.value.errors
+
+
+def test_validate_accepts_complete_valid_match_record(app):
+    """Accept a complete valid match record with all new validations."""
+    _, tournament, team_a, team_b, batter, bowler, match = _scaffold(app)
+    payload = {
+        "toss": {"winner_team_id": team_a.id, "decision": "bat"},
+        "result": {"winner_team_id": team_a.id, "result_text": "Team A won by 10 runs"},
+        "innings": [
+            {
+                "batting_team_id": team_a.id,
+                "runs": 150,
+                "wickets": 3,
+                "overs": "20.0",
+                "batting": [
+                    {
+                        "player_id": batter.id,
+                        "runs": 75,
+                        "balls": 50,
+                        "fours": 8,
+                        "sixes": 2,
+                        "dismissal": "Not Out",
+                    }
+                ],
+                "bowling": [
+                    {
+                        "player_id": bowler.id,
+                        "overs": "4.2",
+                        "maidens": 1,
+                        "runs": 25,
+                        "wickets": 1,
+                    }
+                ],
+            },
+            {
+                "batting_team_id": team_b.id,
+                "runs": 140,
+                "wickets": 8,
+                "overs": "20.0",
+            },
+        ],
+    }
+    normalised = validate_payload(payload, match)
+    save_result(match, normalised)
+
+    db.session.refresh(match)
+    assert match.status == MatchStatus.COMPLETED
+    assert match.winner_id == team_a.id
+    assert len(match.innings) == 2
+    assert match.innings[0].batting_entries[0].dismissal == "Not Out"
