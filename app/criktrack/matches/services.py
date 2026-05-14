@@ -210,6 +210,17 @@ def validate_payload(payload: dict, match: Match) -> dict:
                     )
             cleaned_batting.append(entry)
 
+        # Check for duplicate players in batting entries
+        seen_bat_players = set()
+        for bidx, entry in enumerate(cleaned_batting):
+            if entry["player_id"] in seen_bat_players:
+                bp = f"{prefix}.batting.{bidx}"
+                errors[f"{bp}.player_id"] = (
+                    "This player has already been added to this innings."
+                )
+            else:
+                seen_bat_players.add(entry["player_id"])
+
         cleaned_bowling = []
         for bidx, b in enumerate(inn.get("bowling", []) or []):
             bp = f"{prefix}.bowling.{bidx}"
@@ -232,6 +243,17 @@ def validate_payload(payload: dict, match: Match) -> dict:
             if entry["wickets"] is not None and entry["wickets"] > 10:
                 errors[f"{bp}.wickets"] = "Wickets cannot exceed 10."
             cleaned_bowling.append(entry)
+
+        # Check for duplicate players in bowling entries
+        seen_bowl_players = set()
+        for bidx, entry in enumerate(cleaned_bowling):
+            if entry["player_id"] in seen_bowl_players:
+                bp = f"{prefix}.bowling.{bidx}"
+                errors[f"{bp}.player_id"] = (
+                    "This player has already been added to this innings."
+                )
+            else:
+                seen_bowl_players.add(entry["player_id"])
 
         cleaned_innings.append(
             {

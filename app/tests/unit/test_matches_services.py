@@ -303,3 +303,47 @@ def test_validate_accepts_valid_cricket_overs(app):
     normalised = validate_payload(payload, match)
     assert normalised["innings"][0]["overs"] == Decimal("10.5")
     assert normalised["innings"][0]["bowling"][0]["overs"] == Decimal("4.3")
+
+
+def test_validate_rejects_duplicate_batting_player(app):
+    """Reject same player appearing twice in batting entries."""
+    _, _, team_a, _, batter, _, match = _scaffold(app)
+    payload = {
+        "innings": [
+            {
+                "batting_team_id": team_a.id,
+                "runs": 100,
+                "wickets": 5,
+                "overs": "20.0",
+                "batting": [
+                    {"player_id": batter.id, "runs": 50, "balls": 40},
+                    {"player_id": batter.id, "runs": 30, "balls": 25},
+                ],
+            }
+        ]
+    }
+    with pytest.raises(ValidationError) as exc:
+        validate_payload(payload, match)
+    assert "innings.0.batting.1.player_id" in exc.value.errors
+
+
+def test_validate_rejects_duplicate_bowling_player(app):
+    """Reject same player appearing twice in bowling entries."""
+    _, _, team_a, team_b, _, bowler, match = _scaffold(app)
+    payload = {
+        "innings": [
+            {
+                "batting_team_id": team_a.id,
+                "runs": 100,
+                "wickets": 5,
+                "overs": "20.0",
+                "bowling": [
+                    {"player_id": bowler.id, "overs": "4.0", "runs": 20, "wickets": 1},
+                    {"player_id": bowler.id, "overs": "2.0", "runs": 15, "wickets": 0},
+                ],
+            }
+        ]
+    }
+    with pytest.raises(ValidationError) as exc:
+        validate_payload(payload, match)
+    assert "innings.0.bowling.1.player_id" in exc.value.errors
