@@ -60,6 +60,33 @@ def _to_decimal(value: Any, key: str, errors: dict[str, str]) -> Decimal | None:
     return val
 
 
+def _validate_cricket_overs(
+    value: Any, key: str, errors: dict[str, str]
+) -> Decimal | None:
+    """Validate overs in cricket format: X.Y where X >= 0 and Y (balls) is 0-5.
+
+    Accepts: 0.0, 4.5, 19.3, 19.0
+    Rejects: 4.7, 19.9, -1.0, 4.6
+    """
+    try:
+        val = Decimal(str(value))
+    except (InvalidOperation, TypeError):
+        errors[key] = "Must be a number."
+        return None
+    if val < 0:
+        errors[key] = "Must be >= 0."
+        return None
+
+    val = val.quantize(Decimal("0.1"))
+    str_val = str(val)
+    if "." in str_val:
+        fractional_digit = int(str_val.split(".")[1])
+        if fractional_digit > 5:
+            errors[key] = "Overs decimal must be 0-5 (e.g., 4.0-4.5, not 4.6-4.9)."
+            return None
+    return val
+
+
 def validate_payload(payload: dict, match: Match) -> dict:
     """Return a normalised payload or raise ValidationError.
 
@@ -152,7 +179,7 @@ def validate_payload(payload: dict, match: Match) -> dict:
         wickets = _to_int(inn.get("wickets", 0), f"{prefix}.wickets", errors)
         if wickets is not None and wickets > 10:
             errors[f"{prefix}.wickets"] = "Wickets cannot exceed 10."
-        overs = _to_decimal(inn.get("overs", 0), f"{prefix}.overs", errors)
+        overs = _validate_cricket_overs(inn.get("overs", 0), f"{prefix}.overs", errors)
 
         cleaned_batting = []
         for bidx, b in enumerate(inn.get("batting", []) or []):
@@ -197,7 +224,7 @@ def validate_payload(payload: dict, match: Match) -> dict:
                 continue
             entry = {
                 "player_id": player_id,
-                "overs": _to_decimal(b.get("overs", 0), f"{bp}.overs", errors),
+                "overs": _validate_cricket_overs(b.get("overs", 0), f"{bp}.overs", errors),
                 "maidens": _to_int(b.get("maidens", 0), f"{bp}.maidens", errors) or 0,
                 "runs": _to_int(b.get("runs", 0), f"{bp}.runs", errors),
                 "wickets": _to_int(b.get("wickets", 0), f"{bp}.wickets", errors),

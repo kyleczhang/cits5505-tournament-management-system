@@ -247,3 +247,59 @@ def test_validate_rejects_player_from_wrong_team(app):
     with pytest.raises(ValidationError) as exc:
         validate_payload(payload, match)
     assert "innings.0.batting.0.player_id" in exc.value.errors
+
+
+def test_validate_rejects_invalid_cricket_overs_in_innings(app):
+    """Reject overs with invalid decimal (e.g., 10.7 where decimal > 5)."""
+    _, _, team_a, _, _, _, match = _scaffold(app)
+    payload = {
+        "innings": [
+            {"batting_team_id": team_a.id, "runs": 100, "wickets": 5, "overs": "10.7"}
+        ]
+    }
+    with pytest.raises(ValidationError) as exc:
+        validate_payload(payload, match)
+    assert "innings.0.overs" in exc.value.errors
+
+
+def test_validate_rejects_invalid_cricket_overs_in_bowling(app):
+    """Reject bowling overs with invalid decimal (e.g., 19.9 where decimal > 5)."""
+    _, _, team_a, team_b, _, bowler, match = _scaffold(app)
+    payload = {
+        "innings": [
+            {
+                "batting_team_id": team_a.id,
+                "runs": 100,
+                "wickets": 5,
+                "overs": "20.0",
+                "bowling": [
+                    {"player_id": bowler.id, "overs": "19.9", "runs": 40, "wickets": 2}
+                ],
+            }
+        ]
+    }
+    with pytest.raises(ValidationError) as exc:
+        validate_payload(payload, match)
+    assert "innings.0.bowling.0.overs" in exc.value.errors
+
+
+def test_validate_accepts_valid_cricket_overs(app):
+    """Accept overs in valid cricket format (decimal 0-5)."""
+    _, _, team_a, team_b, batter, bowler, match = _scaffold(app)
+    payload = {
+        "innings": [
+            {
+                "batting_team_id": team_a.id,
+                "runs": 100,
+                "wickets": 5,
+                "overs": "10.5",
+                "batting": [{"player_id": batter.id, "runs": 50, "balls": 40}],
+                "bowling": [
+                    {"player_id": bowler.id, "overs": "4.3", "runs": 20, "wickets": 1}
+                ],
+            }
+        ]
+    }
+    normalised = validate_payload(payload, match)
+    assert normalised["innings"][0]["overs"] == Decimal("10.5")
+    assert normalised["innings"][0]["bowling"][0]["overs"] == Decimal("4.3")
