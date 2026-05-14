@@ -63,6 +63,33 @@ def _to_decimal(value: Any, key: str, errors: dict[str, str]) -> Decimal | None:
     return val
 
 
+def _validate_cricket_overs(
+    value: Any, key: str, errors: dict[str, str]
+) -> Decimal | None:
+    """Validate overs in cricket format: X.Y where X >= 0 and Y (balls) is 0-5.
+
+    Accepts: 0.0, 4.5, 19.3, 19.0
+    Rejects: 4.7, 19.9, -1.0, 4.6
+    """
+    try:
+        val = Decimal(str(value))
+    except (InvalidOperation, TypeError):
+        errors[key] = "Must be a number."
+        return None
+    if val < 0:
+        errors[key] = "Must be >= 0."
+        return None
+
+    val = val.quantize(Decimal("0.1"))
+    str_val = str(val)
+    if "." in str_val:
+        fractional_digit = int(str_val.split(".")[1])
+        if fractional_digit > 5:
+            errors[key] = "Overs decimal must be 0-5 (e.g., 4.0-4.5, not 4.6-4.9)."
+            return None
+    return val
+
+
 def validate_payload(payload: dict, match: Match) -> dict:
     """Return a normalised payload or raise ValidationError.
 
@@ -155,7 +182,7 @@ def validate_payload(payload: dict, match: Match) -> dict:
         wickets = _to_int(inn.get("wickets", 0), f"{prefix}.wickets", errors)
         if wickets is not None and wickets > 10:
             errors[f"{prefix}.wickets"] = "Wickets cannot exceed 10."
-        overs = _to_decimal(inn.get("overs", 0), f"{prefix}.overs", errors)
+        overs = _validate_cricket_overs(inn.get("overs", 0), f"{prefix}.overs", errors)
 
         cleaned_batting = []
         for bidx, b in enumerate(inn.get("batting", []) or []):
@@ -176,9 +203,26 @@ def validate_payload(payload: dict, match: Match) -> dict:
                 "fours": _to_int(b.get("fours", 0), f"{bp}.fours", errors) or 0,
                 "sixes": _to_int(b.get("sixes", 0), f"{bp}.sixes", errors) or 0,
                 "dismissal": (b.get("dismissal") or "").strip() or None,
-                "is_not_out": bool(b.get("is_not_out")),
+                "is_not_out": (b.get("dismissal") or "").strip() in ("Not Out", "Did Not Bat"),
             }
+            if entry["runs"] is not None and entry["fours"] is not None and entry["sixes"] is not None:
+                boundary_runs = 4 * entry["fours"] + 6 * entry["sixes"]
+                if boundary_runs > entry["runs"]:
+                    errors[f"{bp}.fours"] = (
+                        f"Boundary runs ({boundary_runs}) exceed this batter's runs ({entry['runs']})."
+                    )
             cleaned_batting.append(entry)
+
+        # Check for duplicate players in batting entries
+        seen_bat_players = set()
+        for bidx, entry in enumerate(cleaned_batting):
+            if entry["player_id"] in seen_bat_players:
+                bp = f"{prefix}.batting.{bidx}"
+                errors[f"{bp}.player_id"] = (
+                    "This player has already been added to this innings."
+                )
+            else:
+                seen_bat_players.add(entry["player_id"])
 
         cleaned_bowling = []
         for bidx, b in enumerate(inn.get("bowling", []) or []):
@@ -194,12 +238,25 @@ def validate_payload(payload: dict, match: Match) -> dict:
                 continue
             entry = {
                 "player_id": player_id,
-                "overs": _to_decimal(b.get("overs", 0), f"{bp}.overs", errors),
+                "overs": _validate_cricket_overs(b.get("overs", 0), f"{bp}.overs", errors),
                 "maidens": _to_int(b.get("maidens", 0), f"{bp}.maidens", errors) or 0,
                 "runs": _to_int(b.get("runs", 0), f"{bp}.runs", errors),
                 "wickets": _to_int(b.get("wickets", 0), f"{bp}.wickets", errors),
             }
+            if entry["wickets"] is not None and entry["wickets"] > 10:
+                errors[f"{bp}.wickets"] = "Wickets cannot exceed 10."
             cleaned_bowling.append(entry)
+
+        # Check for duplicate players in bowling entries
+        seen_bowl_players = set()
+        for bidx, entry in enumerate(cleaned_bowling):
+            if entry["player_id"] in seen_bowl_players:
+                bp = f"{prefix}.bowling.{bidx}"
+                errors[f"{bp}.player_id"] = (
+                    "This player has already been added to this innings."
+                )
+            else:
+                seen_bowl_players.add(entry["player_id"])
 
         cleaned_innings.append(
             {
@@ -248,6 +305,14 @@ def save_result(match: Match, normalised: dict) -> Match:
     # No winner yet => match is still in progress; once a winner is set it's complete.
     match.status = MatchStatus.COMPLETED if match.winner_id else MatchStatus.LIVE
 
+    # Preserve legacy dismissal values before wiping existing innings.
+    old_dismissals: dict[tuple[int, int], dict[int, str]] = {}
+    for old_inn in match.innings:
+        inning_key = (old_inn.inning_number, old_inn.batting_team_id)
+        old_dismissals[inning_key] = {
+            entry.player_id: entry.dismissal for entry in old_inn.batting_entries
+        }
+
     # Wipe existing innings (cascade clears batting/bowling entries).
     for inn in list(match.innings):
         db.session.delete(inn)
@@ -268,6 +333,10 @@ def save_result(match: Match, normalised: dict) -> Match:
 
         for b in payload["batting"]:
             player = db.session.get(Player, b["player_id"])
+            # Preserve legacy dismissal if new value is None
+            inning_key = (idx, payload["batting_team_id"])
+            old_dismissal = old_dismissals.get(inning_key, {}).get(b["player_id"])
+            dismissal = b["dismissal"] if b["dismissal"] is not None else old_dismissal
             db.session.add(
                 BattingEntry(
                     innings_id=inn.id,
@@ -276,7 +345,7 @@ def save_result(match: Match, normalised: dict) -> Match:
                     balls=b["balls"] or 0,
                     fours=b["fours"],
                     sixes=b["sixes"],
-                    dismissal=b["dismissal"],
+                    dismissal=dismissal,
                     is_not_out=b["is_not_out"],
                 )
             )

@@ -255,3 +255,242 @@ def test_validate_rejects_player_from_wrong_team(app):
     with pytest.raises(ValidationError) as exc:
         validate_payload(payload, match)
     assert "innings.0.batting.0.player_id" in exc.value.errors
+
+
+def test_validate_rejects_invalid_cricket_overs_in_innings(app):
+    """Reject overs with invalid decimal (e.g., 10.7 where decimal > 5)."""
+    _, _, team_a, _, _, _, match = _scaffold(app)
+    payload = {
+        "innings": [
+            {"batting_team_id": team_a.id, "runs": 100, "wickets": 5, "overs": "10.7"}
+        ]
+    }
+    with pytest.raises(ValidationError) as exc:
+        validate_payload(payload, match)
+    assert "innings.0.overs" in exc.value.errors
+
+
+def test_validate_rejects_invalid_cricket_overs_in_bowling(app):
+    """Reject bowling overs with invalid decimal (e.g., 19.9 where decimal > 5)."""
+    _, _, team_a, team_b, _, bowler, match = _scaffold(app)
+    payload = {
+        "innings": [
+            {
+                "batting_team_id": team_a.id,
+                "runs": 100,
+                "wickets": 5,
+                "overs": "20.0",
+                "bowling": [
+                    {"player_id": bowler.id, "overs": "19.9", "runs": 40, "wickets": 2}
+                ],
+            }
+        ]
+    }
+    with pytest.raises(ValidationError) as exc:
+        validate_payload(payload, match)
+    assert "innings.0.bowling.0.overs" in exc.value.errors
+
+
+def test_validate_accepts_valid_cricket_overs(app):
+    """Accept overs in valid cricket format (decimal 0-5)."""
+    _, _, team_a, team_b, batter, bowler, match = _scaffold(app)
+    payload = {
+        "innings": [
+            {
+                "batting_team_id": team_a.id,
+                "runs": 100,
+                "wickets": 5,
+                "overs": "10.5",
+                "batting": [{"player_id": batter.id, "runs": 50, "balls": 40}],
+                "bowling": [
+                    {"player_id": bowler.id, "overs": "4.3", "runs": 20, "wickets": 1}
+                ],
+            }
+        ]
+    }
+    normalised = validate_payload(payload, match)
+    assert normalised["innings"][0]["overs"] == Decimal("10.5")
+    assert normalised["innings"][0]["bowling"][0]["overs"] == Decimal("4.3")
+
+
+def test_validate_rejects_duplicate_batting_player(app):
+    """Reject same player appearing twice in batting entries."""
+    _, _, team_a, _, batter, _, match = _scaffold(app)
+    payload = {
+        "innings": [
+            {
+                "batting_team_id": team_a.id,
+                "runs": 100,
+                "wickets": 5,
+                "overs": "20.0",
+                "batting": [
+                    {"player_id": batter.id, "runs": 50, "balls": 40},
+                    {"player_id": batter.id, "runs": 30, "balls": 25},
+                ],
+            }
+        ]
+    }
+    with pytest.raises(ValidationError) as exc:
+        validate_payload(payload, match)
+    assert "innings.0.batting.1.player_id" in exc.value.errors
+
+
+def test_validate_rejects_duplicate_bowling_player(app):
+    """Reject same player appearing twice in bowling entries."""
+    _, _, team_a, team_b, _, bowler, match = _scaffold(app)
+    payload = {
+        "innings": [
+            {
+                "batting_team_id": team_a.id,
+                "runs": 100,
+                "wickets": 5,
+                "overs": "20.0",
+                "bowling": [
+                    {"player_id": bowler.id, "overs": "4.0", "runs": 20, "wickets": 1},
+                    {"player_id": bowler.id, "overs": "2.0", "runs": 15, "wickets": 0},
+                ],
+            }
+        ]
+    }
+    with pytest.raises(ValidationError) as exc:
+        validate_payload(payload, match)
+    assert "innings.0.bowling.1.player_id" in exc.value.errors
+
+
+def test_save_result_preserves_legacy_dismissal_on_edit(app):
+    """Preserve legacy dismissal values when editing if new value is empty."""
+    _, _, team_a, team_b, batter, _, match = _scaffold(app)
+    # First save: legacy free-text dismissal (non-standard value)
+    first = validate_payload(
+        {
+            "innings": [
+                {
+                    "batting_team_id": team_a.id,
+                    "runs": 100,
+                    "wickets": 1,
+                    "overs": "20.0",
+                    "batting": [{"player_id": batter.id, "runs": 50, "balls": 40, "dismissal": "Caught behind"}],
+                }
+            ]
+        },
+        match,
+    )
+    save_result(match, first)
+    db.session.refresh(match)
+    assert match.innings[0].batting_entries[0].dismissal == "Caught behind"
+
+    # Second edit: empty dismissal (user didn't change it) should preserve old value
+    second = validate_payload(
+        {
+            "innings": [
+                {
+                    "batting_team_id": team_a.id,
+                    "runs": 100,
+                    "wickets": 1,
+                    "overs": "20.0",
+                    "batting": [{"player_id": batter.id, "runs": 60, "balls": 45}],
+                }
+            ]
+        },
+        match,
+    )
+    save_result(match, second)
+    db.session.refresh(match)
+    assert match.innings[0].batting_entries[0].dismissal == "Caught behind"
+    assert match.innings[0].batting_entries[0].runs == 60  # runs were updated
+
+
+def test_validate_rejects_negative_runs_in_batting(app):
+    """Reject negative runs in batting entries."""
+    _, _, team_a, _, batter, _, match = _scaffold(app)
+    payload = {
+        "innings": [
+            {
+                "batting_team_id": team_a.id,
+                "runs": 100,
+                "wickets": 5,
+                "overs": "20.0",
+                "batting": [{"player_id": batter.id, "runs": -5, "balls": 10}],
+            }
+        ]
+    }
+    with pytest.raises(ValidationError) as exc:
+        validate_payload(payload, match)
+    assert "innings.0.batting.0.runs" in exc.value.errors
+
+
+def test_validate_rejects_boundary_runs_exceeding_total(app):
+    """Reject when 4s and 6s total more than batter's runs."""
+    _, _, team_a, _, batter, _, match = _scaffold(app)
+    payload = {
+        "innings": [
+            {
+                "batting_team_id": team_a.id,
+                "runs": 100,
+                "wickets": 5,
+                "overs": "20.0",
+                "batting": [
+                    {
+                        "player_id": batter.id,
+                        "runs": 20,
+                        "balls": 15,
+                        "fours": 8,
+                        "sixes": 0,
+                    }
+                ],
+            }
+        ]
+    }
+    with pytest.raises(ValidationError) as exc:
+        validate_payload(payload, match)
+    assert "innings.0.batting.0.fours" in exc.value.errors
+
+
+def test_validate_accepts_complete_valid_match_record(app):
+    """Accept a complete valid match record with all new validations."""
+    _, tournament, team_a, team_b, batter, bowler, match = _scaffold(app)
+    payload = {
+        "toss": {"winner_team_id": team_a.id, "decision": "bat"},
+        "result": {"winner_team_id": team_a.id, "result_text": "Team A won by 10 runs"},
+        "innings": [
+            {
+                "batting_team_id": team_a.id,
+                "runs": 150,
+                "wickets": 3,
+                "overs": "20.0",
+                "batting": [
+                    {
+                        "player_id": batter.id,
+                        "runs": 75,
+                        "balls": 50,
+                        "fours": 8,
+                        "sixes": 2,
+                        "dismissal": "Not Out",
+                    }
+                ],
+                "bowling": [
+                    {
+                        "player_id": bowler.id,
+                        "overs": "4.2",
+                        "maidens": 1,
+                        "runs": 25,
+                        "wickets": 1,
+                    }
+                ],
+            },
+            {
+                "batting_team_id": team_b.id,
+                "runs": 140,
+                "wickets": 8,
+                "overs": "20.0",
+            },
+        ],
+    }
+    normalised = validate_payload(payload, match)
+    save_result(match, normalised)
+
+    db.session.refresh(match)
+    assert match.status == MatchStatus.COMPLETED
+    assert match.winner_id == team_a.id
+    assert len(match.innings) == 2
+    assert match.innings[0].batting_entries[0].dismissal == "Not Out"
