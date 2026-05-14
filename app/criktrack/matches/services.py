@@ -200,7 +200,7 @@ def validate_payload(payload: dict, match: Match) -> dict:
                 "fours": _to_int(b.get("fours", 0), f"{bp}.fours", errors) or 0,
                 "sixes": _to_int(b.get("sixes", 0), f"{bp}.sixes", errors) or 0,
                 "dismissal": (b.get("dismissal") or "").strip() or None,
-                "is_not_out": (b.get("dismissal") or "").strip() in ("Not Out", "Did Not Bat", ""),
+                "is_not_out": (b.get("dismissal") or "").strip() in ("Not Out", "Did Not Bat"),
             }
             if entry["runs"] is not None and entry["fours"] is not None and entry["sixes"] is not None:
                 boundary_runs = 4 * entry["fours"] + 6 * entry["sixes"]
