@@ -97,8 +97,8 @@
               <div class="row g-2 mb-1 text-muted" style="font-size:.75rem; font-weight:600;">
                 <div class="col-md-3">Batter</div>
                 <div class="col-md-2">Dismissal</div>
-                <div class="col-md-1">Runs</div>
-                <div class="col-md-1">Balls</div>
+                <div class="col-md-2">Runs</div>
+                <div class="col-md-2">Balls</div>
                 <div class="col-md-1">4s</div>
                 <div class="col-md-1">6s</div>
               </div>
@@ -123,11 +123,11 @@
                           {% endfor %}
                         </select>
                       </div>
-                      <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="runs" value="{{ b.runs }}" placeholder="R" min="0"></div>
-                      <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="balls" value="{{ b.balls }}" placeholder="B" min="0"></div>
+                      <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="runs" value="{{ b.runs }}" placeholder="R" min="0"></div>
+                      <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="balls" value="{{ b.balls }}" placeholder="B" min="0"></div>
                       <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="fours" value="{{ b.fours }}" placeholder="4s" min="0"></div>
                       <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="sixes" value="{{ b.sixes }}" placeholder="6s" min="0"></div>
-                      <div class="col-md-1"><button type="button" class="btn btn-ctm-ghost w-100" data-remove-row aria-label="Remove">×</button></div>
+                      <div class="col-md-1 d-flex justify-content-center"><button type="button" class="btn btn-link text-decoration-none" data-remove-row aria-label="Remove" style="padding:0; font-size:1.25rem;">×</button></div>
                     </div>
                   {% endfor %}
                 {% else %}
@@ -148,11 +148,11 @@
                         {% endfor %}
                       </select>
                     </div>
-                    <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="runs" placeholder="R" min="0"></div>
-                    <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="balls" placeholder="B" min="0"></div>
+                    <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="runs" placeholder="R" min="0"></div>
+                    <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="balls" placeholder="B" min="0"></div>
                     <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="fours" placeholder="4s" min="0"></div>
                     <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="sixes" placeholder="6s" min="0"></div>
-                    <div class="col-md-1"><button type="button" class="btn btn-ctm-ghost w-100" data-remove-row aria-label="Remove">×</button></div>
+                    <div class="col-md-1 d-flex justify-content-center"><button type="button" class="btn btn-link text-decoration-none" data-remove-row aria-label="Remove" style="padding:0; font-size:1.25rem;">×</button></div>
                   </div>
                 {% endif %}
               </div>
@@ -160,18 +160,18 @@
 
               <h3 class="h6 mb-2" style="font-family:var(--ctm-font-body); font-weight:700;">Bowling ({{ ctx.opp.name }})</h3>
               <div class="row g-2 mb-1 text-muted" style="font-size:.75rem; font-weight:600;">
-                <div class="col-md-4">Bowler</div>
+                <div class="col-md-3">Bowler</div>
                 <div class="col-md-2">Overs</div>
-                <div class="col-md-1">Maidens</div>
+                <div class="col-md-2">Maidens</div>
                 <div class="col-md-2">Runs</div>
-                <div class="col-md-1">Wickets</div>
+                <div class="col-md-2">Wickets</div>
               </div>
               <div class="d-flex flex-column gap-2 mb-3" data-bowling-list data-team-id="{{ ctx.opp.id }}">
                 {% set bowl_entries = ctx.innings.bowling_entries if ctx.innings else [] %}
                 {% if bowl_entries %}
                   {% for b in bowl_entries %}
                     <div class="row g-2 align-items-center" data-row>
-                      <div class="col-md-4">
+                      <div class="col-md-3">
                         <select class="form-select" data-field="player_id">
                           <option value="">Select bowler</option>
                           {% for player in team_rosters[ctx.opp.id] %}
@@ -180,15 +180,15 @@
                         </select>
                       </div>
                       <div class="col-md-2"><input type="text" inputmode="decimal" class="form-control" data-field="overs" value="{{ b.overs }}" placeholder="Ov"></div>
-                      <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="maidens" value="{{ b.maidens }}" placeholder="M" min="0"></div>
+                      <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="maidens" value="{{ b.maidens }}" placeholder="M" min="0"></div>
                       <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="runs" value="{{ b.runs }}" placeholder="R" min="0"></div>
-                      <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="wickets" value="{{ b.wickets }}" placeholder="W" min="0" max="10"></div>
-                      <div class="col-md-2"><button type="button" class="btn btn-ctm-ghost w-100" data-remove-row aria-label="Remove">Remove</button></div>
+                      <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="wickets" value="{{ b.wickets }}" placeholder="W" min="0" max="10"></div>
+                      <div class="col-md-1 d-flex justify-content-center"><button type="button" class="btn btn-link text-decoration-none" data-remove-row aria-label="Remove" style="padding:0; font-size:1.25rem;">×</button></div>
                     </div>
                   {% endfor %}
                 {% else %}
                   <div class="row g-2 align-items-center" data-row>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                       <select class="form-select" data-field="player_id">
                         <option value="">Select bowler</option>
                         {% for player in team_rosters[ctx.opp.id] %}
@@ -197,10 +197,10 @@
                       </select>
                     </div>
                     <div class="col-md-2"><input type="text" inputmode="decimal" class="form-control" data-field="overs" placeholder="Overs"></div>
-                    <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="maidens" placeholder="Maidens" min="0"></div>
+                    <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="maidens" placeholder="Maidens" min="0"></div>
                     <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="runs" placeholder="Runs" min="0"></div>
-                    <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="wickets" placeholder="Wickets" min="0" max="10"></div>
-                    <div class="col-md-2"><button type="button" class="btn btn-ctm-ghost w-100" data-remove-row aria-label="Remove">Remove</button></div>
+                    <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="wickets" placeholder="Wickets" min="0" max="10"></div>
+                    <div class="col-md-1 d-flex justify-content-center"><button type="button" class="btn btn-link text-decoration-none" data-remove-row aria-label="Remove" style="padding:0; font-size:1.25rem;">×</button></div>
                   </div>
                 {% endif %}
               </div>
