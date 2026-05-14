@@ -22,6 +22,7 @@ from criktrack.models import (
 
 
 def _scaffold(make_user, with_default_venue: bool = False):
+    """Build test helper state for scaffold."""
     organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
     venue = None
     if with_default_venue:
@@ -66,6 +67,7 @@ def _scaffold(make_user, with_default_venue: bool = False):
 
 
 def test_organiser_can_create_match(client, app, make_user, login):
+    """Test that organiser can create match."""
     tournament, team_a, team_b = _scaffold(make_user)
     login("org@example.com")
 
@@ -88,6 +90,7 @@ def test_organiser_can_create_match(client, app, make_user, login):
 
 
 def test_match_create_inherits_tournament_default_venue(client, app, make_user, login):
+    """Test that match create inherits tournament default venue."""
     tournament, team_a, team_b = _scaffold(make_user, with_default_venue=True)
     login("org@example.com")
 
@@ -110,6 +113,7 @@ def test_match_create_inherits_tournament_default_venue(client, app, make_user, 
 def test_match_create_can_override_tournament_default_venue(
     client, app, make_user, login, monkeypatch
 ):
+    """Test that match create can override tournament default venue."""
     tournament, team_a, team_b = _scaffold(make_user, with_default_venue=True)
     monkeypatch.setattr(match_routes, "geocode_address", lambda _: (-32.05, 115.75))
     login("org@example.com")
@@ -138,6 +142,7 @@ def test_match_create_can_override_tournament_default_venue(
 
 
 def test_match_create_rejects_partial_venue_override(client, app, make_user, login):
+    """Test that match create rejects partial venue override."""
     tournament, team_a, team_b = _scaffold(make_user, with_default_venue=True)
     login("org@example.com")
 
@@ -159,6 +164,7 @@ def test_match_create_rejects_partial_venue_override(client, app, make_user, log
 
 
 def test_record_page_uses_roster_selectors(client, app, make_user, login):
+    """Test that record page uses roster selectors."""
     tournament, team_a, team_b = _scaffold(make_user)
     match = Match(
         tournament_id=tournament.id,
@@ -178,6 +184,7 @@ def test_record_page_uses_roster_selectors(client, app, make_user, login):
 
 
 def test_organiser_can_start_upcoming_match(client, app, make_user, login):
+    """Test that organiser can start upcoming match."""
     tournament, team_a, team_b = _scaffold(make_user)
     match = Match(
         tournament_id=tournament.id,
@@ -202,6 +209,7 @@ def test_organiser_can_start_upcoming_match(client, app, make_user, login):
 
 
 def test_other_organiser_cannot_start_foreign_match(client, app, make_user, login):
+    """Test that other organiser cannot start foreign match."""
     tournament, team_a, team_b = _scaffold(make_user)
     make_user("other@example.com", role=Role.ORGANIZER, display_name="Other Org")
     match = Match(

@@ -7,6 +7,7 @@ from criktrack.models import User
 
 
 def test_profile_edit_saves_avatar_color(client, app, make_user, login):
+    """Test that profile edit saves avatar color."""
     user = make_user("fan@example.com", password="secret123", display_name="Fan User")
     login("fan@example.com", "secret123")
 
@@ -29,6 +30,7 @@ def test_profile_edit_saves_avatar_color(client, app, make_user, login):
 
 
 def test_profile_edit_rejects_invalid_avatar_color(client, app, make_user, login):
+    """Test that profile edit rejects invalid avatar color."""
     user = make_user("fan2@example.com", password="secret123", display_name="Fan Two")
     login("fan2@example.com", "secret123")
 

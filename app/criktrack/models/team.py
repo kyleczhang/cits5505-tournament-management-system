@@ -52,8 +52,10 @@ class TournamentTeam(db.Model):
 
     @property
     def name(self) -> str:
+        """Return the registered team name for this tournament entry."""
         return self.team.name
 
     @property
     def short_code(self) -> str:
+        """Return the registered team short code for this tournament entry."""
         return self.team.short_code

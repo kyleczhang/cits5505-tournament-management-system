@@ -22,6 +22,7 @@ _TARGET_MODELS = {
 
 
 def _require_auth() -> None:
+    """Abort if the current request is unauthenticated."""
     if not current_user.is_authenticated:
         abort(401)
 
@@ -49,6 +50,7 @@ def _parse_target() -> tuple[FollowTarget, int]:
 
 @bp.route("/follow", methods=["POST"])
 def create():
+    """Create a follow relationship for the requested target."""
     _require_auth()
     target_type, target_id = _parse_target()
     # Idempotent: a duplicate POST is a no-op rather than a 409 so the UI
@@ -70,6 +72,7 @@ def create():
 
 @bp.route("/follow", methods=["DELETE"])
 def delete():
+    """Remove a follow relationship for the requested target."""
     _require_auth()
     target_type, target_id = _parse_target()
     Follow.query.filter_by(
@@ -81,6 +84,7 @@ def delete():
 
 @bp.route("/follow/status", methods=["GET"])
 def status():
+    """Return whether the current user follows the requested target."""
     _require_auth()
     raw_type = (request.args.get("targetType") or "").strip().lower()
     raw_id = request.args.get("targetId")

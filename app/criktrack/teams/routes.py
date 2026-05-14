@@ -1,3 +1,5 @@
+"""Team management routes for the teams blueprint."""
+
 from __future__ import annotations
 
 from flask import abort, flash, redirect, render_template, url_for
@@ -11,6 +13,7 @@ from .forms import PlayerForm, TeamForm
 
 
 def _owned_team_or_404(team_id: int) -> Team:
+    """Return the organiser-owned team or abort."""
     team = db.session.get(Team, team_id) or abort(404)
     if team.organiser_id != current_user.id:
         abort(403)
@@ -18,6 +21,7 @@ def _owned_team_or_404(team_id: int) -> Team:
 
 
 def _player_for_team_or_404(team: Team, player_id: int) -> Player:
+    """Return a player that belongs to the given team or abort."""
     player = db.session.get(Player, player_id) or abort(404)
     if player.team_id != team.id:
         abort(404)
@@ -25,6 +29,7 @@ def _player_for_team_or_404(team: Team, player_id: int) -> Player:
 
 
 def _player_has_scorecard_history(player_id: int) -> bool:
+    """Return whether the player appears in saved scorecards."""
     return (
         BattingEntry.query.filter_by(player_id=player_id).first() is not None
         or BowlingEntry.query.filter_by(player_id=player_id).first() is not None
@@ -35,6 +40,7 @@ def _player_has_scorecard_history(player_id: int) -> bool:
 @login_required
 @require_role("organizer")
 def list_view():
+    """Render the organiser's team list."""
     teams = (
         Team.query.filter_by(organiser_id=current_user.id).order_by(Team.name.asc()).all()
     )
@@ -45,6 +51,7 @@ def list_view():
 @login_required
 @require_role("organizer")
 def create():
+    """Create a new team for the current organiser."""
     form = TeamForm()
     if form.validate_on_submit():
         team = Team(
@@ -63,6 +70,7 @@ def create():
 @login_required
 @require_role("organizer")
 def detail(team_id: int):
+    """Render the team detail page and roster tools."""
     team = _owned_team_or_404(team_id)
     player_form = PlayerForm()
     return render_template(
@@ -77,6 +85,7 @@ def detail(team_id: int):
 @login_required
 @require_role("organizer")
 def edit(team_id: int):
+    """Update a team from the submitted form data."""
     team = _owned_team_or_404(team_id)
     form = TeamForm(obj=team)
     if form.validate_on_submit():
@@ -92,6 +101,7 @@ def edit(team_id: int):
 @login_required
 @require_role("organizer")
 def add_player(team_id: int):
+    """Add a player to the team roster."""
     team = _owned_team_or_404(team_id)
     form = PlayerForm()
     if form.validate_on_submit():
@@ -115,6 +125,7 @@ def add_player(team_id: int):
 @login_required
 @require_role("organizer")
 def edit_player(team_id: int, player_id: int):
+    """Update an existing player on the team roster."""
     team = _owned_team_or_404(team_id)
     player = _player_for_team_or_404(team, player_id)
     form = PlayerForm(obj=player)
@@ -137,6 +148,7 @@ def edit_player(team_id: int, player_id: int):
 @login_required
 @require_role("organizer")
 def delete_player(team_id: int, player_id: int):
+    """Delete a roster player when no scorecard history blocks it."""
     team = _owned_team_or_404(team_id)
     player = _player_for_team_or_404(team, player_id)
     if _player_has_scorecard_history(player.id):
@@ -155,6 +167,7 @@ def delete_player(team_id: int, player_id: int):
 @login_required
 @require_role("organizer")
 def delete(team_id: int):
+    """Delete a team when it is no longer registered in tournaments."""
     team = _owned_team_or_404(team_id)
     if team.tournament_entries:
         flash(

@@ -19,6 +19,7 @@ from criktrack.models import (
 
 
 def _scaffold_tournament(make_user):
+    """Build test helper state for scaffold tournament."""
     organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
     tournament = Tournament(
         name="Fixture Cup",
@@ -43,6 +44,7 @@ def _scaffold_tournament(make_user):
 def test_tournament_create_lists_only_current_organisers_teams(
     client, app, make_user, login
 ):
+    """Test that tournament create lists only current organisers teams."""
     org_a = make_user("a@example.com", role=Role.ORGANIZER, display_name="Org A")
     org_b = make_user("b@example.com", role=Role.ORGANIZER, display_name="Org B")
     db.session.add_all(
@@ -62,6 +64,7 @@ def test_tournament_create_lists_only_current_organisers_teams(
 def test_organiser_can_create_tournament_from_existing_teams(
     client, app, make_user, login
 ):
+    """Test that organiser can create tournament from existing teams."""
     organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
     team_a = Team(organiser_id=organiser.id, name="Alpha", short_code="ALP")
     team_b = Team(organiser_id=organiser.id, name="Bravo", short_code="BRV")
@@ -92,6 +95,7 @@ def test_organiser_can_create_tournament_from_existing_teams(
 def test_organiser_can_create_tournament_with_default_venue(
     client, app, make_user, login, monkeypatch
 ):
+    """Test that organiser can create tournament with default venue."""
     organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
     team_a = Team(organiser_id=organiser.id, name="Alpha", short_code="ALP")
     team_b = Team(organiser_id=organiser.id, name="Bravo", short_code="BRV")
@@ -125,6 +129,7 @@ def test_organiser_can_create_tournament_with_default_venue(
 
 
 def test_organiser_can_add_existing_team_to_tournament(client, app, make_user, login):
+    """Test that organiser can add existing team to tournament."""
     _, tournament, _, team_b = _scaffold_tournament(make_user)
     login("org@example.com")
 
@@ -146,6 +151,7 @@ def test_organiser_can_add_existing_team_to_tournament(client, app, make_user, l
 def test_tournament_detail_shows_team_management_for_organiser(
     client, app, make_user, login
 ):
+    """Test that tournament detail shows team management for organiser."""
     _, tournament, team_a, team_b = _scaffold_tournament(make_user)
     login("org@example.com")
 
@@ -158,6 +164,7 @@ def test_tournament_detail_shows_team_management_for_organiser(
 
 
 def test_organiser_cannot_add_foreign_team_to_tournament(client, app, make_user, login):
+    """Test that organiser cannot add foreign team to tournament."""
     _, tournament, _, _ = _scaffold_tournament(make_user)
     other = make_user("other@example.com", role=Role.ORGANIZER, display_name="Other")
     foreign_team = Team(organiser_id=other.id, name="Sharks", short_code="SHK")
@@ -181,6 +188,7 @@ def test_organiser_cannot_add_foreign_team_to_tournament(client, app, make_user,
 
 
 def test_organiser_can_remove_team_before_fixtures_exist(client, app, make_user, login):
+    """Test that organiser can remove team before fixtures exist."""
     _, tournament, team_a, team_b = _scaffold_tournament(make_user)
     db.session.add(TournamentTeam(tournament_id=tournament.id, team_id=team_b.id))
     db.session.commit()
@@ -205,6 +213,7 @@ def test_organiser_can_remove_team_before_fixtures_exist(client, app, make_user,
 
 
 def test_organiser_cannot_remove_team_with_existing_fixture(client, app, make_user, login):
+    """Test that organiser cannot remove team with existing fixture."""
     _, tournament, team_a, team_b = _scaffold_tournament(make_user)
     db.session.add(TournamentTeam(tournament_id=tournament.id, team_id=team_b.id))
     db.session.flush()

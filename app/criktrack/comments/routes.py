@@ -18,6 +18,7 @@ _MAX_LEN = 500
 
 
 def _serialize(rows):
+    """Serialise a comment for the JSON API response."""
     return jsonify([c.to_dict() for c in rows])
 
 
@@ -39,6 +40,7 @@ def _ensure_body() -> str:
 
 @bp.route("/matches/<int:match_id>/comments", methods=["GET"])
 def list_match(match_id: int):
+    """Return comments for a match as JSON."""
     db.session.get(Match, match_id) or abort(404)
     rows = (
         Comment.query.filter_by(match_id=match_id)
@@ -50,6 +52,7 @@ def list_match(match_id: int):
 
 @bp.route("/matches/<int:match_id>/comments", methods=["POST"])
 def create_match(match_id: int):
+    """Create a new comment on a match."""
     db.session.get(Match, match_id) or abort(404)
     body = _ensure_body()
     comment = Comment(match_id=match_id, user_id=current_user.id, body=body)
@@ -60,6 +63,7 @@ def create_match(match_id: int):
 
 @bp.route("/tournaments/<int:tournament_id>/comments", methods=["GET"])
 def list_tournament(tournament_id: int):
+    """Return comments for a tournament as JSON."""
     db.session.get(Tournament, tournament_id) or abort(404)
     rows = (
         Comment.query.filter_by(tournament_id=tournament_id)
@@ -71,6 +75,7 @@ def list_tournament(tournament_id: int):
 
 @bp.route("/tournaments/<int:tournament_id>/comments", methods=["POST"])
 def create_tournament(tournament_id: int):
+    """Create a new comment on a tournament."""
     db.session.get(Tournament, tournament_id) or abort(404)
     body = _ensure_body()
     comment = Comment(tournament_id=tournament_id, user_id=current_user.id, body=body)

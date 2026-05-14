@@ -33,6 +33,7 @@ def _team_short_code(name: str, fallback: str = "TBD") -> str:
 
 
 def _owned_tournament_or_403(tournament_id: int) -> Tournament:
+    """Return the organiser-owned tournament or abort."""
     tournament = db.session.get(Tournament, tournament_id) or abort(404)
     if tournament.organiser_id != current_user.id:
         abort(403)
@@ -40,6 +41,7 @@ def _owned_tournament_or_403(tournament_id: int) -> Tournament:
 
 
 def _sync_team_count(tournament: Tournament) -> None:
+    """Refresh the stored team count from tournament registrations."""
     tournament.team_count = TournamentTeam.query.filter_by(
         tournament_id=tournament.id
     ).count()
@@ -47,6 +49,7 @@ def _sync_team_count(tournament: Tournament) -> None:
 
 @bp.route("")
 def list_view():
+    """Render the searchable tournaments list."""
     q = (request.args.get("q") or "").strip()
     status_arg = (request.args.get("status") or "all").lower()
     page = max(int(request.args.get("page", 1) or 1), 1)
@@ -146,6 +149,7 @@ def create():
 
 def _ordered_teams(tournament: Tournament) -> list[TournamentTeam]:
     # Standings order: points desc, then NRR desc, then name asc as a stable tiebreaker.
+    """Return tournament teams in standings order."""
     return sorted(
         tournament.tournament_teams,
         key=lambda t: (-t.points, -float(t.nrr or 0), t.team.name),
@@ -153,6 +157,7 @@ def _ordered_teams(tournament: Tournament) -> list[TournamentTeam]:
 
 
 def _match_payload(matches: list[Match]) -> list[dict]:
+    """Build score summary payloads for the tournament detail page."""
     payload = []
     for m in matches:
         innings = {i.batting_team_id: i for i in m.innings}
@@ -170,6 +175,7 @@ def _match_payload(matches: list[Match]) -> list[dict]:
 
 @bp.route("/<int:tournament_id>")
 def detail(tournament_id: int):
+    """Render the tournament detail page with standings and fixtures."""
     tournament = db.session.get(Tournament, tournament_id) or abort(404)
 
     matches = (
@@ -205,6 +211,7 @@ def detail(tournament_id: int):
 @login_required
 @require_role("organizer")
 def add_team(tournament_id: int):
+    """Add one of the organiser's teams to the tournament."""
     tournament = _owned_tournament_or_403(tournament_id)
     team_id = request.form.get("team_id", type=int)
     if not team_id:
@@ -235,6 +242,7 @@ def add_team(tournament_id: int):
 @login_required
 @require_role("organizer")
 def remove_team(tournament_id: int, team_id: int):
+    """Remove a registered team when no fixtures depend on it."""
     tournament = _owned_tournament_or_403(tournament_id)
     entry = TournamentTeam.query.filter_by(
         tournament_id=tournament.id, team_id=team_id

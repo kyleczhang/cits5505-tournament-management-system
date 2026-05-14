@@ -38,6 +38,7 @@ def create_app(config_class: type[BaseConfig] | None = None) -> Flask:
 
     @app.route("/")
     def landing():
+        """Redirect anonymous visitors to login and signed-in users to the dashboard."""
         return render_template("landing.html")
 
     return app

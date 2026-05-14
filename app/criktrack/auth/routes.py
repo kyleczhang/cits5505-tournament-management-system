@@ -82,6 +82,7 @@ def login():
 @bp.route("/logout", methods=["POST"])
 @login_required
 def logout():
+    """Log out the current user and return to the landing flow."""
     logout_user()
     flash("Logged out.", "info")
     return redirect(url_for("landing"))

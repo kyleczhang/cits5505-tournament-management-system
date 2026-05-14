@@ -29,6 +29,7 @@ class Role(str, enum.Enum):
     USER = "user"
 
     def __str__(self) -> str:  # pragma: no cover - trivial
+        """Return the enum value for display and persistence helpers."""
         return self.value
 
 

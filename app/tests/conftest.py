@@ -50,6 +50,7 @@ def make_user(app):
         role: Role = Role.USER,
         display_name: str = "Test User",
     ) -> User:
+        """Build test helper state for make."""
         user = User(email=email.lower(), display_name=display_name, role=role)
         user.set_password(password)
         _db.session.add(user)
@@ -63,6 +64,7 @@ def make_user(app):
 def login(client):
     """Helper that POSTs to /login and asserts the session cookie was set."""
     def _login(email: str, password: str = "secret123") -> None:
+        """Build test helper state for login."""
         resp = client.post(
             "/login",
             data={"email": email, "password": password},

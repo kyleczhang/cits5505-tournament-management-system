@@ -24,6 +24,7 @@ from . import bp
 
 @bp.route("/tournaments/<int:tournament_id>/players/<int:player_id>")
 def stats(tournament_id: int, player_id: int):
+    """Render the player statistics page."""
     tournament = db.session.get(Tournament, tournament_id) or abort(404)
     player = db.session.get(Player, player_id) or abort(404)
     # Guard against cross-tournament URL tampering: a player must belong to

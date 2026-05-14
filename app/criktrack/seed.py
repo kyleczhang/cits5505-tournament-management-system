@@ -33,6 +33,7 @@ _DEFAULT_ORGANISER_KEY = "cheng"
 
 
 def _seed_users() -> dict[str, User]:
+    """Insert the configured demo users and return them by seed key."""
     users_by_key: dict[str, User] = {}
     for payload in SEED_USERS:
         user = User(
@@ -51,6 +52,7 @@ def _seed_users() -> dict[str, User]:
 
 
 def _seed_venues() -> dict[str, Venue]:
+    """Insert the configured demo venues and return them by seed key."""
     venues_by_key: dict[str, Venue] = {}
     for key, payload in SEED_VENUES.items():
         venue = Venue(**payload)
@@ -61,6 +63,7 @@ def _seed_venues() -> dict[str, Venue]:
 
 
 def _seed_team_pool(users_by_key: dict[str, User]) -> dict[str, Team]:
+    """Insert the configured demo teams and return them by team name."""
     teams_by_name: dict[str, Team] = {}
     organiser_id = users_by_key[_DEFAULT_ORGANISER_KEY].id
     for payload in SEED_TEAMS:
@@ -78,6 +81,7 @@ def _seed_team_pool(users_by_key: dict[str, User]) -> dict[str, Team]:
 def _seed_rosters(
     teams_by_name: dict[str, Team],
 ) -> dict[str, dict[str, Player]]:
+    """Insert seeded roster players for each team."""
     players_by_team: dict[str, dict[str, Player]] = {}
     for team_name, players in SEED_ROSTERS.items():
         team = teams_by_name[team_name]
@@ -117,6 +121,7 @@ def _seed_match(
     players_by_team: dict[str, dict[str, Player]],
     venues_by_key: dict[str, Venue],
 ) -> Match:
+    """Create a seeded match with innings and scorecard entries."""
     team_a = teams_by_name[match_data["team_a"]]
     team_b = teams_by_name[match_data["team_b"]]
     venue = venues_by_key.get(match_data.get("venue_key")) or tournament.venue
@@ -198,6 +203,7 @@ def _seed_tournaments(
     venues_by_key: dict[str, Venue],
 ) -> tuple[dict[str, Tournament], dict[str, Match]]:
     tournaments_by_key: dict[str, Tournament] = {}
+    """Create seeded tournaments and their matches."""
     matches_by_key: dict[str, Match] = {}
 
     for payload in SEED_TOURNAMENTS:
@@ -247,6 +253,7 @@ def _seed_comments(
     tournaments_by_key: dict[str, Tournament],
     matches_by_key: dict[str, Match],
 ) -> None:
+    """Insert seeded comments for the demo matches."""
     for payload in SEED_COMMENTS:
         comment = Comment(
             user_id=users_by_key[payload["user_key"]].id,

@@ -25,6 +25,7 @@ def _load(tournament_id: int, match_id: int) -> tuple[Tournament, Match]:
 
 
 def _owned_tournament_or_403(tournament_id: int) -> Tournament:
+    """Return the organiser-owned tournament or abort."""
     tournament = db.session.get(Tournament, tournament_id) or abort(404)
     if tournament.organiser_id != current_user.id:
         abort(403)
@@ -32,10 +33,12 @@ def _owned_tournament_or_403(tournament_id: int) -> Tournament:
 
 
 def _registered_teams(tournament: Tournament) -> list[Team]:
+    """Return the teams currently registered in the tournament."""
     return [entry.team for entry in tournament.tournament_teams]
 
 
 def _team_rosters(match: Match) -> dict[int, list[Player]]:
+    """Return match rosters keyed by team id."""
     return {
         match.team_a_id: sorted(match.team_a.players, key=lambda player: player.name),
         match.team_b_id: sorted(match.team_b.players, key=lambda player: player.name),
@@ -44,6 +47,7 @@ def _team_rosters(match: Match) -> dict[int, list[Player]]:
 
 @bp.route("/tournaments/<int:tournament_id>/matches/<int:match_id>")
 def scorecard(tournament_id: int, match_id: int):
+    """Render the match scorecard page."""
     tournament, match = _load(tournament_id, match_id)
     is_organiser = (
         current_user.is_authenticated and current_user.id == tournament.organiser_id
@@ -60,6 +64,7 @@ def scorecard(tournament_id: int, match_id: int):
 @login_required
 @require_role("organizer")
 def create(tournament_id: int):
+    """Schedule a new match for the tournament."""
     tournament = _owned_tournament_or_403(tournament_id)
     teams = _registered_teams(tournament)
     if len(teams) < 2:
@@ -122,6 +127,7 @@ def create(tournament_id: int):
 @login_required
 @require_role("organizer")
 def start(tournament_id: int, match_id: int):
+    """Move an upcoming match into the live state."""
     tournament, match = _load(tournament_id, match_id)
     if tournament.organiser_id != current_user.id:
         abort(403)
@@ -146,6 +152,7 @@ def start(tournament_id: int, match_id: int):
 @login_required
 @require_role("organizer")
 def record(tournament_id: int, match_id: int):
+    """Render or submit the score recording workflow for a match."""
     tournament, match = _load(tournament_id, match_id)
     # Ownership check: the organizer role alone isn't enough — only the tournament's
     # own organiser may record results for its matches.

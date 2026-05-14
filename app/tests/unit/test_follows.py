@@ -50,6 +50,7 @@ def _scaffold():
 
 
 def test_follow_requires_authentication(client, app):
+    """Test that follow requires authentication."""
     tournament, _, _ = _scaffold()
     resp = client.post(
         "/api/follow",
@@ -59,6 +60,7 @@ def test_follow_requires_authentication(client, app):
 
 
 def test_follow_unknown_target_type_rejected(client, app, make_user, login):
+    """Test that follow unknown target type rejected."""
     make_user("fan@example.com")
     login("fan@example.com")
     resp = client.post("/api/follow", json={"targetType": "match", "targetId": 1})
@@ -66,6 +68,7 @@ def test_follow_unknown_target_type_rejected(client, app, make_user, login):
 
 
 def test_follow_missing_target_returns_404(client, app, make_user, login):
+    """Test that follow missing target returns 404."""
     make_user("fan@example.com")
     login("fan@example.com")
     resp = client.post(
@@ -75,6 +78,7 @@ def test_follow_missing_target_returns_404(client, app, make_user, login):
 
 
 def test_follow_creates_row_and_is_idempotent(client, app, make_user, login):
+    """Test that follow creates row and is idempotent."""
     tournament, _, _ = _scaffold()
     make_user("fan@example.com")
     login("fan@example.com")
@@ -96,6 +100,7 @@ def test_follow_creates_row_and_is_idempotent(client, app, make_user, login):
 
 
 def test_unfollow_removes_row(client, app, make_user, login):
+    """Test that unfollow removes row."""
     _, team, _ = _scaffold()
     make_user("fan@example.com")
     login("fan@example.com")
@@ -112,6 +117,7 @@ def test_unfollow_removes_row(client, app, make_user, login):
 
 
 def test_status_endpoint_reports_follow_state(client, app, make_user, login):
+    """Test that status endpoint reports follow state."""
     _, _, player = _scaffold()
     make_user("fan@example.com")
     login("fan@example.com")
@@ -132,6 +138,7 @@ def test_status_endpoint_reports_follow_state(client, app, make_user, login):
 
 
 def test_follow_targets_are_isolated_per_user(client, app, make_user, login):
+    """Test that follow targets are isolated per user."""
     tournament, _, _ = _scaffold()
     make_user("a@example.com")
     make_user("b@example.com")

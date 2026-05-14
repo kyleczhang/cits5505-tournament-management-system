@@ -18,6 +18,7 @@ def _fake(payload):
 
 
 def test_geocode_returns_none_without_key(app):
+    """Test that geocode returns none without key."""
     app.config["GOOGLE_MAPS_GEOCODING_API_KEY"] = ""
     app.config["GOOGLE_MAPS_API_KEY"] = ""
     with app.app_context():
@@ -25,6 +26,7 @@ def test_geocode_returns_none_without_key(app):
 
 
 def test_geocode_parses_successful_response(app):
+    """Test that geocode parses successful response."""
     app.config["GOOGLE_MAPS_GEOCODING_API_KEY"] = "test-key"
     resp = _fake(
         {
@@ -37,6 +39,7 @@ def test_geocode_parses_successful_response(app):
 
 
 def test_geocode_returns_none_on_zero_results(app):
+    """Test that geocode returns none on zero results."""
     app.config["GOOGLE_MAPS_GEOCODING_API_KEY"] = "test-key"
     resp = _fake({"status": "ZERO_RESULTS", "results": []})
     with app.app_context(), patch.object(geocoding.requests, "get", return_value=resp):
@@ -44,6 +47,7 @@ def test_geocode_returns_none_on_zero_results(app):
 
 
 def test_geocode_returns_none_on_network_failure(app):
+    """Test that geocode returns none on network failure."""
     app.config["GOOGLE_MAPS_GEOCODING_API_KEY"] = "test-key"
     with (
         app.app_context(),

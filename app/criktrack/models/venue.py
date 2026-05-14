@@ -18,6 +18,7 @@ class Venue(db.Model):
 
     @property
     def has_coords(self) -> bool:
+        """Return whether both venue coordinates are available."""
         return self.lat is not None and self.lng is not None
 
     def to_dict(self) -> dict:

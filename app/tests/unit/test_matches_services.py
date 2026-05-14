@@ -67,6 +67,7 @@ def _scaffold(app):
 
 
 def test_validate_rejects_invalid_winner(app):
+    """Test that validate rejects invalid winner."""
     _, _, team_a, team_b, _, _, match = _scaffold(app)
     payload = {
         "result": {"winner_team_id": 9999},
@@ -80,6 +81,7 @@ def test_validate_rejects_invalid_winner(app):
 
 
 def test_validate_rejects_wickets_over_ten(app):
+    """Test that validate rejects wickets over ten."""
     _, _, team_a, _, _, _, match = _scaffold(app)
     payload = {
         "innings": [
@@ -92,6 +94,7 @@ def test_validate_rejects_wickets_over_ten(app):
 
 
 def test_save_result_marks_match_completed_and_updates_standings(app):
+    """Test that save result marks match completed and updates standings."""
     _, tournament, team_a, team_b, batter, bowler, match = _scaffold(app)
     payload = {
         "result": {"winner_team_id": team_a.id, "result_text": "Aces won by 20 runs"},
@@ -134,6 +137,7 @@ def test_save_result_marks_match_completed_and_updates_standings(app):
 
 
 def test_save_result_replaces_previous_innings(app):
+    """Test that save result replaces previous innings."""
     _, _, team_a, team_b, _, _, match = _scaffold(app)
     first = validate_payload(
         {
@@ -179,6 +183,7 @@ def test_save_result_replaces_previous_innings(app):
 
 
 def test_save_result_without_winner_keeps_tournament_live(app):
+    """Test that save result without winner keeps tournament live."""
     _, tournament, team_a, _, _, _, match = _scaffold(app)
     normalised = validate_payload(
         {
@@ -203,6 +208,7 @@ def test_save_result_without_winner_keeps_tournament_live(app):
 
 
 def test_validate_rejects_innings_inconsistent_with_toss(app):
+    """Test that validate rejects innings inconsistent with toss."""
     _, _, team_a, team_b, _, _, match = _scaffold(app)
     # Toss winner = A, decision = bowl, so B should bat first. Sending A first
     # should be rejected.
@@ -219,6 +225,7 @@ def test_validate_rejects_innings_inconsistent_with_toss(app):
 
 
 def test_validate_accepts_innings_consistent_with_toss(app):
+    """Test that validate accepts innings consistent with toss."""
     _, _, team_a, team_b, _, _, match = _scaffold(app)
     payload = {
         "toss": {"winner_team_id": team_a.id, "decision": "bowl"},
@@ -232,6 +239,7 @@ def test_validate_accepts_innings_consistent_with_toss(app):
 
 
 def test_validate_rejects_player_from_wrong_team(app):
+    """Test that validate rejects player from wrong team."""
     _, _, team_a, team_b, _, bowler, match = _scaffold(app)
     payload = {
         "innings": [

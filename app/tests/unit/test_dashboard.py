@@ -61,6 +61,7 @@ def _seed(make_user):
 
 
 def test_organizer_dashboard_renders_workspace(client, app, make_user, login):
+    """Test that organizer dashboard renders workspace."""
     _seed(make_user)
     login("org@example.com")
     resp = client.get("/dashboard")
@@ -74,6 +75,7 @@ def test_organizer_dashboard_renders_workspace(client, app, make_user, login):
 
 
 def test_organizer_record_cta_points_to_record_route(client, app, make_user, login):
+    """Test that organizer record cta points to record route."""
     _, tournament, _, _, _, match = _seed(make_user)
     login("org@example.com")
     body = client.get("/dashboard").data.decode()
@@ -82,6 +84,7 @@ def test_organizer_record_cta_points_to_record_route(client, app, make_user, log
 
 
 def test_organizer_fan_view_renders_user_dashboard(client, app, make_user, login):
+    """Test that organizer fan view renders user dashboard."""
     _seed(make_user)
     login("org@example.com")
     body = client.get("/dashboard?view=fan").data.decode()
@@ -91,6 +94,7 @@ def test_organizer_fan_view_renders_user_dashboard(client, app, make_user, login
 
 
 def test_user_dashboard_default_is_fan_view(client, app, make_user, login):
+    """Test that user dashboard default is fan view."""
     _seed(make_user)
     make_user("fan@example.com")
     login("fan@example.com")
@@ -102,6 +106,7 @@ def test_user_dashboard_default_is_fan_view(client, app, make_user, login):
 def test_following_widgets_render_when_user_follows_targets(
     client, app, make_user, login
 ):
+    """Test that following widgets render when user follows targets."""
     _, tournament, team, player, _, _ = _seed(make_user)
     fan = make_user("fan@example.com")
     db.session.add_all(

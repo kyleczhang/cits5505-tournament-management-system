@@ -18,6 +18,7 @@ def _fake_response(payload):
 
 
 def test_mock_response_when_no_api_key(client, app):
+    """Test that mock response when no api key."""
     app.config["CRICKETDATA_API_KEY"] = ""
     resp = client.get("/api/live/matches")
     assert resp.status_code == 200
@@ -26,6 +27,7 @@ def test_mock_response_when_no_api_key(client, app):
 
 
 def test_live_then_cache_hit(client, app):
+    """Test that live then cache hit."""
     app.config["CRICKETDATA_API_KEY"] = "fake-key"
     app.config["LIVE_FEED_CACHE_SECONDS"] = 30
     fake = _fake_response({"status": "success", "data": [{"id": "1"}]})

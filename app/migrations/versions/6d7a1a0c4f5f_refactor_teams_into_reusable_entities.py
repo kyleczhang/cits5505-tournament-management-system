@@ -18,6 +18,7 @@ depends_on = None
 
 
 def upgrade():
+    """Apply the migration changes."""
     op.create_table(
         "tournament_teams",
         sa.Column("id", sa.Integer(), nullable=False),
@@ -85,6 +86,7 @@ def upgrade():
 
 
 def downgrade():
+    """Revert the migration changes."""
     with op.batch_alter_table("teams", schema=None) as batch_op:
         batch_op.add_column(sa.Column("nrr", sa.Numeric(precision=5, scale=2), nullable=False, server_default="0"))
         batch_op.add_column(sa.Column("points", sa.Integer(), nullable=False, server_default="0"))

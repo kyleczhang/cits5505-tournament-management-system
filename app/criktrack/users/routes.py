@@ -45,6 +45,7 @@ def dashboard():
 
 
 def _render_organizer_dashboard():
+    """Render the organiser dashboard context and template."""
     organised = (
         Tournament.query.filter_by(organiser_id=current_user.id)
         .order_by(Tournament.start_date.desc())
@@ -157,6 +158,7 @@ def _build_needs_attention(organised, organised_ids):
 
 
 def _render_fan_dashboard(viewing_as_fan: bool):
+    """Render the fan dashboard context and template."""
     today = date.today()
 
     ongoing_tournaments = (
@@ -203,6 +205,7 @@ def _render_fan_dashboard(viewing_as_fan: bool):
 
 
 def _build_following():
+    """Assemble followed tournaments, teams, and players for the dashboard."""
     t_ids = followed_ids(FollowTarget.TOURNAMENT)
     team_ids = followed_ids(FollowTarget.TEAM)
     player_ids = followed_ids(FollowTarget.PLAYER)
@@ -254,6 +257,7 @@ def _build_following():
 
 
 def _latest_match_per_tournament(tournament_ids):
+    """Return the latest match keyed by tournament id."""
     if not tournament_ids:
         return {}
     rows = (
@@ -268,6 +272,7 @@ def _latest_match_per_tournament(tournament_ids):
 
 
 def _next_fixture_per_team(team_ids):
+    """Return the next scheduled fixture keyed by team id."""
     if not team_ids:
         return {}
     rows = (
@@ -287,6 +292,7 @@ def _next_fixture_per_team(team_ids):
 
 
 def _latest_tournament_entry_per_team(team_ids):
+    """Return each team's latest tournament entry keyed by team id."""
     if not team_ids:
         return {}
     rows = (
@@ -400,6 +406,7 @@ def _profile_completion(user: User) -> dict:
 
 @bp.route("/users/<int:user_id>")
 def profile(user_id: int):
+    """Render and update the current user profile."""
     user = db.session.get(User, user_id) or abort(404)
     organised = (
         Tournament.query.filter_by(organiser_id=user.id)

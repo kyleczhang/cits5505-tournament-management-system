@@ -7,6 +7,7 @@ from criktrack.models import Role, User
 
 
 def test_register_creates_regular_user(client):
+    """Test that register creates regular user."""
     resp = client.post(
         "/register",
         data={
@@ -25,6 +26,7 @@ def test_register_creates_regular_user(client):
 
 
 def test_register_with_valid_invite_becomes_organizer(client, app):
+    """Test that register with valid invite becomes organizer."""
     assert app.config["ORGANIZER_INVITE_CODE"] == "test-invite"
     resp = client.post(
         "/register",
@@ -44,6 +46,7 @@ def test_register_with_valid_invite_becomes_organizer(client, app):
 
 
 def test_login_rejects_bad_password(client, make_user):
+    """Test that login rejects bad password."""
     make_user("bob@example.com", password="secret123")
     resp = client.post(
         "/login",
@@ -54,6 +57,7 @@ def test_login_rejects_bad_password(client, make_user):
 
 
 def test_safe_next_blocks_external_host(app):
+    """Test that safe next blocks external host."""
     with app.test_request_context("/login"):
         assert _safe_next("https://evil.example/phish") is None
         assert _safe_next("//evil.example/phish") is None

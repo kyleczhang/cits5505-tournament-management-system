@@ -22,6 +22,7 @@ from criktrack.models import (
 
 
 def test_organiser_can_create_team(client, app, make_user, login):
+    """Test that organiser can create team."""
     make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
     login("org@example.com")
 
@@ -38,6 +39,7 @@ def test_organiser_can_create_team(client, app, make_user, login):
 
 
 def test_team_list_only_shows_current_organisers_teams(client, app, make_user, login):
+    """Test that team list only shows current organisers teams."""
     org_a = make_user("a@example.com", role=Role.ORGANIZER, display_name="Org A")
     org_b = make_user("b@example.com", role=Role.ORGANIZER, display_name="Org B")
     db.session.add_all(
@@ -55,6 +57,7 @@ def test_team_list_only_shows_current_organisers_teams(client, app, make_user, l
 
 
 def test_edit_team_cancel_links_back_to_team_detail(client, app, make_user, login):
+    """Test that edit team cancel links back to team detail."""
     organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
     team = Team(organiser_id=organiser.id, name="Alpha", short_code="ALP")
     db.session.add(team)
@@ -68,6 +71,7 @@ def test_edit_team_cancel_links_back_to_team_detail(client, app, make_user, logi
 
 
 def test_organiser_can_add_player_to_team_roster(client, app, make_user, login):
+    """Test that organiser can add player to team roster."""
     organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
     team = Team(organiser_id=organiser.id, name="Alpha", short_code="ALP")
     db.session.add(team)
@@ -87,6 +91,7 @@ def test_organiser_can_add_player_to_team_roster(client, app, make_user, login):
 
 
 def test_organiser_can_delete_unused_team(client, app, make_user, login):
+    """Test that organiser can delete unused team."""
     organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
     team = Team(organiser_id=organiser.id, name="Alpha", short_code="ALP")
     db.session.add(team)
@@ -102,6 +107,7 @@ def test_organiser_can_delete_unused_team(client, app, make_user, login):
 def test_organiser_cannot_delete_team_registered_in_tournament(
     client, app, make_user, login
 ):
+    """Test that organiser cannot delete team registered in tournament."""
     organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
     team = Team(organiser_id=organiser.id, name="Alpha", short_code="ALP")
     tournament = Tournament(
@@ -127,6 +133,7 @@ def test_organiser_cannot_delete_team_registered_in_tournament(
 def test_team_detail_shows_delete_tooltip_for_registered_team(
     client, app, make_user, login
 ):
+    """Test that team detail shows delete tooltip for registered team."""
     organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
     team = Team(organiser_id=organiser.id, name="Alpha", short_code="ALP")
     tournament = Tournament(
@@ -153,6 +160,7 @@ def test_team_detail_shows_delete_tooltip_for_registered_team(
 
 
 def test_other_organiser_cannot_delete_foreign_team(client, app, make_user, login):
+    """Test that other organiser cannot delete foreign team."""
     owner = make_user("owner@example.com", role=Role.ORGANIZER, display_name="Owner")
     make_user("other@example.com", role=Role.ORGANIZER, display_name="Other")
     team = Team(organiser_id=owner.id, name="Alpha", short_code="ALP")
@@ -168,6 +176,7 @@ def test_other_organiser_cannot_delete_foreign_team(client, app, make_user, logi
 def test_organiser_cannot_remove_player_with_scorecard_history(
     client, app, make_user, login
 ):
+    """Test that organiser cannot remove player with scorecard history."""
     organiser = make_user("org@example.com", role=Role.ORGANIZER, display_name="Org User")
     team_a = Team(organiser_id=organiser.id, name="Alpha", short_code="ALP")
     team_b = Team(organiser_id=organiser.id, name="Bravo", short_code="BRV")

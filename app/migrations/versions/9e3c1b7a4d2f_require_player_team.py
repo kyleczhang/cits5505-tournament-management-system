@@ -19,6 +19,7 @@ depends_on = None
 
 
 def upgrade() -> None:
+    """Apply the migration changes."""
     op.execute(sa.text("DELETE FROM players WHERE team_id IS NULL"))
     with op.batch_alter_table("players", schema=None) as batch_op:
         batch_op.alter_column(
@@ -29,6 +30,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    """Revert the migration changes."""
     with op.batch_alter_table("players", schema=None) as batch_op:
         batch_op.alter_column(
             "team_id",

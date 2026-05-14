@@ -19,6 +19,7 @@ depends_on = None
 
 
 def upgrade() -> None:
+    """Apply the migration changes."""
     with op.batch_alter_table("users", schema=None) as batch_op:
         batch_op.add_column(
             sa.Column(
@@ -31,5 +32,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    """Revert the migration changes."""
     with op.batch_alter_table("users", schema=None) as batch_op:
         batch_op.drop_column("avatar_color")

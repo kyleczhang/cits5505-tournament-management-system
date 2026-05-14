@@ -58,6 +58,7 @@ def _scaffold(organiser_email: str = "org@example.com"):
 
 
 def test_list_match_comments_returns_empty_array(client, app):
+    """Test that list match comments returns empty array."""
     _, match = _scaffold()
     resp = client.get(f"/api/matches/{match.id}/comments")
     assert resp.status_code == 200
@@ -65,6 +66,7 @@ def test_list_match_comments_returns_empty_array(client, app):
 
 
 def test_post_comment_requires_authentication(client, app):
+    """Test that post comment requires authentication."""
     _, match = _scaffold()
     resp = client.post(
         f"/api/matches/{match.id}/comments",
@@ -75,6 +77,7 @@ def test_post_comment_requires_authentication(client, app):
 
 
 def test_authenticated_user_can_post_and_fetch_comment(client, app, make_user, login):
+    """Test that authenticated user can post and fetch comment."""
     tournament, match = _scaffold()
     user = make_user("fan@example.com", password="secret123")
     user.avatar_color = "violet"
@@ -96,6 +99,7 @@ def test_authenticated_user_can_post_and_fetch_comment(client, app, make_user, l
 
 
 def test_comment_length_limit_enforced(client, app, make_user, login):
+    """Test that comment length limit enforced."""
     _, match = _scaffold()
     make_user("fan2@example.com", password="secret123")
     login("fan2@example.com", "secret123")

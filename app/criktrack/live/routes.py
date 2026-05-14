@@ -13,6 +13,7 @@ from . import bp
 
 @bp.route("/matches", methods=["GET"])
 def matches():
+    """Return the live matches feed with cache metadata headers."""
     payload, status = fetch_live_matches()
     response = jsonify(payload)
     # Map the integration's status into observable headers:

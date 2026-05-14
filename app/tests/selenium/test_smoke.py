@@ -19,16 +19,19 @@ from selenium.webdriver.support.ui import WebDriverWait  # noqa: E402
 
 
 def _wait(browser, timeout: float = 4.0):
+    """Build test helper state for wait."""
     return WebDriverWait(browser, timeout)
 
 
 def _unique_email() -> str:
+    """Build test helper state for unique email."""
     return f"sel-{uuid.uuid4().hex[:8]}@example.com"
 
 
 def _submit_form(browser, button_name: str = "submit") -> None:
     # JS click instead of native click — sticky headers can intercept clicks
     # on off-screen submit buttons in headless Chrome.
+    """Build test helper state for submit form."""
     btn = browser.find_element(By.NAME, button_name)
     browser.execute_script("arguments[0].scrollIntoView({block:'center'});", btn)
     browser.execute_script("arguments[0].click();", btn)
@@ -41,6 +44,7 @@ def _register(
     display_name: str = "Selena Test",
     password: str = "secret123",
 ) -> None:
+    """Build test helper state for register."""
     browser.get(f"{base_url}/register")
     browser.find_element(By.NAME, "display_name").send_keys(display_name)
     browser.find_element(By.NAME, "email").send_keys(email)
@@ -52,17 +56,20 @@ def _register(
 
 
 def test_landing_page_loads(browser, live_server):
+    """Test that landing page loads."""
     browser.get(live_server["url"] + "/")
     assert "CRIKTRACK" in browser.title
 
 
 def test_user_can_register_and_reach_dashboard(browser, live_server):
+    """Test that user can register and reach dashboard."""
     email = _unique_email()
     _register(browser, live_server["url"], email)
     assert "/dashboard" in browser.current_url
 
 
 def test_user_can_log_out_and_log_back_in(browser, live_server):
+    """Test that user can log out and log back in."""
     email = _unique_email()
     _register(browser, live_server["url"], email)
 
@@ -81,12 +88,14 @@ def test_user_can_log_out_and_log_back_in(browser, live_server):
 
 
 def test_anonymous_dashboard_redirects_to_login(browser, live_server):
+    """Test that anonymous dashboard redirects to login."""
     browser.get(live_server["url"] + "/dashboard")
     _wait(browser).until(EC.url_contains("/login"))
     assert "/login" in browser.current_url
 
 
 def test_tournaments_list_page_loads(browser, live_server):
+    """Test that tournaments list page loads."""
     browser.get(live_server["url"] + "/tournaments")
     _wait(browser).until(EC.presence_of_element_located((By.TAG_NAME, "main")))
     body = browser.find_element(By.TAG_NAME, "body").text.lower()
@@ -94,6 +103,7 @@ def test_tournaments_list_page_loads(browser, live_server):
 
 
 def test_register_form_rejects_weak_password(browser, live_server):
+    """Test that register form rejects weak password."""
     browser.get(live_server["url"] + "/register")
     browser.find_element(By.NAME, "display_name").send_keys("Weak Pw")
     browser.find_element(By.NAME, "email").send_keys(_unique_email())

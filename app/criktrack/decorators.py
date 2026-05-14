@@ -22,9 +22,11 @@ def require_role(role: str):
     """
 
     def decorator(fn):
+        """Wrap a view function with the role check."""
         # ``fn`` is the original Flask view being wrapped, such as ``create``.
         @wraps(fn)
         def wrapper(*args, **kwargs):
+            """Abort on missing or mismatched roles before calling the view."""
             if not current_user.is_authenticated:
                 # Current user is not logged in at all.
                 abort(401)

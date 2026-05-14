@@ -64,6 +64,7 @@ class ProdConfig(BaseConfig):
     SESSION_COOKIE_SECURE = True
 
     def __init__(self) -> None:
+        """Validate the production configuration on instantiation."""
         if BaseConfig.SECRET_KEY == "dev-only-do-not-use-in-prod":
             raise RuntimeError("SECRET_KEY must be set in production")
 

@@ -30,6 +30,7 @@ class ValidationError(Exception):
     """
 
     def __init__(self, errors: dict[str, str]):
+        """Store field-level validation errors for the caller."""
         super().__init__("Validation failed")
         self.errors = errors
 
@@ -37,6 +38,7 @@ class ValidationError(Exception):
 def _to_int(
     value: Any, key: str, errors: dict[str, str], min_value: int = 0
 ) -> int | None:
+    """Coerce a value to an integer or record a validation error."""
     try:
         val = int(value)
     except (TypeError, ValueError):
@@ -49,6 +51,7 @@ def _to_int(
 
 
 def _to_decimal(value: Any, key: str, errors: dict[str, str]) -> Decimal | None:
+    """Coerce a value to a decimal or record a validation error."""
     try:
         val = Decimal(str(value))
     except (InvalidOperation, TypeError):
