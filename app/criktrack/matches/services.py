@@ -302,6 +302,14 @@ def save_result(match: Match, normalised: dict) -> Match:
     # No winner yet => match is still in progress; once a winner is set it's complete.
     match.status = MatchStatus.COMPLETED if match.winner_id else MatchStatus.LIVE
 
+    # Preserve legacy dismissal values before wiping existing innings.
+    old_dismissals: dict[tuple[int, int], dict[int, str]] = {}
+    for old_inn in match.innings:
+        inning_key = (old_inn.inning_number, old_inn.batting_team_id)
+        old_dismissals[inning_key] = {
+            entry.player_id: entry.dismissal for entry in old_inn.batting_entries
+        }
+
     # Wipe existing innings (cascade clears batting/bowling entries).
     for inn in list(match.innings):
         db.session.delete(inn)
@@ -322,6 +330,10 @@ def save_result(match: Match, normalised: dict) -> Match:
 
         for b in payload["batting"]:
             player = db.session.get(Player, b["player_id"])
+            # Preserve legacy dismissal if new value is None
+            inning_key = (idx, payload["batting_team_id"])
+            old_dismissal = old_dismissals.get(inning_key, {}).get(b["player_id"])
+            dismissal = b["dismissal"] if b["dismissal"] is not None else old_dismissal
             db.session.add(
                 BattingEntry(
                     innings_id=inn.id,
@@ -330,7 +342,7 @@ def save_result(match: Match, normalised: dict) -> Match:
                     balls=b["balls"] or 0,
                     fours=b["fours"],
                     sixes=b["sixes"],
-                    dismissal=b["dismissal"],
+                    dismissal=dismissal,
                     is_not_out=b["is_not_out"],
                 )
             )

@@ -117,6 +117,7 @@
                       </div>
                       <div class="col-md-2">
                         <select class="form-select" data-field="dismissal">
+                          <option value="">—</option>
 {% for d in ['Bowled','Caught','LBW','Run Out','Stumped','Hit Wicket','Retired Out','Not Out','Did Not Bat'] %}
                             <option value="{{ d }}" {% if b.dismissal == d %}selected{% endif %}>{{ d }}</option>
                           {% endfor %}
@@ -141,7 +142,7 @@
                     </div>
                     <div class="col-md-2">
                       <select class="form-select" data-field="dismissal">
-                        <option value="">Dismissal</option>
+                        <option value="">—</option>
                         {% for d in ['Bowled','Caught','LBW','Run Out','Stumped','Hit Wicket','Retired Out','Not Out','Did Not Bat'] %}
                           <option value="{{ d }}">{{ d }}</option>
                         {% endfor %}

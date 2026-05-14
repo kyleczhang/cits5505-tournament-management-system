@@ -158,6 +158,7 @@
     }
 
     var dismissalOptions =
+      '<option value="">—</option>' +
       '<option value="Bowled">Bowled</option>' +
       '<option value="Caught">Caught</option>' +
       '<option value="LBW">LBW</option>' +

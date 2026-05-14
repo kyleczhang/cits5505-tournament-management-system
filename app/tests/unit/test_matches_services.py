@@ -347,3 +347,46 @@ def test_validate_rejects_duplicate_bowling_player(app):
     with pytest.raises(ValidationError) as exc:
         validate_payload(payload, match)
     assert "innings.0.bowling.1.player_id" in exc.value.errors
+
+
+def test_save_result_preserves_legacy_dismissal_on_edit(app):
+    """Preserve legacy dismissal values when editing if new value is empty."""
+    _, _, team_a, team_b, batter, _, match = _scaffold(app)
+    # First save: legacy free-text dismissal (non-standard value)
+    first = validate_payload(
+        {
+            "innings": [
+                {
+                    "batting_team_id": team_a.id,
+                    "runs": 100,
+                    "wickets": 1,
+                    "overs": "20.0",
+                    "batting": [{"player_id": batter.id, "runs": 50, "balls": 40, "dismissal": "Caught behind"}],
+                }
+            ]
+        },
+        match,
+    )
+    save_result(match, first)
+    db.session.refresh(match)
+    assert match.innings[0].batting_entries[0].dismissal == "Caught behind"
+
+    # Second edit: empty dismissal (user didn't change it) should preserve old value
+    second = validate_payload(
+        {
+            "innings": [
+                {
+                    "batting_team_id": team_a.id,
+                    "runs": 100,
+                    "wickets": 1,
+                    "overs": "20.0",
+                    "batting": [{"player_id": batter.id, "runs": 60, "balls": 45}],
+                }
+            ]
+        },
+        match,
+    )
+    save_result(match, second)
+    db.session.refresh(match)
+    assert match.innings[0].batting_entries[0].dismissal == "Caught behind"
+    assert match.innings[0].batting_entries[0].runs == 60  # runs were updated
