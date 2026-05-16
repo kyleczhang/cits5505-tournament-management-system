@@ -30,11 +30,11 @@
 
       <div class="row g-3 mb-4">
         <div class="col-sm-4"><div class="stat-card"><div class="stat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><div><div class="stat-value">{{ stats.tournaments_organised }}</div><div class="stat-label">Tournaments organised</div></div></div></div>
-        <div class="col-sm-4"><div class="stat-card"><div class="stat-icon" style="background:rgba(22,163,74,0.12); color:#15803D;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><div><div class="stat-value">{{ stats.matches_recorded }}</div><div class="stat-label">Matches recorded</div></div></div></div>
-        <div class="col-sm-4"><div class="stat-card"><div class="stat-icon" style="background:rgba(245,158,11,0.12); color:#B45309;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l2.5 6.5L21 9l-5 4.5L17.5 20 12 16.5 6.5 20 8 13.5 3 9l6.5-.5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div><div><div class="stat-value">{{ stats.titles_won }}</div><div class="stat-label">Titles won</div></div></div></div>
+        <div class="col-sm-4"><div class="stat-card"><div class="stat-icon stat-icon-green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><div><div class="stat-value">{{ stats.matches_recorded }}</div><div class="stat-label">Matches recorded</div></div></div></div>
+        <div class="col-sm-4"><div class="stat-card"><div class="stat-icon stat-icon-amber"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l2.5 6.5L21 9l-5 4.5L17.5 20 12 16.5 6.5 20 8 13.5 3 9l6.5-.5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div><div><div class="stat-value">{{ stats.titles_won }}</div><div class="stat-label">Titles won</div></div></div></div>
       </div>
 
-      <h2 class="h4 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Tournament history</h2>
+      <h2 class="h4 mb-3 ctm-heading">Tournament history</h2>
       <div class="row g-3">
         {% for t in organised %}
           <div class="col-md-6 col-lg-4">

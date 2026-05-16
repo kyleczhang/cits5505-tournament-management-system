@@ -10,7 +10,7 @@
 
 {% block content %}
   <section class="section">
-    <div class="container" style="max-width:860px;">
+    <div class="container container-form-xl">
       <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb small">
           <li class="breadcrumb-item"><a class="link-primary" href="{{ url_for('users.dashboard') }}">Dashboard</a></li>
@@ -23,7 +23,7 @@
       <form method="post" class="ctm-card" novalidate>
         {{ form.hidden_tag() }}
 
-        <h2 class="h5 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Tournament details</h2>
+        <h2 class="h5 mb-3 ctm-heading">Tournament details</h2>
         <div class="row g-3">
           <div class="col-12">
             {{ field(form.name, "Tournament name", placeholder="e.g. UWA Social League 2026") }}
@@ -52,7 +52,7 @@
 
         <hr class="my-4">
 
-        <h2 class="h5 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Default venue</h2>
+        <h2 class="h5 mb-3 ctm-heading">Default venue</h2>
         <p class="small muted mb-3">Set an optional default venue for this tournament. You can keep it for new matches or override it per fixture later.</p>
         <div class="row g-3">
           <div class="col-md-6">
@@ -65,7 +65,7 @@
 
         <hr class="my-4">
 
-        <h2 class="h5 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Teams</h2>
+        <h2 class="h5 mb-3 ctm-heading">Teams</h2>
         <p class="small muted mb-3">Choose at least two existing teams. Create more teams from the team management area if needed.</p>
         <div class="mb-3" data-team-picker>
           <label for="team-picker-search" class="form-label">Participating teams</label>
