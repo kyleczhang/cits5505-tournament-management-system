@@ -37,12 +37,12 @@
         <div class="col-lg-7">
           <div class="ctm-card">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h2 class="h5 m-0" style="font-family:var(--ctm-font-body); font-weight:700;">Roster</h2>
+              <h2 class="h5 m-0 ctm-heading">Roster</h2>
               <span class="small muted">{{ team.players | length }} player{{ '' if team.players | length == 1 else 's' }}</span>
             </div>
             <ul class="list-unstyled d-flex flex-column gap-2 m-0">
               {% for player in team.players | sort(attribute='name') %}
-                <li class="d-flex justify-content-between align-items-center gap-3 p-2 rounded" style="background:var(--ctm-bg-subtle, #F8FAFC);">
+                <li class="d-flex justify-content-between align-items-center gap-3 p-2 rounded ctm-soft-row">
                   <div>
                     <strong class="d-block">{{ player.name }}</strong>
                     <span class="small muted">{{ player.role.value | replace('_', ' ') | title }}</span>
@@ -64,7 +64,7 @@
 
         <div class="col-lg-5">
           <div class="ctm-card">
-            <h2 class="h5 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Add player</h2>
+            <h2 class="h5 mb-3 ctm-heading">Add player</h2>
             <form method="post" action="{{ url_for('teams.add_player', team_id=team.id) }}" novalidate>
               {{ player_form.hidden_tag() }}
               <div class="row g-3">
