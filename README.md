@@ -1,8 +1,8 @@
-# CRIKTRACK — Cricket Tournament Management System
+# CRIKTRACK
 
-A web application for creating and managing cricket tournaments. Organisers can set up fixtures (knockout, round-robin, or group stage), record detailed scorecards, track player statistics, and share tournament results with anyone via a public link.
+CRIKTRACK is a Flask + SQLAlchemy cricket tournament management system built for **CITS5505 Agile Web Development**. It supports organiser-managed tournaments, reusable teams and rosters, detailed match scorecards, public sharing, fan-facing dashboards, comments, follows, and a cached live cricket feed.
 
-Built for **CITS5505 (Agile Web Development) — Group Project 2026**.
+All active application code lives in [`app/`](app/). Project documentation, design notes, setup guides, and historical reference material live under [`docs/`](docs/).
 
 ## Team
 
@@ -12,171 +12,245 @@ Built for **CITS5505 (Agile Web Development) — Group Project 2026**.
 | 24268801 | Leon Nel            | DemionNeo1      |
 | 24878502 | Cheng Zhang         | kyleczhang      |
 
-## Status — Checkpoint 3 (Flask backend)
+## What the app does
 
-The Flask + SQLAlchemy backend is now wired up end-to-end. All pages are server-rendered from Jinja templates, persistent data lives in SQLite via Flask-Migrate, and the frontend prototype at `frontend-original/` is kept untouched as a design reference.
+- Organisers can create tournaments in round-robin, knockout, or group-stage formats.
+- Teams are reusable across tournaments and each team has its own editable roster.
+- Match scheduling, live/in-progress state, and result recording are handled in the Flask app.
+- Scorecards store innings, batting, bowling, toss, winner, and standings-impacting result data.
+- Tournament standings are recomputed from recorded completed matches after every saved result.
+- Fans can browse live and upcoming tournaments, recent results, profiles, and public share pages.
+- Logged-in users can comment on matches and tournaments, and follow tournaments, teams, and players.
+- Venue maps use Google Maps when configured and fall back to OpenStreetMap otherwise.
+- A live-match widget proxies CricAPI's `currentMatches` endpoint with in-process caching and stale/mock fallback.
 
-## Features
+## Current architecture
 
-- **Organiser-gated tournament creation** — role assigned at sign-up via a secret invite code. Organisers pick a format (round-robin / knockout / group stage), add teams on the fly, attach a venue, and get a shareable public link.
-- **Match results + scorecards** — organisers submit full innings (batting + bowling line-ups, toss, winner, result text) through a single JSON-validated form. Scorecards render batting/bowling tables and a venue map for everyone.
-- **Live standings** — points, wins/losses, net run rate are recomputed from completed matches after every saved result, so the points table is always consistent.
-- **Player stats** — per-player page aggregates batting and bowling across the tournament, showing averages, strike rate, fifties/hundreds, economy, and a match-by-match history.
-- **Discussion threads** — logged-in users can comment on any tournament or match via a CSRF-protected JSON API.
-- **Live cricket feed** — a dashboard widget pulls currently-live international matches from [cricketdata.org](https://cricketdata.org/) through a server-side proxy with a TTL cache and graceful fallback (live → cache → stale → mock).
-- **Venue maps** — addresses are geocoded server-side via Google Maps at venue creation, then rendered client-side (Google when a key is configured, OpenStreetMap otherwise).
-- **Public share views** — every tournament gets a `secrets.token_urlsafe` slug that exposes a read-only page with no auth required, ideal for posting in a team chat.
-- **Responsive + accessible** — the UI inherits the Checkpoint 2 design system (field-green + championship-gold palette, Bebas Neue display headings, 4.5:1 contrast, skip-to-content link, keyboard focus rings, `prefers-reduced-motion` respected).
+- **App factory:** [`app/criktrack/__init__.py`](app/criktrack/__init__.py)
+- **Templates:** [`app/criktrack/templates/`](app/criktrack/templates/)
+- **Static assets:** [`app/criktrack/static/`](app/criktrack/static/)
+- **Tests:** [`app/tests/`](app/tests/)
+- **Database migrations:** [`app/migrations/`](app/migrations/)
 
-## Running the application
+Registered blueprints:
 
-All backend code lives under `app/`.
+- `auth` for registration and login
+- `users` for dashboards and profiles
+- `teams` for organiser-owned team and roster management
+- `tournaments` for tournament list, create, detail, and public share view
+- `matches` for fixture creation, start, result recording, and scorecards
+- `players` for per-tournament player stats
+- `comments` for JSON comment endpoints
+- `follows` for JSON follow/unfollow endpoints
+- `live` for the live cricket proxy
+- `errors` for error pages
+
+## Quick start
+
+### Option 1: manual setup
 
 ```bash
 cd app
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env            # then edit SECRET_KEY + any API keys
-flask --app run:app db upgrade  # create tables from Alembic migrations
-flask --app run:app seed        # optional: seed demo data
-flask --app run:app run         # serves on http://127.0.0.1:5000
+pip install -r requirements-dev.txt
+cp .env.example .env
+flask --app run:app db upgrade
+flask --app run:app seed          # optional
+flask --app run:app run
 ```
 
-### Environment variables
+The development server runs on `http://127.0.0.1:5000`.
 
-| Variable                        | Purpose                                                    |
-| ------------------------------- | ---------------------------------------------------------- |
-| `SECRET_KEY`                    | Flask session signing key (set a long random value)        |
-| `DATABASE_URL`                  | SQLAlchemy URI (defaults to `sqlite:///criktrack.sqlite3`) |
-| `ORGANIZER_INVITE_CODE`         | Sign-up code that promotes a new account to organizer      |
-| `GOOGLE_MAPS_API_KEY`           | Optional; client-side Google Maps rendering                |
-| `GOOGLE_MAPS_GEOCODING_API_KEY` | Optional; server-side address → lat/lng at venue create    |
-| `CRICKETDATA_API_KEY`           | Optional; live match feed from cricketdata.org             |
-| `LIVE_FEED_CACHE_SECONDS`       | TTL for the in-process live-feed cache (default 30)        |
-
-When external API keys are absent the app degrades gracefully: maps fall back to OpenStreetMap, the live feed returns an empty `{"status": "mock"}` payload, and geocoding is skipped (venues keep a null lat/lng).
-
-## First-run walkthrough
-
-After `flask run`, a quick smoke test of the main flows:
-
-1. Open <http://127.0.0.1:5000/> and click **Sign up**.
-2. Create an account — paste the `ORGANIZER_INVITE_CODE` from your `.env` into the *Organizer invite code* field to get organiser privileges.
-3. From the dashboard, click **Create tournament**. Pick a format, add at least two teams, optionally fill in a venue, and submit.
-4. On the tournament detail page, open a fixture and click **Enter result** to record a full innings. Submit — you'll be redirected to the scorecard.
-5. Click **Share** to copy the public link; open it in a private window to confirm no auth is required.
-6. Back on the dashboard, the **Live cricket** widget polls the backend proxy every 30 s. Without a `CRICKETDATA_API_KEY` it shows an empty/mock state.
-
-If you prefer pre-populated data, run `flask --app run:app seed` before step 1 — it creates three demo accounts (all with password `password123`):
-
-- `cheng@example.com` — organiser, owns the *UWA Social League 2026* with six teams and a completed scorecard
-- `priya@example.com` — regular user
-- `daniel@example.com` — regular user, also a player in one of the teams
-
-Pass `--reset` to wipe and re-seed.
-
-## Running the tests
+### Option 2: using `make`
 
 ```bash
 cd app
-pip install -r requirements-dev.txt
-pytest tests/unit          # 20 unit tests
-pytest tests/selenium      # 6 end-to-end tests — needs Chrome + chromedriver
-pytest                     # all 26
+make setup-dev
+make seed              # optional
+make run
 ```
 
-The Selenium suite spins up the Flask app on a random port in a background thread and drives a headless Chrome. If Chrome or its driver is unavailable, Selenium tests skip rather than fail.
+`make setup-dev` creates `.venv`, installs development dependencies, bootstraps `.env` if missing, and runs `db upgrade`.
 
-## Architecture
+## Environment variables
 
-- **Application factory** (`criktrack/__init__.py`) binds Flask-SQLAlchemy, Flask-Migrate, Flask-Login and Flask-WTF CSRF, then registers one blueprint per feature area.
-- **Blueprints:** `auth`, `users`, `tournaments`, `matches`, `players`, `comments` (JSON API), `live` (cricket-feed proxy), `errors`.
-- **Role-based access** via a `Role` enum on `User` + a `@require_role("organizer")` decorator.
-- **Server-side validation** for match results lives in `matches/services.py`; the record page POSTs JSON and receives per-field errors back.
-- **Standings recomputation** runs after every saved match result — played/won/lost/points/NRR are rebuilt from the completed-match set.
-- **Comments** are a small JSON REST API under `/api/{matches,tournaments}/<id>/comments`, backed by the same CSRF-protected session cookie.
-- **Live cricket feed** is a thin proxy over cricketdata.org with a thread-safe in-process TTL cache and a live → cache → stale → mock fallback chain.
-- **Geocoding** calls the Google Maps Geocoding API when a venue is created; a failure/no-key case leaves lat/lng null and the map falls back to OpenStreetMap on the client.
+The backend reads configuration from [`app/.env`](app/.env) via [`app/config.py`](app/config.py).
 
-## Security
+| Variable | Purpose |
+| -------- | ------- |
+| `SECRET_KEY` | Required. Signs session cookies and CSRF tokens. |
+| `DATABASE_URL` | SQLAlchemy database URL. Defaults to `sqlite:///criktrack.sqlite3`. |
+| `ORGANIZER_INVITE_CODE` | Secret code that grants organiser role during registration. |
+| `GOOGLE_MAPS_API_KEY` | Optional. Enables Google Maps rendering on the client. |
+| `GOOGLE_MAPS_GEOCODING_API_KEY` | Optional. Enables server-side venue geocoding. |
+| `CRICKETDATA_API_KEY` | Optional. Enables live cricket data fetches from CricAPI. |
+| `LIVE_FEED_CACHE_SECONDS` | TTL for the in-process live-feed cache. |
+| `LIVE_FEED_POLL_MS` | Frontend polling interval for the live widget. |
 
-- Passwords hashed with `pbkdf2:sha256` (600k iterations) via `werkzeug.security`.
-- CSRF protection on every form and every JSON POST (`X-CSRFToken` header from JS).
-- `Role`-based authorisation, enforced server-side — the client never trusts `current_user.role` for anything sensitive.
-- Open-redirect guard on `?next=` — see `_safe_next()` in `auth/routes.py`.
-- Response headers set globally: `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: geolocation=(), microphone=(), camera=()`.
-- Session cookies are `HttpOnly` + `SameSite=Lax`; `ProdConfig` adds `Secure`.
-- User-supplied text is escaped by Jinja by default; comment rendering in JS goes through `escapeHtml()`.
-- Secrets (API keys, invite code) live in `.env`, never in the repo — see `.env.example`.
+When external API keys are not configured:
+
+- venue pages fall back to OpenStreetMap embeds
+- geocoding is skipped and venues keep null coordinates
+- the live feed returns mock or empty fallback data instead of failing the page
+
+Setup guides:
+
+- [`docs/api-key-setup/google-maps-setup-en.md`](docs/api-key-setup/google-maps-setup-en.md)
+- [`docs/api-key-setup/cricketdata-setup-en.md`](docs/api-key-setup/cricketdata-setup-en.md)
+
+## Demo data
+
+Run:
+
+```bash
+cd app
+flask --app run:app seed
+```
+
+Or reset and reseed:
+
+```bash
+cd app
+flask --app run:app seed --reset
+```
+
+The seed command creates:
+
+- 3 demo users, all with password `password123`
+- 12 reusable teams with rosters
+- 6 venues
+- multiple tournaments across `upcoming`, `live`, and `completed` states
+- seeded matches, scorecards, and comments
+
+Demo accounts:
+
+- `cheng@example.com` — organiser
+- `priya@example.com` — regular user
+- `daniel@example.com` — regular user
+
+## Testing
+
+From [`app/`](app/):
+
+Manual commands:
+
+```bash
+.venv/bin/python -m pytest tests -q
+.venv/bin/python -m pytest tests/unit -q
+.venv/bin/python -m pytest tests/selenium -q
+```
+
+Equivalent `make` targets:
+
+```bash
+make test
+make test-unit
+make test-selenium
+```
+
+Current baseline from this repository:
+
+- `78 passed` with `.venv/bin/python -m pytest tests -q`
+
+Notes:
+
+- Selenium tests start a live Flask server with a file-backed SQLite database.
+- If Chrome or ChromeDriver is unavailable, Selenium tests skip instead of failing.
+- `TestConfig` disables CSRF to keep form and JSON endpoint tests straightforward.
+
+## Main user flows
+
+### Organiser flow
+
+1. Register with the organiser invite code.
+2. Create reusable teams and add roster players.
+3. Create a tournament and register teams into it.
+4. Schedule fixtures, start a match, and record innings-based results.
+5. Share the public tournament page with anyone.
+
+### Fan flow
+
+1. Register or log in as a normal user.
+2. Browse live and upcoming tournaments from the dashboard.
+3. Open scorecards, player stats, and tournament pages.
+4. Follow tournaments, teams, or players.
+5. Post comments on matches and tournaments.
 
 ## Key routes
 
-| Method + path                                              | Purpose                                      |
-| ---------------------------------------------------------- | -------------------------------------------- |
-| `GET /`                                                    | Landing page                                 |
-| `GET/POST /register`, `/login`, `POST /logout`             | Auth                                         |
-| `GET /dashboard`                                           | Logged-in home                               |
-| `GET /tournaments` + `?q=&status=&page=`                   | Search/browse tournaments                    |
-| `GET/POST /tournaments/create`                             | Organiser-only                               |
-| `GET /tournaments/<id>`                                    | Fixtures, standings, discussion              |
-| `GET /tournaments/p/<slug>`                                | Public share view (no auth)                  |
-| `GET /tournaments/<tid>/matches/<mid>/scorecard`           | Full scorecard + comments                    |
-| `GET/POST /tournaments/<tid>/matches/<mid>/record`         | Organiser-only; POST takes JSON              |
-| `GET /tournaments/<tid>/players/<pid>/stats`               | Per-player stats                             |
-| `GET/POST /api/matches/<id>/comments`                      | Comments JSON API                            |
-| `GET/POST /api/tournaments/<id>/comments`                  | Comments JSON API                            |
-| `GET /api/live/matches`                                    | Cricket-feed proxy (cached)                  |
+| Method + path | Purpose |
+| ------------- | ------- |
+| `GET /` | Landing page |
+| `GET/POST /register`, `GET/POST /login`, `POST /logout` | Authentication |
+| `GET /dashboard` | Role-aware dashboard |
+| `GET /teams` | Organiser team list |
+| `GET/POST /teams/create` | Create team |
+| `GET /teams/<team_id>` | Team detail and roster tools |
+| `GET /tournaments` | Tournament list and filters |
+| `GET/POST /tournaments/create` | Create tournament |
+| `GET /tournaments/<tournament_id>` | Tournament detail |
+| `GET /tournaments/<slug>/share` | Anonymous public share view |
+| `GET/POST /tournaments/<tournament_id>/matches/create` | Create fixture |
+| `POST /tournaments/<tournament_id>/matches/<match_id>/start` | Mark a match live |
+| `GET /tournaments/<tournament_id>/matches/<match_id>` | Scorecard |
+| `GET/POST /tournaments/<tournament_id>/matches/<match_id>/record` | Record result; JSON POST |
+| `GET /tournaments/<tournament_id>/players/<player_id>` | Player stats |
+| `GET/POST /api/matches/<id>/comments` | Match comments JSON API |
+| `GET/POST /api/tournaments/<id>/comments` | Tournament comments JSON API |
+| `POST /api/follow`, `DELETE /api/follow` | Follow or unfollow target |
+| `GET /api/follow/status` | Follow status check |
+| `GET /api/live/matches` | Cached live cricket proxy |
 
 ## Project structure
 
-```
+```text
 .
 ├── README.md
-├── Makefile
-├── pyproject.toml
 ├── docs/
-│   ├── checkpoint-2/                 # Checkpoint 2 static prototype (historical reference)
-│   ├── design-doc/                   # Backend / frontend planning and DB notes
-│   └── *.md                          # Product, implementation, and setup docs
+│   ├── api-key-setup/
+│   ├── checkpoint-2/
+│   ├── design-doc/
+│   ├── implementation-plan-v2.md
+│   └── product-v2.md
 └── app/
-    ├── run.py                         # Flask entrypoint
-    ├── config.py                      # Dev / Test / Prod configs
-    ├── requirements.txt               # Runtime dependencies
-    ├── requirements-dev.txt           # + pytest, selenium
-    ├── pytest.ini
-    ├── .env.example                   # Copy to .env
-    ├── migrations/                    # Alembic
-    ├── instance/                      # Local instance data (e.g. SQLite DB)
+    ├── Makefile
+    ├── run.py
+    ├── config.py
+    ├── requirements.txt
+    ├── requirements-dev.txt
+    ├── .env.example
+    ├── migrations/
     ├── criktrack/
-    │   ├── __init__.py                # App factory
-    │   ├── extensions.py              # db, migrate, login_manager, csrf
-    │   ├── decorators.py              # @require_role
-    │   ├── filters.py                 # pretty_date, etc.
-    │   ├── seed.py / seed_data.py     # `flask seed` CLI + demo fixtures
-    │   ├── models/                    # User, Tournament, Team, Match, …
-    │   ├── auth/ users/ tournaments/  # Page blueprints
-    │   ├── matches/ teams/ players/   # Match recording + team/player views
-    │   ├── comments/ follows/ live/   # JSON APIs + live-feed proxy
-    │   ├── integrations/              # cricketdata + geocoding clients
-    │   ├── templates/                 # Server-rendered Jinja
-    │   └── static/                    # CSS + JS (record, comments, maps, livefeed)
+    │   ├── __init__.py
+    │   ├── auth/
+    │   ├── comments/
+    │   ├── follows/
+    │   ├── integrations/
+    │   ├── live/
+    │   ├── matches/
+    │   ├── models/
+    │   ├── players/
+    │   ├── static/
+    │   ├── teams/
+    │   ├── templates/
+    │   ├── tournaments/
+    │   └── users/
     └── tests/
-        ├── conftest.py                # App / client / auth fixtures
-        ├── unit/                      # Unit and route tests
-        └── selenium/                  # Browser smoke tests
+        ├── selenium/
+        └── unit/
 ```
 
-## Team organisation
+## Development notes
 
-- **Meetings:** Every Wednesday 12 PM – 2 PM, adjusted via When2Meet when needed.
-- **Communication:** Microsoft Teams for day-to-day discussion; GitHub Issues and Pull Requests for task tracking and code review.
-- **Workflow:** Each feature or bug fix is developed on its own branch and merged via Pull Request with at least one review from another team member.
+- Work from [`app/`](app/) for nearly all development commands.
+- JSON POST endpoints expect the `X-CSRFToken` header from the browser.
+- Match results should go through `matches/services.py` so standings stay consistent.
+- The public share page is intentionally anonymous-friendly.
+- The live-feed cache is single-process and in-memory; it is sufficient for local/dev use.
 
-### Checkpoint 3 — backend task allocation
+## Further reading
 
-| Member              | Area                                                                                   |
-| ------------------- | -------------------------------------------------------------------------------------- |
-| Hafiz Zeeshan Ahmad | Auth blueprint, users/profile, landing + dashboard, search & public tournament views   |
-| Leon Nel            | Tournaments blueprint, create-tournament flow, match record form, standings service    |
-| Cheng Zhang         | Match scorecard, player stats, comments API, live-feed proxy, geocoding, test harness  |
+- [`docs/product-v2.md`](docs/product-v2.md)
+- [`docs/implementation-plan-v2.md`](docs/implementation-plan-v2.md)
+- [`docs/project-description-and-rubrics.md`](docs/project-description-and-rubrics.md)
