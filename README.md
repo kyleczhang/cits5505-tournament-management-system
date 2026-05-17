@@ -88,6 +88,8 @@ The backend reads configuration from [`app/.env`](app/.env) via [`app/config.py`
 | `LIVE_FEED_CACHE_SECONDS` | TTL for the in-process live-feed cache. |
 | `LIVE_FEED_POLL_MS` | Frontend polling interval for the live widget. |
 
+`SECRET_KEY` is mandatory. The app fails fast at startup if it is missing.
+
 When external API keys are not configured:
 
 - venue pages fall back to OpenStreetMap embeds
@@ -125,13 +127,24 @@ The seed command creates:
 
 Demo accounts:
 
-- `cheng@example.com` — organiser
-- `priya@example.com` — regular user
-- `daniel@example.com` — regular user
+- `cheng@example.com` — organizer account
+- `priya@example.com` — general user account
+- `daniel@example.com` — general user account
+
+Use password `password123` for all three accounts.
+
+Recommended test logins:
+
+- Organizer flow: `cheng@example.com`
+- General user flow: `priya@example.com` or `daniel@example.com`
 
 ## Testing
 
 From [`app/`](app/):
+
+```bash
+cd app
+```
 
 Manual commands:
 
@@ -151,12 +164,11 @@ make test-selenium
 
 Current baseline from this repository:
 
-- `78 passed` with `.venv/bin/python -m pytest tests -q`
+- On a fully provisioned local machine: `86 passed` with `.venv/bin/python -m pytest tests -q`
 
 Notes:
 
 - Selenium tests start a live Flask server with a file-backed SQLite database.
-- If Chrome or ChromeDriver is unavailable, Selenium tests skip instead of failing.
 - `TestConfig` disables CSRF to keep form and JSON endpoint tests straightforward.
 
 ## Main user flows
@@ -211,11 +223,16 @@ Notes:
 │   ├── api-key-setup/
 │   ├── checkpoint-2/
 │   ├── design-doc/
-│   ├── implementation-plan-v2.md
-│   └── product-v2.md
+│   │   ├── database-design-v1.md
+│   │   ├── implementation-plan-v2.md
+│   │   ├── plan-backend-v1.md
+│   │   ├── plan-frontend-v1.md
+│   │   └── product-v2.md
+│   └── project-description-and-rubrics.md
 └── app/
     ├── Makefile
     ├── run.py
+    ├── wsgi.py
     ├── config.py
     ├── requirements.txt
     ├── requirements-dev.txt
@@ -244,6 +261,7 @@ Notes:
 ## Development notes
 
 - Work from [`app/`](app/) for nearly all development commands.
+- `docs/checkpoint-2/` is a historical static prototype. Use it as reference material, not an active edit target.
 - JSON POST endpoints expect the `X-CSRFToken` header from the browser.
 - Match results should go through `matches/services.py` so standings stay consistent.
 - The public share page is intentionally anonymous-friendly.
@@ -251,6 +269,7 @@ Notes:
 
 ## Further reading
 
-- [`docs/product-v2.md`](docs/product-v2.md)
-- [`docs/implementation-plan-v2.md`](docs/implementation-plan-v2.md)
+- [`docs/design-doc/product-v2.md`](docs/design-doc/product-v2.md)
+- [`docs/design-doc/implementation-plan-v2.md`](docs/design-doc/implementation-plan-v2.md)
+- [`docs/design-doc/database-design-v1.md`](docs/design-doc/database-design-v1.md)
 - [`docs/project-description-and-rubrics.md`](docs/project-description-and-rubrics.md)
