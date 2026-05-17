@@ -32,7 +32,6 @@ from selenium.webdriver.common.by import By  # noqa: E402
 from selenium.webdriver.support import expected_conditions as EC  # noqa: E402
 from selenium.webdriver.support.ui import Select, WebDriverWait  # noqa: E402
 
-
 # --- shared helpers ---------------------------------------------------------
 
 
@@ -77,9 +76,7 @@ def _create_team(browser, base_url: str, name: str, short_code: str) -> int:
     return int(browser.current_url.rstrip("/").split("/")[-1])
 
 
-def _create_tournament(
-    browser, base_url: str, name: str, team_ids: list[int]
-) -> int:
+def _create_tournament(browser, base_url: str, name: str, team_ids: list[int]) -> int:
     """Create a tournament that registers `team_ids`. Returns tournament id."""
     browser.get(f"{base_url}/tournaments/create")
     browser.find_element(By.NAME, "name").send_keys(name)
@@ -372,8 +369,11 @@ def test_user_clicks_follow_button_and_state_toggles_in_dom(browser, live_server
     browser.get(f"{base}/tournaments/{tid}")
     btn = _wait(browser).until(
         EC.presence_of_element_located(
-            (By.CSS_SELECTOR, f"[data-ctm-follow][data-target-type='tournament']"
-                              f"[data-target-id='{tid}']")
+            (
+                By.CSS_SELECTOR,
+                f"[data-ctm-follow][data-target-type='tournament']"
+                f"[data-target-id='{tid}']",
+            )
         )
     )
     assert btn.get_attribute("data-following") == "0"
@@ -382,18 +382,14 @@ def test_user_clicks_follow_button_and_state_toggles_in_dom(browser, live_server
     assert label.text.strip().lower() == "follow"
 
     _click(browser, btn)
-    _wait(browser, 6).until(
-        lambda _: btn.get_attribute("data-following") == "1"
-    )
+    _wait(browser, 6).until(lambda _: btn.get_attribute("data-following") == "1")
     assert btn.get_attribute("aria-pressed") == "true"
     assert "is-following" in (btn.get_attribute("class") or "")
     assert label.text.strip().lower() == "following"
 
     # Click again — should unfollow and revert all three attributes.
     _click(browser, btn)
-    _wait(browser, 6).until(
-        lambda _: btn.get_attribute("data-following") == "0"
-    )
+    _wait(browser, 6).until(lambda _: btn.get_attribute("data-following") == "0")
     assert btn.get_attribute("aria-pressed") == "false"
     assert "is-following" not in (btn.get_attribute("class") or "")
     assert label.text.strip().lower() == "follow"

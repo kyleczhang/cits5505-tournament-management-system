@@ -61,6 +61,7 @@ class TestConfig(BaseConfig):
 
 
 class ProdConfig(BaseConfig):
+    # Only send the session cookie over HTTPS in production.
     SESSION_COOKIE_SECURE = True
 
     def __init__(self) -> None:
