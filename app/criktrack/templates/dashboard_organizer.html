@@ -6,7 +6,7 @@
 {% set status_badges = {'live': 'badge-live', 'upcoming': 'badge-upcoming', 'completed': 'badge-completed'} %}
 
 {% block content %}
-  <section class="section" style="padding-top:2.5rem;">
+  <section class="section section-tight">
     <div class="container">
       <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
         <div>
@@ -27,17 +27,17 @@
       </div>
 
       {% if needs_attention %}
-        <div class="ctm-card mb-4" style="border-left:4px solid var(--ctm-accent);">
+        <div class="ctm-card ctm-card-accent-left mb-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="h5 m-0" style="font-family:var(--ctm-font-body); font-weight:700;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="me-1" aria-hidden="true" style="vertical-align:-3px;"><path d="M12 9v4M12 17h.01M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <h2 class="h5 m-0 ctm-heading">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="me-1 icon-inline-lg" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
               Needs your attention
             </h2>
             <span class="small muted">{{ needs_attention | length }} item{{ '' if needs_attention | length == 1 else 's' }}</span>
           </div>
           <ul class="list-unstyled d-flex flex-column gap-2 m-0">
             {% for item in needs_attention %}
-              <li class="d-flex justify-content-between align-items-center gap-3 p-2 rounded" style="background:var(--ctm-bg-subtle, #F8FAFC);">
+              <li class="d-flex justify-content-between align-items-center gap-3 p-2 rounded ctm-soft-row">
                 <div class="flex-grow-1">
                   <strong class="d-block">{{ item.label }}</strong>
                   <span class="small muted">{{ item.hint }}</span>
@@ -58,19 +58,19 @@
         </div>
         <div class="col-sm-6 col-lg-3">
           <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(245,158,11,0.12); color:#B45309;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+            <div class="stat-icon stat-icon-amber"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
             <div><div class="stat-value">{{ summary.upcoming_matches }}</div><div class="stat-label">Upcoming matches</div></div>
           </div>
         </div>
         <div class="col-sm-6 col-lg-3">
           <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(22,163,74,0.12); color:#15803D;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+            <div class="stat-icon stat-icon-green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
             <div><div class="stat-value">{{ summary.recent_results }}</div><div class="stat-label">Recent results</div></div>
           </div>
         </div>
         <div class="col-sm-6 col-lg-3">
           <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(124,58,237,0.12); color:#6D28D9;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+            <div class="stat-icon stat-icon-violet"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
             <div><div class="stat-value">{{ summary.total_players }}</div><div class="stat-label">Players tracked</div></div>
           </div>
         </div>
@@ -79,7 +79,7 @@
       <div class="row g-4">
         <div class="col-lg-8">
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="h4 m-0" style="font-family:var(--ctm-font-body); font-weight:700;">My tournaments</h2>
+            <h2 class="h4 m-0 ctm-heading">My tournaments</h2>
             <a href="{{ url_for('tournaments.list_view') }}" class="small link-primary">Browse all →</a>
           </div>
           <div class="row g-3">
@@ -109,9 +109,9 @@
 
             <div class="col-md-6">
               <a class="text-decoration-none h-100 d-block" href="{{ url_for('tournaments.create') }}">
-                <div class="ctm-card ctm-card-hover h-100 d-flex flex-column align-items-center justify-content-center text-center" style="border-style:dashed; min-height:238px;">
+                <div class="ctm-card ctm-card-hover ctm-card-dashed ctm-card-create-shortcut h-100 d-flex flex-column align-items-center justify-content-center text-center">
                   <div class="stat-icon mb-3"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
-                  <strong class="d-block mb-1" style="color:var(--ctm-text);">Create a new tournament</strong>
+                  <strong class="d-block mb-1 text-body">Create a new tournament</strong>
                   <span class="small muted">Round-robin, knockout or group stage</span>
                 </div>
               </a>
@@ -121,7 +121,7 @@
 
         <div class="col-lg-4">
           <div class="ctm-card mb-3">
-            <h3 class="h5 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Upcoming matches</h3>
+            <h3 class="h5 mb-3 ctm-heading">Upcoming matches</h3>
             <ul class="list-unstyled d-flex flex-column gap-3 m-0">
               {% for m in upcoming_matches %}
                 <li>
@@ -137,7 +137,7 @@
             </ul>
           </div>
           <div class="ctm-card">
-            <h3 class="h5 mb-3" style="font-family:var(--ctm-font-body); font-weight:700;">Recent results</h3>
+            <h3 class="h5 mb-3 ctm-heading">Recent results</h3>
             <ul class="list-unstyled d-flex flex-column gap-3 m-0">
               {% for m in recent_results %}
                 <li>

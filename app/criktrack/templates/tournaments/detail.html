@@ -6,17 +6,12 @@
 {% set status_labels = {'live': 'Live', 'upcoming': 'Upcoming', 'completed': 'Completed'} %}
 
 {% block content %}
-<section
-  style="background:linear-gradient(135deg,#0F766E,#0B5952); color:#fff; padding:3rem 0 3.5rem; position:relative; overflow:hidden;">
-  <div
-    style="position:absolute; right:-120px; top:-120px; width:400px; height:400px; background:radial-gradient(circle, rgba(245,158,11,0.3), transparent 70%);">
-  </div>
+<section class="ctm-hero-brand ctm-hero-detail">
   <div class="container position-relative">
     <nav aria-label="breadcrumb" class="mb-3">
-      <ol class="breadcrumb small" style="--bs-breadcrumb-divider-color:#CBD5E1;">
-        <li class="breadcrumb-item"><a href="{{ url_for('tournaments.list_view') }}"
-            style="color:#CBD5E1;">Tournaments</a></li>
-        <li class="breadcrumb-item active" style="color:#fff;" aria-current="page">{{ tournament.name }}</li>
+      <ol class="breadcrumb small">
+        <li class="breadcrumb-item"><a href="{{ url_for('tournaments.list_view') }}">Tournaments</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ tournament.name }}</li>
       </ol>
     </nav>
     <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
@@ -24,14 +19,14 @@
         <div class="d-flex align-items-center gap-2 mb-2">
           <span class="badge-ctm {{ status_badges.get(tournament.status.value, '') }}">{{
             status_labels.get(tournament.status.value, tournament.status.value) }}</span>
-          <span class="badge-ctm" style="background:rgba(255,255,255,0.15); color:#fff;">{{ tournament.format.value |
+          <span class="badge-ctm badge-on-dark-soft">{{ tournament.format.value |
             replace('_', ' ') | title }}</span>
         </div>
-        <h1 class="mb-2" style="color:#fff;">{{ tournament.name }}</h1>
+        <h1 class="mb-2">{{ tournament.name }}</h1>
         {% if tournament.description %}
-        <p class="mb-0" style="color:rgba(255,255,255,0.8);">{{ tournament.description }}</p>
+        <p class="mb-0 muted-on-dark">{{ tournament.description }}</p>
         {% endif %}
-        <div class="d-flex flex-wrap gap-3 mt-3 small" style="color:rgba(255,255,255,0.85);">
+        <div class="d-flex flex-wrap gap-3 mt-3 small muted-on-dark">
           <span class="d-inline-flex align-items-center gap-1">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2" />
@@ -42,8 +37,7 @@
           <span>•</span>
           <span>{{ tournament.team_count }} teams • {{ matches | length }} matches</span>
           <span>•</span>
-          <span>Organiser: <a class="link-light" href="{{ url_for('users.profile', user_id=tournament.organiser_id) }}"
-              style="color:#fff; text-decoration:underline;">{{ tournament.organiser.display_name }}</a></span>
+          <span>Organiser: <a class="link-on-dark" href="{{ url_for('users.profile', user_id=tournament.organiser_id) }}">{{ tournament.organiser.display_name }}</a></span>
         </div>
       </div>
       <div class="d-flex gap-2 flex-wrap">
@@ -60,8 +54,7 @@
         {% include "partials/follow_button.html" %}
         {% endwith %}
         {% if is_organiser %}
-        <a class="btn" href="{{ url_for('users.dashboard') }}"
-          style="background:#fff; color:var(--ctm-primary); font-weight:600;">Manage</a>
+        <a class="btn btn-on-dark" href="{{ url_for('users.dashboard') }}">Manage</a>
         {% endif %}
       </div>
     </div>
@@ -73,13 +66,13 @@
     <div class="ctm-card mb-4">
       <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
         <div>
-          <h2 class="h5 mb-1" style="font-family:var(--ctm-font-body); font-weight:700;">Participating teams</h2>
+          <h2 class="h5 mb-1 ctm-heading">Participating teams</h2>
           <p class="small muted m-0">Reusable teams registered to this tournament.</p>
         </div>
         {% if is_organiser and available_teams %}
           <form method="post" action="{{ url_for('tournaments.add_team', tournament_id=tournament.id) }}" class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <select name="team_id" class="form-select form-select-sm" style="min-width:220px;">
+            <select name="team_id" class="form-select form-select-sm tournament-team-select">
               <option value="">Select a team…</option>
               {% for team in available_teams %}
                 <option value="{{ team.id }}">{{ team.name }}</option>
@@ -96,7 +89,7 @@
               <div class="d-flex align-items-center gap-2">
                 <span class="team-logo">{{ entry.team.short_code }}</span>
                 <div>
-                  <strong style="color:var(--ctm-text);">{{ entry.team.name }}</strong>
+                  <strong class="text-body">{{ entry.team.name }}</strong>
                   <div class="small muted">{{ entry.team.players | length }} players in roster</div>
                 </div>
               </div>
@@ -168,7 +161,7 @@
                 <div>{{ m.team_b.name }}</div>
                 {% if row.b_score %}<div class="team-score">{{ row.b_score }}</div>{% endif %}
               </div>
-              <span class="team-logo" style="background:linear-gradient(135deg,#1E40AF,#3B82F6);">{{ m.team_b.short_code
+              <span class="team-logo team-logo-blue">{{ m.team_b.short_code
                 }}</span>
             </div>
           </article>
@@ -190,7 +183,7 @@
           <table class="ctm-table">
             <thead>
               <tr>
-                <th style="width:60px;">#</th>
+                <th class="col-table-rank">#</th>
                 <th>Team</th>
                 <th>P</th>
                 <th>W</th>

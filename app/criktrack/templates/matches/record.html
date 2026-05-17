@@ -28,7 +28,7 @@
 
 {% block content %}
   <section class="section">
-    <div class="container" style="max-width:960px;">
+    <div class="container container-record">
       <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb small">
           <li class="breadcrumb-item"><a class="link-primary" href="{{ url_for('tournaments.detail', tournament_id=tournament.id) }}">{{ tournament.name }}</a></li>
@@ -93,8 +93,8 @@
               </div>
               <div class="form-text mb-3" data-chase-hint hidden></div>
 
-              <h3 class="h6 mb-2" style="font-family:var(--ctm-font-body); font-weight:700;">Batting ({{ ctx.team.name }})</h3>
-              <div class="row g-2 mb-1 text-muted" style="font-size:.75rem; font-weight:600;">
+              <h3 class="h6 mb-2 ctm-heading">Batting ({{ ctx.team.name }})</h3>
+              <div class="row g-2 mb-1 text-muted record-col-head">
                 <div class="col-md-3">Batter</div>
                 <div class="col-md-2">Dismissal</div>
                 <div class="col-md-2">Runs</div>
@@ -127,7 +127,7 @@
                       <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="balls" value="{{ b.balls }}" placeholder="B" min="0"></div>
                       <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="fours" value="{{ b.fours }}" placeholder="4s" min="0"></div>
                       <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="sixes" value="{{ b.sixes }}" placeholder="6s" min="0"></div>
-                      <div class="col-md-1 d-flex justify-content-center"><button type="button" class="btn btn-link text-decoration-none" data-remove-row aria-label="Remove" style="padding:0; font-size:1.25rem;">×</button></div>
+                      <div class="col-md-1 d-flex justify-content-center"><button type="button" class="btn btn-link text-decoration-none btn-row-remove" data-remove-row aria-label="Remove">×</button></div>
                     </div>
                   {% endfor %}
                 {% else %}
@@ -152,14 +152,14 @@
                     <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="balls" placeholder="B" min="0"></div>
                     <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="fours" placeholder="4s" min="0"></div>
                     <div class="col-md-1"><input type="number" step="1" class="form-control" data-field="sixes" placeholder="6s" min="0"></div>
-                    <div class="col-md-1 d-flex justify-content-center"><button type="button" class="btn btn-link text-decoration-none" data-remove-row aria-label="Remove" style="padding:0; font-size:1.25rem;">×</button></div>
+                    <div class="col-md-1 d-flex justify-content-center"><button type="button" class="btn btn-link text-decoration-none btn-row-remove" data-remove-row aria-label="Remove">×</button></div>
                   </div>
                 {% endif %}
               </div>
               <button type="button" class="btn btn-ctm-ghost btn-sm mb-3" data-add-batter>+ Add batter</button>
 
-              <h3 class="h6 mb-2" style="font-family:var(--ctm-font-body); font-weight:700;">Bowling ({{ ctx.opp.name }})</h3>
-              <div class="row g-2 mb-1 text-muted" style="font-size:.75rem; font-weight:600;">
+              <h3 class="h6 mb-2 ctm-heading">Bowling ({{ ctx.opp.name }})</h3>
+              <div class="row g-2 mb-1 text-muted record-col-head">
                 <div class="col-md-3">Bowler</div>
                 <div class="col-md-2">Overs</div>
                 <div class="col-md-2">Maidens</div>
@@ -183,7 +183,7 @@
                       <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="maidens" value="{{ b.maidens }}" placeholder="M" min="0"></div>
                       <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="runs" value="{{ b.runs }}" placeholder="R" min="0"></div>
                       <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="wickets" value="{{ b.wickets }}" placeholder="W" min="0" max="10"></div>
-                      <div class="col-md-1 d-flex justify-content-center"><button type="button" class="btn btn-link text-decoration-none" data-remove-row aria-label="Remove" style="padding:0; font-size:1.25rem;">×</button></div>
+                      <div class="col-md-1 d-flex justify-content-center"><button type="button" class="btn btn-link text-decoration-none btn-row-remove" data-remove-row aria-label="Remove">×</button></div>
                     </div>
                   {% endfor %}
                 {% else %}
@@ -200,7 +200,7 @@
                     <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="maidens" placeholder="Maidens" min="0"></div>
                     <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="runs" placeholder="Runs" min="0"></div>
                     <div class="col-md-2"><input type="number" step="1" class="form-control" data-field="wickets" placeholder="Wickets" min="0" max="10"></div>
-                    <div class="col-md-1 d-flex justify-content-center"><button type="button" class="btn btn-link text-decoration-none" data-remove-row aria-label="Remove" style="padding:0; font-size:1.25rem;">×</button></div>
+                    <div class="col-md-1 d-flex justify-content-center"><button type="button" class="btn btn-link text-decoration-none btn-row-remove" data-remove-row aria-label="Remove">×</button></div>
                   </div>
                 {% endif %}
               </div>
@@ -230,7 +230,7 @@
           </div>
         </div>
 
-        <div id="record-errors" class="form-hint-error mt-3" role="alert" style="display:none;"></div>
+        <div id="record-errors" class="form-hint-error is-hidden mt-3" role="alert"></div>
 
         <div class="d-flex gap-2 justify-content-end mt-4">
           <a href="{{ url_for('tournaments.detail', tournament_id=tournament.id) }}" class="btn btn-ctm-ghost">Cancel</a>

@@ -1031,6 +1031,182 @@ textarea:focus-visible {
   }
 }
 
+/* ---------- INLINE STYLE EXTRACTS ---------- */
+/* Reusable classes for patterns that used to live as `style="…"` in templates. */
+
+.ctm-heading {
+  font-family: var(--ctm-font-body);
+  font-weight: 700;
+}
+
+.section-tight {
+  padding-top: 2.5rem;
+}
+
+.ctm-card-accent-left {
+  border-left: 4px solid var(--ctm-accent);
+}
+.ctm-card-accent-top {
+  border-top: 4px solid var(--ctm-accent);
+}
+.ctm-card-dashed {
+  border-style: dashed;
+}
+.ctm-card-create-shortcut {
+  min-height: 238px;
+}
+
+.ctm-soft-row {
+  background: var(--ctm-bg-alt);
+}
+
+.icon-inline {
+  vertical-align: -2px;
+}
+.icon-inline-lg {
+  vertical-align: -3px;
+}
+.icon-star {
+  color: var(--ctm-accent);
+}
+
+.stat-icon-amber  { background: rgba(245, 158, 11, 0.12); color: #b45309; }
+.stat-icon-green  { background: rgba(22, 163, 74, 0.12);  color: #15803d; }
+.stat-icon-violet { background: rgba(124, 58, 237, 0.12); color: #6d28d9; }
+
+.innings-score-frac {
+  font-size: 1.5rem;
+  opacity: 0.8;
+}
+
+.container-narrow   { max-width: 680px; }
+.container-form     { max-width: 720px; }
+.container-form-lg  { max-width: 820px; }
+.container-form-xl  { max-width: 860px; }
+.container-record   { max-width: 960px; }
+
+.ctm-hero-brand {
+  background: linear-gradient(135deg, #0f766e, #0b5952);
+  color: #fff;
+  padding: 3rem 0;
+}
+.ctm-hero-brand h1,
+.ctm-hero-brand h2,
+.ctm-hero-brand h3 {
+  color: #fff;
+}
+.ctm-hero-brand .text-on-dark    { color: #fff; }
+.ctm-hero-brand .muted-on-dark   { color: rgba(255, 255, 255, 0.85); }
+.ctm-hero-brand .subtle-on-dark  { color: rgba(255, 255, 255, 0.7); }
+.ctm-hero-brand .link-on-dark    { color: #fff; text-decoration: underline; }
+.ctm-hero-brand .breadcrumb {
+  --bs-breadcrumb-divider-color: #cbd5e1;
+}
+.ctm-hero-brand .breadcrumb-item a    { color: #cbd5e1; }
+.ctm-hero-brand .breadcrumb-item.active { color: #fff; }
+
+.ctm-hero-detail {
+  padding: 3rem 0 3.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.ctm-hero-detail::after {
+  content: '';
+  position: absolute;
+  right: -120px;
+  top: -120px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.3), transparent 70%);
+  pointer-events: none;
+}
+
+.dashboard-live-card {
+  background: linear-gradient(135deg, #0f766e 0%, #0b5952 100%);
+  color: #fff;
+  border: none;
+}
+.dashboard-live-card h2,
+.dashboard-live-card h3 { color: #fff; }
+.dashboard-live-card .subtle-on-dark { color: rgba(255, 255, 255, 0.7); }
+
+.badge-on-dark      { background: rgba(255, 255, 255, 0.2);  color: #fff; }
+.badge-on-dark-soft { background: rgba(255, 255, 255, 0.15); color: #fff; }
+
+.btn-on-dark {
+  background: #fff;
+  color: var(--ctm-primary);
+  font-weight: 600;
+}
+
+.scorecard-vs {
+  font-family: var(--ctm-font-heading);
+  font-size: 1.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+.scorecard-divider {
+  border-color: rgba(255, 255, 255, 0.2);
+  margin: 1.5rem 0 1rem;
+}
+.match-result-text {
+  color: var(--ctm-accent);
+  font-family: var(--ctm-font-heading);
+  font-size: 1.5rem;
+  letter-spacing: 0.05em;
+}
+
+.ctm-table-bare {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.btn-row-remove {
+  padding: 0;
+  font-size: 1.25rem;
+}
+
+.record-col-head {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.is-hidden { display: none; }
+
+.tournament-team-select { min-width: 220px; }
+
+.player-stat-headline {
+  font-family: var(--ctm-font-heading);
+  font-size: 3rem;
+  color: var(--ctm-primary);
+  line-height: 1;
+}
+.bat-runs-century { color: var(--ctm-accent); }
+.text-accent-dark { color: var(--ctm-accent-dark); }
+
+.runs-bars { height: 180px; }
+.runs-bar {
+  background: linear-gradient(180deg, var(--ctm-primary-light), var(--ctm-primary));
+  min-height: 4px;
+  border-radius: 6px 6px 0 0;
+}
+
+.progress-thin { height: 6px; }
+.progress-thin .progress-bar { background: var(--ctm-accent); }
+
+.error-card {
+  max-width: 560px;
+  padding: 3rem 2rem;
+}
+.error-status {
+  font-family: var(--ctm-font-heading);
+  font-size: 5rem;
+  line-height: 1;
+  color: var(--ctm-primary);
+}
+
+.col-table-rank { width: 60px; }
+
 /* ---------- VENUE MAP ---------- */
 .ctm-map {
   background: #fff;

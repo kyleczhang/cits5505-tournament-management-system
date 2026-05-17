@@ -397,7 +397,7 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       const errBox = document.getElementById('record-errors');
-      errBox.style.display = 'none';
+      errBox.classList.add('is-hidden');
       errBox.textContent = '';
 
       const innings = [];
@@ -459,7 +459,7 @@
           submitBtn.disabled = false;
           submitBtn.innerHTML = original;
           const errs = (res.data && res.data.errors) || { _: 'Could not save result.' };
-          errBox.style.display = '';
+          errBox.classList.remove('is-hidden');
           errBox.innerHTML = Object.keys(errs)
             .map(function (k) { return '<div><strong>' + k + ':</strong> ' + errs[k] + '</div>'; })
             .join('');
@@ -467,7 +467,7 @@
         .catch(function () {
           submitBtn.disabled = false;
           submitBtn.innerHTML = original;
-          errBox.style.display = '';
+          errBox.classList.remove('is-hidden');
           errBox.textContent = 'Network error — please try again.';
         });
     });
